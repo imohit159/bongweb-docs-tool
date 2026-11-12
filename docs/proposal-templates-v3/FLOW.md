@@ -6,12 +6,12 @@ How a client moves from first enquiry to payment, and which document is sent at 
 
 Every offer Bongweb sends belongs to one family with four types. Each scenario gets **one** offer: a quotation or a proposal, never both.
 
-| Type              | Use when                                          | Template                    | Number    |
-| ----------------- | ------------------------------------------------- | --------------------------- | --------- |
-| Quotation         | Client knows exactly what they want; small job    | `01-quick-quote.docx`       | BW-Q-001  |
-| Project Proposal  | Client has a problem to solve; one-time project   | `02-project-proposal.docx`  | BW-P-001  |
-| Retainer Proposal | Ongoing monthly work                              | `03-retainer-proposal.docx` | BW-R-001  |
-| Change Request    | Extra work on a project that is already accepted  | `04-change-request.docx`    | BW-CR-001 |
+| Type              | Use when                                         | Template                    | Number    |
+| ----------------- | ------------------------------------------------ | --------------------------- | --------- |
+| Quotation         | Client knows exactly what they want; small job   | `01-quick-quote.docx`       | BW-Q-001  |
+| Project Proposal  | Client has a problem to solve; one-time project  | `02-project-proposal.docx`  | BW-P-001  |
+| Retainer Proposal | Ongoing monthly work                             | `03-retainer-proposal.docx` | BW-R-001  |
+| Change Request    | Extra work on a project that is already accepted | `04-change-request.docx`    | BW-CR-001 |
 
 ### Choosing the type
 
@@ -63,12 +63,12 @@ Client asks for something outside scope → Change Request → Client approves
 
 ## Payment terms
 
-| Offer type        | Terms                                                         |
-| ----------------- | ------------------------------------------------------------- |
-| Quotation         | 50% advance, 50% on delivery                                  |
-| Project Proposal  | 50% advance, 40% on design/beta approval, 10% before go-live  |
-| Retainer Proposal | Monthly in advance; minimum term; 30 days' notice to stop     |
-| Change Request    | 100% before the change work starts                            |
+| Offer type        | Terms                                                        |
+| ----------------- | ------------------------------------------------------------ |
+| Quotation         | 50% advance, 50% on delivery                                 |
+| Project Proposal  | 50% advance, 40% on design/beta approval, 10% before go-live |
+| Retainer Proposal | Monthly in advance; minimum term; 30 days' notice to stop    |
+| Change Request    | 100% before the change work starts                           |
 
 Bongweb is not registered under GST, so no document charges GST or shows a GSTIN.
 

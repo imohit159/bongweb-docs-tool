@@ -29,12 +29,12 @@ A ready-written description of one service. Answers: _what exactly are we delive
 
 Example for "Business Website":
 
-|                      |                                                                                                    |
-| -------------------- | -------------------------------------------------------------------------------------------------- |
+|                      |                                                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- |
 | **What you get**     | Mobile-friendly website, contact form, Google Maps, WhatsApp button, basic SEO setup, handover walkthrough |
-| **Revision rounds**  | As per the chosen plan                                                                             |
-| **We need from you** | Logo, photos, page text, domain login, by the kick-off date                                        |
-| **Not included**     | Content writing, product photography, paid plugins, domain and hosting fees                        |
+| **Revision rounds**  | As per the chosen plan                                                                                     |
+| **We need from you** | Logo, photos, page text, domain login, by the kick-off date                                                |
+| **Not included**     | Content writing, product photography, paid plugins, domain and hosting fees                                |
 
 Copied into **section 3 (Our solution)** of the Project Proposal. One block per service; a client wanting a website and branding gets both blocks.
 
