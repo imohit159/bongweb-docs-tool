@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { IconCheck } from "@tabler/icons-react";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { getProposalTemplate } from "../../templates";
@@ -49,7 +49,7 @@ export function SectionNav({ className }: { className?: string }) {
                 {missing}
               </span>
             ) : (
-              <Check aria-label="Complete" className="text-muted-foreground size-3.5 shrink-0" />
+              <IconCheck aria-label="Complete" className="text-muted-foreground size-3.5 shrink-0" />
             )}
           </button>
         );

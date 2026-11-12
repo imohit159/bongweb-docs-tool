@@ -27,11 +27,7 @@ import {
 } from "@/hooks/use-fluid-hover";
 import { FluidHoverHighlight } from "@/components/ui/fluid-hover-highlight";
 import { useShape } from "@/lib/shape-context";
-import {
-  SelectionBackgrounds,
-  useMergeSplitBlocks,
-  useSelectionRuns,
-} from "@/hooks/use-merge-split";
+import { SelectionBackgrounds, useMergeSplitBlocks, useSelectionRuns } from "@/hooks/use-merge-split";
 
 // ---------------------------------------------------------------------------
 // Table is a plain HTML table with one fluid hover highlight drawn behind all
@@ -80,7 +76,18 @@ interface TableProps extends HTMLAttributes<HTMLTableElement> {
 const NO_SELECTION: readonly number[] = [];
 
 const Table = forwardRef<HTMLTableElement, TableProps>(
-  ({ children, size, selectedIndices = NO_SELECTION, snapKey, hideHeadHighlight = false, className, ...props }, ref) => {
+  (
+    {
+      children,
+      size,
+      selectedIndices = NO_SELECTION,
+      snapKey,
+      hideHeadHighlight = false,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const sizeClasses = useSize(size);
 
@@ -90,13 +97,7 @@ const Table = forwardRef<HTMLTableElement, TableProps>(
     // body. Only the cell under the pointer lights.
     const headHover = useFluidHover(containerRef, { axis: "x" });
     const registerHead = headHover.registerItem;
-    const {
-      activeStore,
-      handlers,
-      registerItem,
-      itemRects,
-      setActiveIndex,
-    } = hover;
+    const { activeStore, handlers, registerItem, itemRects, setActiveIndex } = hover;
 
     // The same merged, merge/split-animated selection CheckboxGroup draws.
     const shape = useShape();
@@ -148,7 +149,7 @@ const Table = forwardRef<HTMLTableElement, TableProps>(
     const selectedKey = selectedIndices.join(",");
     const selected = useMemo(
       () => new Set(selectedKey ? selectedKey.split(",").map(Number) : []),
-      [selectedKey]
+      [selectedKey],
     );
 
     // A divider hides once the highlight's fill covers it, read from where
@@ -193,7 +194,7 @@ const Table = forwardRef<HTMLTableElement, TableProps>(
 
     const contextValue = useMemo(
       () => ({ registerItem, activeStore, selected, registerHead }),
-      [registerItem, activeStore, selected, registerHead]
+      [registerItem, activeStore, selected, registerHead],
     );
 
     const table = (
@@ -276,7 +277,7 @@ const Table = forwardRef<HTMLTableElement, TableProps>(
               "w-full border-separate border-spacing-0",
               sizeClasses.variant === "compact" ? "[--table-cell-py:5px]" : "[--table-cell-py:--spacing(2)]",
               sizeClasses.text,
-              className
+              className,
             )}
             {...props}
           >
@@ -288,30 +289,24 @@ const Table = forwardRef<HTMLTableElement, TableProps>(
 
     // A size prop pins every cell to one ladder step (cells read the context).
     return size ? <SizeProvider size={size}>{table}</SizeProvider> : table;
-  }
+  },
 );
 
 Table.displayName = "Table";
 
 // ── TableHeader ──────────────────────────────────────────
 
-const TableHeader = forwardRef<
-  HTMLTableSectionElement,
-  HTMLAttributes<HTMLTableSectionElement>
->(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("", className)} {...props} />
-));
+const TableHeader = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
+  ({ className, ...props }, ref) => <thead ref={ref} className={cn("", className)} {...props} />,
+);
 
 TableHeader.displayName = "TableHeader";
 
 // ── TableBody ────────────────────────────────────────────
 
-const TableBody = forwardRef<
-  HTMLTableSectionElement,
-  HTMLAttributes<HTMLTableSectionElement>
->(({ className, ...props }, ref) => (
-  <tbody ref={ref} className={cn("", className)} {...props} />
-));
+const TableBody = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(
+  ({ className, ...props }, ref) => <tbody ref={ref} className={cn("", className)} {...props} />,
+);
 
 TableBody.displayName = "TableBody";
 
@@ -338,8 +333,7 @@ const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
     // selected run is one block with no lines through or over it.
     const selected = ctx?.selected;
     const nextIndex = isBodyRow ? index + 1 : 0;
-    const bySelection =
-      !!selected && ((isBodyRow && selected.has(index)) || selected.has(nextIndex));
+    const bySelection = !!selected && ((isBodyRow && selected.has(index)) || selected.has(nextIndex));
     const hideBorder = bySelection;
 
     return (
@@ -358,20 +352,18 @@ const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
             ? "*:border-transparent"
             : "*:border-accent/40 data-[under-highlight]:*:border-transparent data-[under-highlight]:*:duration-0",
           lit && "is-active",
-          className
+          className,
         )}
         // Weight goes through the variable font's axis with the same values
         // every component uses: semibold header, normal body.
         style={{
           ...style,
-          fontVariationSettings: isBodyRow
-            ? fontWeights.normal
-            : fontWeights.semibold,
+          fontVariationSettings: isBodyRow ? fontWeights.normal : fontWeights.semibold,
         }}
         {...props}
       />
     );
-  }
+  },
 );
 
 TableRow.displayName = "TableRow";
@@ -384,55 +376,56 @@ interface TableHeadProps extends ThHTMLAttributes<HTMLTableCellElement> {
   hoverIndex?: number;
 }
 
-const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(({ hoverIndex, className, ...props }, ref) => {
-  const sizeClasses = useSize();
-  const ctx = useContext(TableContext);
-  const internalRef = useRef<HTMLTableCellElement>(null);
-  useRegisterFluidHoverItem(ctx?.registerHead, hoverIndex, internalRef);
-  return (
-    <th
-      ref={(node) => {
-        internalRef.current = node;
-        if (typeof ref === "function") ref(node);
-        else if (ref) ref.current = node;
-      }}
-      data-head-hover={hoverIndex !== undefined || undefined}
-      className={cn(
-        "text-left text-foreground",
-        // py + line box lands the row on the ladder (36px / 28px).
-        "py-(--table-cell-py)",
-        sizeClasses.variant === "compact" ? "px-2.5" : "px-3",
-        className
-      )}
-      {...props}
-    />
-  );
-});
+const TableHead = forwardRef<HTMLTableCellElement, TableHeadProps>(
+  ({ hoverIndex, className, ...props }, ref) => {
+    const sizeClasses = useSize();
+    const ctx = useContext(TableContext);
+    const internalRef = useRef<HTMLTableCellElement>(null);
+    useRegisterFluidHoverItem(ctx?.registerHead, hoverIndex, internalRef);
+    return (
+      <th
+        ref={(node) => {
+          internalRef.current = node;
+          if (typeof ref === "function") ref(node);
+          else if (ref) ref.current = node;
+        }}
+        data-head-hover={hoverIndex !== undefined || undefined}
+        className={cn(
+          "text-foreground text-left",
+          // py + line box lands the row on the ladder (36px / 28px).
+          "py-(--table-cell-py)",
+          sizeClasses.variant === "compact" ? "px-2.5" : "px-3",
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 
 TableHead.displayName = "TableHead";
 
 // ── TableCell ────────────────────────────────────────────
 
-const TableCell = forwardRef<
-  HTMLTableCellElement,
-  TdHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => {
-  const sizeClasses = useSize();
-  return (
-    <td
-      ref={ref}
-      // Muted at rest, foreground on the lit row, on the same 80ms as the
-      // border fade. Same padding as TableHead so every row shares a height.
-      className={cn(
-        "text-muted-foreground transition-colors duration-80 group-[.is-active]/row:text-foreground",
-        "py-(--table-cell-py)",
-        sizeClasses.variant === "compact" ? "px-2.5" : "px-3",
-        className
-      )}
-      {...props}
-    />
-  );
-});
+const TableCell = forwardRef<HTMLTableCellElement, TdHTMLAttributes<HTMLTableCellElement>>(
+  ({ className, ...props }, ref) => {
+    const sizeClasses = useSize();
+    return (
+      <td
+        ref={ref}
+        // Muted at rest, foreground on the lit row, on the same 80ms as the
+        // border fade. Same padding as TableHead so every row shares a height.
+        className={cn(
+          "text-muted-foreground group-[.is-active]/row:text-foreground transition-colors duration-80",
+          "py-(--table-cell-py)",
+          sizeClasses.variant === "compact" ? "px-2.5" : "px-3",
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 
 TableCell.displayName = "TableCell";
 
@@ -466,14 +459,11 @@ const TableEmpty = forwardRef<HTMLTableRowElement, TableEmptyProps>(
             // Pinned to the visible box: sticky at its left edge and as wide
             // as the scroll box (--table-view-w, which DataTable sets), so the
             // message centers on what's in view, not on a table wider than it.
-            className="sticky left-0 flex w-(--table-view-w,100%) min-h-[calc(var(--table-empty-rows)*(1lh+2*var(--table-cell-py)+1px))] flex-col items-center justify-center gap-1 px-3 py-4 text-center"
+            className="sticky left-0 flex min-h-[calc(var(--table-empty-rows)*(1lh+2*var(--table-cell-py)+1px))] w-(--table-view-w,100%) flex-col items-center justify-center gap-1 px-3 py-4 text-center"
             style={{ "--table-empty-rows": rows } as CSSProperties}
           >
             {title && (
-              <span
-                className="text-foreground"
-                style={{ fontVariationSettings: fontWeights.semibold }}
-              >
+              <span className="text-foreground" style={{ fontVariationSettings: fontWeights.semibold }}>
                 {title}
               </span>
             )}
@@ -484,7 +474,7 @@ const TableEmpty = forwardRef<HTMLTableRowElement, TableEmptyProps>(
         </td>
       </tr>
     );
-  }
+  },
 );
 
 TableEmpty.displayName = "TableEmpty";

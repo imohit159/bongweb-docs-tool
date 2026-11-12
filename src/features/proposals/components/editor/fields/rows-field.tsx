@@ -1,7 +1,7 @@
 "use client";
 
 import type { Draft } from "immer";
-import { Plus } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -124,7 +124,7 @@ export function RowsField<T extends RowBase>({
       {!readOnly && rows.length < maxRows && (
         <Button
           variant="tertiary"
-          leadingIcon={Plus}
+          leadingIcon={IconPlus}
           className="self-start"
           onClick={() => update((draft) => void draft.push(createRow() as Draft<T>))}
         >

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Draft } from "immer";
-import { Plus } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { newService, type ServiceBlock } from "../../../templates/project";
@@ -95,7 +95,7 @@ export function ServiceBlocksField({
       {!readOnly && services.length < 8 && (
         <Button
           variant="tertiary"
-          leadingIcon={Plus}
+          leadingIcon={IconPlus}
           className="self-start"
           onClick={() => update((draft) => void draft.push(newService()))}
         >

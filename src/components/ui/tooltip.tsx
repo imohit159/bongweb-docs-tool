@@ -31,17 +31,9 @@ import { useShape } from "@/lib/shape-context";
 
 const TooltipPortalContainerContext = createContext<HTMLElement | null>(null);
 
-function TooltipPortalContainer({
-  value,
-  children,
-}: {
-  value: HTMLElement | null;
-  children: ReactNode;
-}) {
+function TooltipPortalContainer({ value, children }: { value: HTMLElement | null; children: ReactNode }) {
   return (
-    <TooltipPortalContainerContext.Provider value={value}>
-      {children}
-    </TooltipPortalContainerContext.Provider>
+    <TooltipPortalContainerContext.Provider value={value}>{children}</TooltipPortalContainerContext.Provider>
   );
 }
 
@@ -77,10 +69,7 @@ function TooltipProvider({
 }: TooltipProviderProps) {
   return (
     <TooltipGroupContext.Provider value={true}>
-      <TooltipPrimitive.Provider
-        delay={delayDuration}
-        timeout={skipDelayDuration}
-      >
+      <TooltipPrimitive.Provider delay={delayDuration} timeout={skipDelayDuration}>
         {children}
       </TooltipPrimitive.Provider>
     </TooltipGroupContext.Provider>
@@ -250,7 +239,7 @@ function GroupBubble({
       value: MotionValue<number>,
       to: number,
       transition: BubbleTransition,
-      onComplete?: () => void
+      onComplete?: () => void,
     ) => {
       state.runs.push(animate(value, to, { ...transition, onComplete }));
     };
@@ -380,14 +369,12 @@ function GroupBubble({
       className="relative"
       style={{
         opacity: mv.opacity,
-        ...(side === "top" || side === "bottom"
-          ? { y: mv.slide }
-          : { x: mv.slide }),
+        ...(side === "top" || side === "bottom" ? { y: mv.slide } : { x: mv.slide }),
       }}
     >
       <motion.div
         ref={shapeRef}
-        className={cn("absolute bg-foreground", shape.bg)}
+        className={cn("bg-foreground absolute", shape.bg)}
         style={{
           left: mv.left,
           right: mv.right,
@@ -411,7 +398,7 @@ function GroupBubble({
           aria-hidden
           className={cn(
             label,
-            "pointer-events-none absolute left-1/2 top-1/2 w-max -translate-x-1/2 -translate-y-1/2"
+            "pointer-events-none absolute top-1/2 left-1/2 w-max -translate-x-1/2 -translate-y-1/2",
           )}
           style={{
             fontVariationSettings: fontWeights.normal,
@@ -443,10 +430,7 @@ function TooltipGroup({
   const [store] = useState(createGroupStore);
   return (
     <TooltipGroupStoreContext.Provider value={store}>
-      <TooltipProvider
-        delayDuration={delayDuration}
-        skipDelayDuration={skipDelayDuration}
-      >
+      <TooltipProvider delayDuration={delayDuration} skipDelayDuration={skipDelayDuration}>
         {children}
       </TooltipProvider>
     </TooltipGroupStoreContext.Provider>
@@ -474,10 +458,7 @@ function usePopupExit(open: boolean, setOpen: (open: boolean) => void) {
     if (actionsRef.current) actionsRef.current.close();
     else setRootOpen(false);
   }, [open, rootOpen]);
-  const onOpenChange = (
-    next: boolean,
-    details: { preventUnmountOnClose: () => void }
-  ) => {
+  const onOpenChange = (next: boolean, details: { preventUnmountOnClose: () => void }) => {
     if (!next) {
       details.preventUnmountOnClose();
       setRootOpen(false);
@@ -543,7 +524,7 @@ function Tooltip({
     followOffset.set(
       followCursor === "y"
         ? event.clientY - (rect.top + rect.height / 2)
-        : event.clientX - (rect.left + rect.width / 2)
+        : event.clientX - (rect.left + rect.width / 2),
     );
   };
 
@@ -567,18 +548,13 @@ function Tooltip({
         <TooltipPrimitive.Positioner
           side={side}
           sideOffset={sideOffset}
-          className={cn(
-            "z-[var(--z-tooltip,70)]",
-            groupStore && "pointer-events-none",
-            contentClassName
-          )}
+          className={cn("z-[var(--z-tooltip,70)]", groupStore && "pointer-events-none", contentClassName)}
         >
           <TooltipPrimitive.Popup
             render={(props, state) => {
               const exiting = state.transitionStatus === "ending";
               const contentChildren = content;
-              const { style: baseStyle, ...baseProps } =
-                props as React.HTMLAttributes<HTMLDivElement>;
+              const { style: baseStyle, ...baseProps } = props as React.HTMLAttributes<HTMLDivElement>;
               // motion.div has incompatible drag/animation event signatures —
               // strip the React-DOM versions so they don't fight motion's own.
               const rest = omit(baseProps, [
@@ -615,21 +591,14 @@ function Tooltip({
                     />
                   ) : (
                     <motion.div
-                      className={cn(
-                        "bg-foreground",
-                        bubbleText,
-                        shape.bg,
-                        className
-                      )}
+                      className={cn("bg-foreground", bubbleText, shape.bg, className)}
                       style={{ fontVariationSettings: fontWeights.normal }}
                       initial={{ opacity: 0, ...slideOffset }}
                       // Both targets name x and y: an exit target without one
                       // starts a separate, instant animation back to 0 whose
                       // completion would release the unmount below too early.
                       animate={
-                        exiting
-                          ? { opacity: 0, x: 0, y: 0, ...slideOffset }
-                          : { opacity: 1, x: 0, y: 0 }
+                        exiting ? { opacity: 0, x: 0, y: 0, ...slideOffset } : { opacity: 1, x: 0, y: 0 }
                       }
                       transition={exiting ? spring.fast.exit : spring.fast}
                       onAnimationComplete={() => {
@@ -654,16 +623,9 @@ function Tooltip({
   if (hasAmbientProvider) return tooltip;
 
   return (
-    <TooltipPrimitive.Provider delay={delayDuration ?? DEFAULT_DELAY}>
-      {tooltip}
-    </TooltipPrimitive.Provider>
+    <TooltipPrimitive.Provider delay={delayDuration ?? DEFAULT_DELAY}>{tooltip}</TooltipPrimitive.Provider>
   );
 }
 
 export { Tooltip, TooltipGroup, TooltipPortalContainer, TooltipProvider };
-export type {
-  TooltipGroupProps,
-  TooltipProps,
-  TooltipProviderProps,
-  TooltipSide,
-};
+export type { TooltipGroupProps, TooltipProps, TooltipProviderProps, TooltipSide };

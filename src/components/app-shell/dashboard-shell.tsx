@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileSignature, FileText, ReceiptIndianRupee, type LucideIcon, type LucideProps } from "lucide-react";
+import { IconContract, IconFileText, IconReceiptRupee, type Icon as TablerIcon } from "@tabler/icons-react";
+import type { IconComponentProps } from "@/lib/icon-context";
 import { MotionConfig } from "motion/react";
 import { useState, type ReactNode } from "react";
 import {
@@ -30,18 +31,18 @@ const EDITOR_ROUTE = /^\/proposals\/[0-9a-f-]{36}$/i;
 
 // The menu thickens a lit row's icon stroke; these keep one light outline in
 // every state, so the pill background alone marks the active and hovered row.
-function outline(Icon: LucideIcon) {
-  function OutlineIcon(props: LucideProps) {
-    return <Icon {...props} strokeWidth={1.5} />;
+function outline(Icon: TablerIcon) {
+  function OutlineIcon({ size, className }: IconComponentProps) {
+    return <Icon size={size} className={className} stroke={1.5} />;
   }
   OutlineIcon.displayName = `Outline${Icon.displayName ?? ""}`;
   return OutlineIcon;
 }
 
 const navigation = [
-  { href: "/proposals", label: "Proposals", icon: outline(FileText) },
-  { href: "/agreements", label: "Agreements", icon: outline(FileSignature) },
-  { href: "/invoices", label: "Invoices", icon: outline(ReceiptIndianRupee) },
+  { href: "/proposals", label: "Proposals", icon: outline(IconFileText) },
+  { href: "/agreements", label: "Agreements", icon: outline(IconContract) },
+  { href: "/invoices", label: "Invoices", icon: outline(IconReceiptRupee) },
 ];
 
 export function DashboardShell({

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Draft } from "immer";
-import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
+import { IconArrowDown, IconArrowUp, IconPlus, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CharCount } from "./char-count";
@@ -44,7 +44,7 @@ export function LineItemsField({
                       disabled={index === 0}
                       onClick={() => move(index, index - 1)}
                     >
-                      <ArrowUp />
+                      <IconArrowUp />
                     </Button>
                   </Tooltip>
                   <Tooltip content="Move down">
@@ -55,7 +55,7 @@ export function LineItemsField({
                       disabled={index === items.length - 1}
                       onClick={() => move(index, index + 1)}
                     >
-                      <ArrowDown />
+                      <IconArrowDown />
                     </Button>
                   </Tooltip>
                   <Tooltip content="Remove">
@@ -65,7 +65,7 @@ export function LineItemsField({
                       aria-label={`Remove item ${index + 1}`}
                       onClick={() => update((draft) => void draft.splice(index, 1))}
                     >
-                      <X />
+                      <IconX />
                     </Button>
                   </Tooltip>
                 </div>
@@ -112,7 +112,7 @@ export function LineItemsField({
       {!readOnly && items.length < MAX_LINE_ITEMS && (
         <Button
           variant="tertiary"
-          leadingIcon={Plus}
+          leadingIcon={IconPlus}
           className="self-start"
           onClick={() =>
             update((draft) => void draft.push({ id: newLineItemId(), description: "", qty: 1, ratePaise: 0 }))

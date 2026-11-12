@@ -44,7 +44,7 @@ const FieldSet = forwardRef<HTMLFieldSetElement, FieldsetHTMLAttributes<HTMLFiel
       className={cn("m-0 flex min-w-0 flex-col gap-3 border-0 p-0", className)}
       {...props}
     />
-  )
+  ),
 );
 FieldSet.displayName = "FieldSet";
 
@@ -67,7 +67,7 @@ const FieldLegend = forwardRef<HTMLLegendElement, FieldLegendProps>(
           variant === "legend"
             ? cn(sizeClasses.type.subtitle, "text-foreground")
             : cn(sizeClasses.type.body, "text-muted-foreground"),
-          className
+          className,
         )}
         style={{
           fontVariationSettings: variant === "legend" ? fontWeights.semibold : fontWeights.normal,
@@ -76,7 +76,7 @@ const FieldLegend = forwardRef<HTMLLegendElement, FieldLegendProps>(
         {...props}
       />
     );
-  }
+  },
 );
 FieldLegend.displayName = "FieldLegend";
 
@@ -92,7 +92,7 @@ const FieldGroup = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
       className={cn("@container/field-group flex w-full flex-col gap-3", className)}
       {...props}
     />
-  )
+  ),
 );
 FieldGroup.displayName = "FieldGroup";
 
@@ -125,12 +125,11 @@ const NATIVE_CONTROL = "input:not([type=hidden]):not([aria-hidden=true]), textar
  *  what sits directly in it. */
 function linkDescriptions(root: HTMLElement) {
   const own = (el: Element) => el.closest("[data-slot=field]") === root;
-  const find = (selector: string) =>
-    Array.from(root.querySelectorAll<HTMLElement>(selector)).find(own);
+  const find = (selector: string) => Array.from(root.querySelectorAll<HTMLElement>(selector)).find(own);
   const control = find(LIBRARY_CONTROL) ?? find(NATIVE_CONTROL);
   if (!control) return;
   const ids = Array.from(
-    root.querySelectorAll<HTMLElement>("[data-slot=field-description], [data-slot=field-error]")
+    root.querySelectorAll<HTMLElement>("[data-slot=field-description], [data-slot=field-error]"),
   )
     .filter(own)
     .map((el) => el.id)
@@ -183,12 +182,12 @@ const Field = forwardRef<HTMLDivElement, FieldProps>(
           // Side by side once the group is wide enough: the same ladder gap.
           orientation === "responsive" &&
             (sizeClasses.variant === "compact" ? "@md/field-group:gap-1" : "@md/field-group:gap-2"),
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 Field.displayName = "Field";
 
@@ -200,7 +199,7 @@ const FieldContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
       className={cn("flex min-w-0 flex-1 flex-col gap-1", className)}
       {...props}
     />
-  )
+  ),
 );
 FieldContent.displayName = "FieldContent";
 
@@ -222,7 +221,7 @@ const FieldLabel = forwardRef<HTMLLabelElement, LabelHTMLAttributes<HTMLLabelEle
           // Choice card: a whole Field wrapped in the label becomes one
           // bordered, hoverable target. Block, since an inline label would
           // break its border around the Field inside.
-          "has-[>[data-slot=field]]:block has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:border has-[>[data-slot=field]]:border-border",
+          "has-[>[data-slot=field]]:border-border has-[>[data-slot=field]]:block has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:border",
           // The card takes the shape's container radius and the ladder's
           // control padding (12px, 10px compact) on every side.
           {
@@ -230,8 +229,10 @@ const FieldLabel = forwardRef<HTMLLabelElement, LabelHTMLAttributes<HTMLLabelEle
             rounded: "has-[>[data-slot=field]]:rounded-xl",
             sharp: "has-[>[data-slot=field]]:rounded-[1px]",
           }[shape.variant],
-          sizeClasses.variant === "compact" ? "has-[>[data-slot=field]]:p-2.5" : "has-[>[data-slot=field]]:p-3",
-          "has-[>[data-slot=field]]:transition-[background-color,border-color] has-[>[data-slot=field]]:duration-80 has-[>[data-slot=field]]:hover:bg-hover",
+          sizeClasses.variant === "compact"
+            ? "has-[>[data-slot=field]]:p-2.5"
+            : "has-[>[data-slot=field]]:p-3",
+          "has-[>[data-slot=field]]:hover:bg-hover has-[>[data-slot=field]]:transition-[background-color,border-color] has-[>[data-slot=field]]:duration-80",
           // Hovering anywhere on the card, padding included, lights the box
           // the same way hovering its row does. A disabled box stays put and an
           // invalid one keeps its red border.
@@ -241,13 +242,13 @@ const FieldLabel = forwardRef<HTMLLabelElement, LabelHTMLAttributes<HTMLLabelEle
           // the control's own ring steps aside.
           "has-[>[data-slot=field]]:has-focus-visible:ring-1 has-[>[data-slot=field]]:has-focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
           "has-[>[data-slot=field]]:[&_[data-slot=checkbox]:focus-visible]:ring-0",
-          className
+          className,
         )}
         style={{ fontVariationSettings: fontWeights.normal, ...style }}
         {...props}
       />
     );
-  }
+  },
 );
 FieldLabel.displayName = "FieldLabel";
 
@@ -263,7 +264,7 @@ const FieldTitle = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
         {...props}
       />
     );
-  }
+  },
 );
 FieldTitle.displayName = "FieldTitle";
 
@@ -277,12 +278,12 @@ const FieldDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPar
         ref={ref}
         id={id ?? autoId}
         data-slot="field-description"
-        className={cn(sizeClasses.type.caption, "text-pretty text-muted-foreground", className)}
+        className={cn(sizeClasses.type.caption, "text-muted-foreground text-pretty", className)}
         style={{ fontVariationSettings: fontWeights.normal, ...style }}
         {...props}
       />
     );
-  }
+  },
 );
 FieldDescription.displayName = "FieldDescription";
 
@@ -297,12 +298,15 @@ const FieldSeparator = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>
         className={cn("relative flex h-5 items-center", className)}
         {...props}
       >
-        <div aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-border" />
+        <div aria-hidden className="bg-border absolute inset-x-0 top-1/2 h-px" />
         {children && (
           // The label masks the rule with the page background; pass a
           // className with the surface's own bg when it sits on a card.
           <span
-            className={cn("relative mx-auto bg-background px-2 text-muted-foreground", sizeClasses.type.caption)}
+            className={cn(
+              "bg-background text-muted-foreground relative mx-auto px-2",
+              sizeClasses.type.caption,
+            )}
             style={{ fontVariationSettings: fontWeights.normal }}
           >
             {children}
@@ -310,7 +314,7 @@ const FieldSeparator = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>
         )}
       </div>
     );
-  }
+  },
 );
 FieldSeparator.displayName = "FieldSeparator";
 
@@ -331,23 +335,23 @@ const FieldError = forwardRef<HTMLDivElement, FieldErrorProps>(
 
     const messages = useMemo(
       () => [...new Set((errors ?? []).map((e) => e?.message).filter((m): m is string => !!m))],
-      [errors]
+      [errors],
     );
 
     // `{cond && "msg"}` hands over false; only real content stands in for
     // the errors array.
     const hasChildren = children != null && children !== false && children !== "";
-    const content = hasChildren
-      ? children
-      : (messages.length > 1 ? (
-        <ul className="m-0 flex list-none flex-col gap-1 p-0">
-          {messages.map((m) => (
-            <li key={m}>{m}</li>
-          ))}
-        </ul>
-      ) : (
-        messages[0]
-      ));
+    const content = hasChildren ? (
+      children
+    ) : messages.length > 1 ? (
+      <ul className="m-0 flex list-none flex-col gap-1 p-0">
+        {messages.map((m) => (
+          <li key={m}>{m}</li>
+        ))}
+      </ul>
+    ) : (
+      messages[0]
+    );
 
     if (!content) return null;
 
@@ -358,10 +362,10 @@ const FieldError = forwardRef<HTMLDivElement, FieldErrorProps>(
         role="alert"
         data-slot="field-error"
         className={cn(
-          "flex items-start text-destructive",
+          "text-destructive flex items-start",
           sizeClasses.gap,
           sizeClasses.type.caption,
-          className
+          className,
         )}
         style={{ fontVariationSettings: fontWeights.normal, ...style }}
         {...props}
@@ -372,7 +376,7 @@ const FieldError = forwardRef<HTMLDivElement, FieldErrorProps>(
         <div className="min-w-0">{content}</div>
       </div>
     );
-  }
+  },
 );
 FieldError.displayName = "FieldError";
 

@@ -10,7 +10,7 @@ export const PROPOSAL_STATUS_COLORS: Record<ProposalStatus, BadgeColor> = {
 
 export function ProposalStatusBadge({ status }: { status: ProposalStatus }) {
   return (
-    <Badge variant="dot" color={PROPOSAL_STATUS_COLORS[status]}>
+    <Badge variant="dashed" color={PROPOSAL_STATUS_COLORS[status]}>
       {PROPOSAL_STATUS_LABELS[status]}
     </Badge>
   );

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { IconEye, IconEyeOff } from "@tabler/icons-react";
 import { InputGroup, InputField } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/features/auth/client";
@@ -81,7 +81,7 @@ export function AuthForm() {
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => setShowPassword((visible) => !visible)}
           >
-            {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+            {showPassword ? <IconEyeOff aria-hidden="true" /> : <IconEye aria-hidden="true" />}
           </Button>
         </div>
       </InputGroup>

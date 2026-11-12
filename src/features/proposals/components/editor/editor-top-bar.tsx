@@ -1,6 +1,14 @@
 "use client";
 
-import { ArrowLeft, Check, ChevronDown, Download, FilePen, Send, Undo2 } from "lucide-react";
+import {
+  IconArrowBackUp,
+  IconArrowLeft,
+  IconCheck,
+  IconChevronDown,
+  IconDownload,
+  IconFilePencil,
+  IconSend,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -78,23 +86,23 @@ function StatusMenu({ onError }: { onError: (message: string) => void }) {
   const unsaved = saveState === "dirty" || saveState === "saving";
   const items = [
     canChangeStatus(proposal.status, "sent") && {
-      icon: Send,
+      icon: IconSend,
       label: "Mark as sent",
       run: () => change("sent"),
       disabled: unsaved,
     },
     canChangeStatus(proposal.status, "accepted") && {
-      icon: Check,
+      icon: IconCheck,
       label: "Mark as accepted",
       run: () => change("accepted"),
     },
     canChangeStatus(proposal.status, "draft") && {
-      icon: Undo2,
+      icon: IconArrowBackUp,
       label: "Back to draft",
       run: () => change("draft"),
     },
-    canRevise(proposal.status) && { icon: FilePen, label: "Revise (new version)", run: revise },
-  ].filter(Boolean) as { icon: typeof Send; label: string; run: () => void; disabled?: boolean }[];
+    canRevise(proposal.status) && { icon: IconFilePencil, label: "Revise (new version)", run: revise },
+  ].filter(Boolean) as { icon: typeof IconSend; label: string; run: () => void; disabled?: boolean }[];
 
   if (items.length === 0) return <ProposalStatusBadge status={proposal.status} />;
   return (
@@ -104,7 +112,7 @@ function StatusMenu({ onError }: { onError: (message: string) => void }) {
           <Button
             variant="ghost"
             size="compact"
-            trailingIcon={ChevronDown}
+            trailingIcon={IconChevronDown}
             loading={pending}
             aria-label="Change status"
           >
@@ -144,7 +152,7 @@ export function EditorTopBar({
         aria-label="Back to proposals"
         render={<Link href="/proposals" />}
       >
-        <ArrowLeft />
+        <IconArrowLeft />
       </Button>
       <div className="flex min-w-0 flex-col">
         <span className="text-muted-foreground truncate text-xs">
@@ -156,7 +164,7 @@ export function EditorTopBar({
       <div className="ml-auto flex items-center gap-2">
         <SaveIndicator />
         <StudioDetailsDialog />
-        <Button size="compact" leadingIcon={Download} onClick={onDownload}>
+        <Button size="compact" leadingIcon={IconDownload} onClick={onDownload}>
           Download
         </Button>
       </div>

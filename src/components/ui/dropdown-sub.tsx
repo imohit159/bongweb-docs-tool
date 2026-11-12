@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  type RefObject,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 import { useIcons } from "@/lib/icon-context";
 import { useSize } from "@/lib/size-context";
@@ -35,15 +29,11 @@ export const SUBMENU_SIDE_OFFSET = 6;
  *  lines up with the trigger row. */
 export const SUBMENU_ALIGN_OFFSET = -4;
 
-export type DropdownSubTriggerProps = Omit<
-  MenuItemProps,
-  "checked" | "onSelect" | "closeOnClick"
->;
+export type DropdownSubTriggerProps = Omit<MenuItemProps, "checked" | "onSelect" | "closeOnClick">;
 
 const ROW_SELECTOR = "[data-fluid-hover-index]";
 
-const useIsoLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 /**
  * The parent popup's side of its submenus. Use `onMouseEnter`,
@@ -54,17 +44,13 @@ const useIsoLayoutEffect =
 export function useSubmenuHost(
   containerRef: RefObject<HTMLElement | null>,
   hover: Pick<UseFluidHoverReturn, "setActiveIndex" | "handlers">,
-  open: boolean
+  open: boolean,
 ) {
   // The hook's handlers object is new every render, but the functions in it
   // are stable: depend on those, so the callbacks below stay stable too and
   // a trigger's report effect only re-runs when its submenu really changes.
   const { setActiveIndex } = hover;
-  const {
-    onMouseEnter: hoverEnter,
-    onMouseMove: hoverMove,
-    onMouseLeave: hoverLeave,
-  } = hover.handlers;
+  const { onMouseEnter: hoverEnter, onMouseMove: hoverMove, onMouseLeave: hoverLeave } = hover.handlers;
   const openIndexRef = useRef<number | null>(null);
   // Read when a submenu closes, in its trigger's effect cleanup. A layout
   // effect refreshes it in the commit's layout phase, before any passive
@@ -125,7 +111,7 @@ export function useSubmenuHost(
         setActiveIndex(null);
       }
     },
-    [containerRef, setActiveIndex, hoverMove, listen]
+    [containerRef, setActiveIndex, hoverMove, listen],
   );
 
   const holding = useCallback(() => openIndexRef.current !== null, []);
@@ -145,7 +131,7 @@ export function useSubmenuHost(
       if (openIndexRef.current !== null) return;
       hoverMove(e);
     },
-    [hoverMove]
+    [hoverMove],
   );
 
   const onMouseLeave = useCallback(() => {
@@ -160,7 +146,7 @@ export function useSubmenuHost(
 export function useReportSubmenu(
   onSubmenuOpenChange: ((index: number, open: boolean) => void) | undefined,
   index: number,
-  open: boolean
+  open: boolean,
 ) {
   useEffect(() => {
     if (!open || !onSubmenuOpenChange) return;
@@ -182,7 +168,7 @@ export function SubmenuChevron({ lit }: { lit: boolean }) {
         strokeWidth={lit ? 2 : 1.5}
         className={cn(
           "transition-[color,stroke-width] duration-80",
-          lit ? "text-foreground" : "text-muted-foreground"
+          lit ? "text-foreground" : "text-muted-foreground",
         )}
       />
     </span>

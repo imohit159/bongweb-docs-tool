@@ -200,7 +200,7 @@ type DataTableSearchValue = string | { column: string; query: string };
 /** The global filter's test, which DataTableSearch sets: the text, without
  *  case, in any column, or in the one column it names. */
 function dataTableSearchFn<TData>(row: Row<TData>, columnId: string, search: DataTableSearchValue) {
-  const query = (typeof search === "string" ? search : search?.query ?? "").trim().toLowerCase();
+  const query = (typeof search === "string" ? search : (search?.query ?? "")).trim().toLowerCase();
   if (!query) return true;
   if (typeof search === "object" && search.column !== columnId) return false;
   const value = row.getValue(columnId);
@@ -210,10 +210,7 @@ function dataTableSearchFn<TData>(row: Row<TData>, columnId: string, search: Dat
 
 /** How a column filters (see `meta.filter`). */
 type DataTableFilterKind =
-  | "text"
-  | "number"
-  | "date"
-  | { type: "options"; options: readonly DataTableSelectOption[] };
+  "text" | "number" | "date" | { type: "options"; options: readonly DataTableSelectOption[] };
 
 /** A column's filter value, as DataTableFilters sets it. A plain string
  *  (DataTableSearch on one column) means "contains". */
@@ -394,7 +391,7 @@ function useDataTable<TData>({ pageSize = 10, initialState, ...options }: UseDat
         },
       }) as DataTableInstance<TData>,
     // eslint-disable-next-line react-hooks/exhaustive-deps -- state is the trigger
-    [table, state, columnLines, filterRequest, chipsMounted]
+    [table, state, columnLines, filterRequest, chipsMounted],
   );
 }
 
@@ -519,9 +516,21 @@ const SKELETON_FILL = "bg-hover";
 // Skeleton corners follow the shape setting, as the controls they stand in
 // for do: the checkbox's own radius for its square, and for text bars the
 // shape's character (rounded, a full pill, or sharp's 1px).
-const SKELETON_BOX_RADIUS = { rounded: "rounded-[5px]", pill: "rounded-[5px]", sharp: "rounded-none" } as const;
-const SKELETON_BOX_RADIUS_COMPACT = { rounded: "rounded-[4px]", pill: "rounded-[4px]", sharp: "rounded-none" } as const;
-const SKELETON_BAR_RADIUS = { rounded: "rounded-[3px]", pill: "rounded-full", sharp: "rounded-[1px]" } as const;
+const SKELETON_BOX_RADIUS = {
+  rounded: "rounded-[5px]",
+  pill: "rounded-[5px]",
+  sharp: "rounded-none",
+} as const;
+const SKELETON_BOX_RADIUS_COMPACT = {
+  rounded: "rounded-[4px]",
+  pill: "rounded-[4px]",
+  sharp: "rounded-none",
+} as const;
+const SKELETON_BAR_RADIUS = {
+  rounded: "rounded-[3px]",
+  pill: "rounded-full",
+  sharp: "rounded-[1px]",
+} as const;
 
 /** Columns whose content is text to fade in (the selection and row-menu
  *  columns hold controls with hit areas that must not be clipped). */
@@ -535,7 +544,7 @@ function skeletonFor(
   row: number,
   col: number,
   shape: keyof typeof SKELETON_BAR_RADIUS,
-  compact: boolean
+  compact: boolean,
 ) {
   if (columnId === "actions") return null;
   return (
@@ -547,7 +556,7 @@ function skeletonFor(
           className={cn(
             SKELETON_FILL,
             compact ? "size-[14px]" : "size-4",
-            (compact ? SKELETON_BOX_RADIUS_COMPACT : SKELETON_BOX_RADIUS)[shape]
+            (compact ? SKELETON_BOX_RADIUS_COMPACT : SKELETON_BOX_RADIUS)[shape],
           )}
         />
       ) : (
@@ -561,9 +570,7 @@ function skeletonFor(
 }
 
 // Clicks that land on a control in the row belong to that control.
-const CONTROL =
-  "button, a, input, select, textarea, [role=checkbox], [role=menuitem], [data-select-hit]";
-
+const CONTROL = "button, a, input, select, textarea, [role=checkbox], [role=menuitem], [data-select-hit]";
 
 // The header press fill's corners, per shape: the shape's item radius, as
 // the ghost uses (literal classes, so Tailwind sees them).
@@ -643,7 +650,7 @@ function MenuShield({ open, onClose }: { open: boolean; onClose?: () => void }) 
       className="fixed inset-0 z-[calc(var(--z-popover,60)-1)]"
       onPointerDown={onClose}
     />,
-    document.body
+    document.body,
   );
 }
 
@@ -667,7 +674,7 @@ function moveColumn<TData>(
   table: TanStackTable<TData>,
   id: string,
   refId: string,
-  place: "before" | "after"
+  place: "before" | "after",
 ) {
   if (id === refId) return;
   const all = table.getAllLeafColumns();
@@ -738,7 +745,7 @@ function DataTable<TData>({
   // put while a filter runs dry.
   const heldRows = Math.max(
     1,
-    Math.min(table.getState().pagination.pageSize, table.getPreFilteredRowModel().rows.length)
+    Math.min(table.getState().pagination.pageSize, table.getPreFilteredRowModel().rows.length),
   );
 
   // Loading → loaded: for one fade, the real rows keep the skeletons in
@@ -757,11 +764,8 @@ function DataTable<TData>({
   }, [swapping]);
   const skeletonRows = loadingRows ?? table.getState().pagination.pageSize;
 
-
   // The header being dragged, and where it would land.
-  const [drag, setDrag] = useState<{ id: string; refId: string; place: "before" | "after" } | null>(
-    null
-  );
+  const [drag, setDrag] = useState<{ id: string; refId: string; place: "before" | "after" } | null>(null);
   const headRowRef = useRef<HTMLTableRowElement>(null);
   const sizeClasses = useSize(size);
   const shape = useShape();
@@ -779,9 +783,7 @@ function DataTable<TData>({
   const ghostRef = useRef<HTMLDivElement>(null);
 
   const dropTarget = (x: number, id: string) => {
-    const heads = Array.from(
-      headRowRef.current?.querySelectorAll<HTMLElement>("th[data-reorderable]") ?? []
-    );
+    const heads = Array.from(headRowRef.current?.querySelectorAll<HTMLElement>("th[data-reorderable]") ?? []);
     const before = heads.find((th) => {
       const r = th.getBoundingClientRect();
       return x < r.left + r.width / 2;
@@ -914,8 +916,8 @@ function DataTable<TData>({
       });
     });
   });
-  const [stableToggle] = useState(() => (row: Row<unknown>, open?: boolean) =>
-    toggleRef.current(row as Row<TData>, open)
+  const [stableToggle] = useState(
+    () => (row: Row<unknown>, open?: boolean) => toggleRef.current(row as Row<TData>, open),
   );
 
   // Editors hold the row order while they have focus (see heldOrder). A
@@ -938,8 +940,7 @@ function DataTable<TData>({
       captureLayout();
       setHeldOrder(null);
     },
-    commit: (row, columnId, value) =>
-      onCellEdit?.({ row: row as Row<TData>, columnId, value }),
+    commit: (row, columnId, value) => onCellEdit?.({ row: row as Row<TData>, columnId, value }),
   };
 
   // One context value for the table's life, reading the latest handlers,
@@ -963,24 +964,22 @@ function DataTable<TData>({
     const wrap = wrapRef.current;
     if (!before || !wrap) return;
     snapshot.current = null;
-    wrap
-      .querySelectorAll<HTMLElement>("th[data-column-id], td[data-column-id]")
-      .forEach((el) => {
-        const id = el.dataset.columnId!;
-        const old = before.lefts.get(id);
-        if (old === undefined) {
-          animate(el, { opacity: [0, 1] }, spring.moderate).then(() => {
-            el.style.opacity = "";
-          });
-          return;
-        }
-        const th = wrap.querySelector<HTMLElement>(`thead th[data-column-id="${CSS.escape(id)}"]`);
-        const dx = th ? old - th.offsetLeft : 0;
-        if (!dx) return;
-        animate(el, { x: [dx, 0] }, spring.moderate).then(() => {
-          el.style.transform = "";
+    wrap.querySelectorAll<HTMLElement>("th[data-column-id], td[data-column-id]").forEach((el) => {
+      const id = el.dataset.columnId!;
+      const old = before.lefts.get(id);
+      if (old === undefined) {
+        animate(el, { opacity: [0, 1] }, spring.moderate).then(() => {
+          el.style.opacity = "";
         });
+        return;
+      }
+      const th = wrap.querySelector<HTMLElement>(`thead th[data-column-id="${CSS.escape(id)}"]`);
+      const dx = th ? old - th.offsetLeft : 0;
+      if (!dx) return;
+      animate(el, { x: [dx, 0] }, spring.moderate).then(() => {
+        el.style.transform = "";
       });
+    });
     wrap.querySelectorAll<HTMLElement>("tbody tr[data-row-id]").forEach((tr) => {
       const old = before.tops.get(tr.dataset.rowId!);
       // A row that wasn't there (a sub-row just opened) fades in where it
@@ -1014,7 +1013,7 @@ function DataTable<TData>({
     e: PointerEvent<HTMLTableCellElement>,
     id: string,
     label: string,
-    icon: IconComponent | undefined
+    icon: IconComponent | undefined,
   ) => {
     // A press in the header's menu (portalled, but bubbling here through
     // React) isn't one on the cell.
@@ -1026,9 +1025,7 @@ function DataTable<TData>({
     let target: ReturnType<typeof dropTarget> | null = null;
     let lastX = startX;
     let frame = 0;
-    const viewport = wrapRef.current?.querySelector<HTMLElement>(
-      "[data-slot=scroll-area-viewport]"
-    );
+    const viewport = wrapRef.current?.querySelector<HTMLElement>("[data-slot=scroll-area-viewport]");
     // Places the ghost for a pointer x and finds where it would land.
     const place = (clientX: number) => {
       // The ghost stays within the table's visible box: it stops at the left
@@ -1056,7 +1053,8 @@ function DataTable<TData>({
       const fromRight = box.right - lastX;
       const pull = (d: number) => Math.min(1, Math.max(0, (EDGE_SCROLL_BAND - d) / EDGE_SCROLL_BAND));
       const speed = (d: number) => Math.round((EDGE_SCROLL_SPEED * pull(d) * dt) / 1000);
-      const step = fromLeft < EDGE_SCROLL_BAND ? -speed(fromLeft) : fromRight < EDGE_SCROLL_BAND ? speed(fromRight) : 0;
+      const step =
+        fromLeft < EDGE_SCROLL_BAND ? -speed(fromLeft) : fromRight < EDGE_SCROLL_BAND ? speed(fromRight) : 0;
       if (!step) return;
       const before = viewport.scrollLeft;
       viewport.scrollLeft += step;
@@ -1140,7 +1138,7 @@ function DataTable<TData>({
     const give = cols.reduce((sum, c) => sum + (c.fixed ? 0 : c.width - c.floor), 0);
     const share = deficit > 0 && give > 0 ? Math.min(1, deficit / give) : 0;
     return Object.fromEntries(
-      cols.map((c) => [c.id, Math.round(c.fixed ? c.width : c.width - (c.width - c.floor) * share)])
+      cols.map((c) => [c.id, Math.round(c.fixed ? c.width : c.width - (c.width - c.floor) * share)]),
     );
   }, []);
   // Measured again when the rows change in number, not when they're
@@ -1197,7 +1195,8 @@ function DataTable<TData>({
             if (value == null || value === "") continue;
             const text = String(value);
             if (r.depth > 0) widest = Math.max(widest, textWidth(sample, text));
-            for (const word of text.split(/\s+/)) if (word) widestWord = Math.max(widestWord, textWidth(sample, word));
+            for (const word of text.split(/\s+/))
+              if (word) widestWord = Math.max(widestWord, textWidth(sample, word));
           }
           const chrome = parseFloat(cellCss.paddingLeft) + parseFloat(cellCss.paddingRight) + 24 + 4;
           if (widest > 0) content = Math.max(content, widest + chrome);
@@ -1212,7 +1211,10 @@ function DataTable<TData>({
       const own = size !== undefined || !column?.getCanResize();
       return {
         id,
-        width: size !== undefined ? size : Math.ceil(own ? content : Math.max(Math.min(content, NATURAL_CAP), floor)),
+        width:
+          size !== undefined
+            ? size
+            : Math.ceil(own ? content : Math.max(Math.min(content, NATURAL_CAP), floor)),
         floor,
         // Pinned columns keep theirs too: scrolling, not cutting, makes room.
         fixed: own || !!column?.getIsPinned(),
@@ -1240,8 +1242,12 @@ function DataTable<TData>({
   const sized = resizeColumns ? seeded : fitted !== null;
   // The row-menu column hugs its button: 4px narrower in compact, where the
   // button sits flush right on the compact controls' center line.
-  const trim = (id: string, w: number) => (id === "actions" && sizeClasses.variant === "compact" ? w - ACTIONS_COMPACT_TRIM : w);
-  const actionsShown = !!table.getAllLeafColumns().find((c) => c.id === "actions")?.getIsVisible();
+  const trim = (id: string, w: number) =>
+    id === "actions" && sizeClasses.variant === "compact" ? w - ACTIONS_COMPACT_TRIM : w;
+  const actionsShown = !!table
+    .getAllLeafColumns()
+    .find((c) => c.id === "actions")
+    ?.getIsVisible();
   const widthOf = (id: string, size: number) => {
     const w = resizeColumns ? size : fitted?.[id];
     return w === undefined ? undefined : trim(id, w);
@@ -1260,16 +1266,32 @@ function DataTable<TData>({
   const pins = useMemo(() => {
     const map: Record<string, PinInfo> = {};
     if (!pinsKey) return map;
-    const lefts = pinsKey.split("|").filter((p) => p.startsWith("l:")).map((p) => p.split(":"));
-    const rights = pinsKey.split("|").filter((p) => p.startsWith("r:")).map((p) => p.split(":"));
+    const lefts = pinsKey
+      .split("|")
+      .filter((p) => p.startsWith("l:"))
+      .map((p) => p.split(":"));
+    const rights = pinsKey
+      .split("|")
+      .filter((p) => p.startsWith("r:"))
+      .map((p) => p.split(":"));
     let at = 0;
     lefts.forEach(([, id, w], i) => {
-      map[id] = { side: "left", offset: at, edge: i === lefts.length - 1, outer: i === 0 && visible[0]?.id === id };
+      map[id] = {
+        side: "left",
+        offset: at,
+        edge: i === lefts.length - 1,
+        outer: i === 0 && visible[0]?.id === id,
+      };
       at += Number(w);
     });
     at = 0;
     [...rights].reverse().forEach(([, id, w], i) => {
-      map[id] = { side: "right", offset: at, edge: i === rights.length - 1, outer: i === 0 && visible[visible.length - 1]?.id === id };
+      map[id] = {
+        side: "right",
+        offset: at,
+        edge: i === rights.length - 1,
+        outer: i === 0 && visible[visible.length - 1]?.id === id,
+      };
       at += Number(w);
     });
     return map;
@@ -1288,7 +1310,7 @@ function DataTable<TData>({
         const [side, , w] = p.split(":");
         return side === "l" ? { ...sum, l: sum.l + Number(w) } : { ...sum, r: sum.r + Number(w) };
       },
-      { l: 0, r: 0 }
+      { l: 0, r: 0 },
     );
   // Where the table sits in its sideways scroll, on the root, for the
   // pinned cells: opaque (with copies of the row fills) and edged with a
@@ -1375,7 +1397,9 @@ function DataTable<TData>({
     if (!tr) return false;
     const target = rowsFocusable
       ? tr
-      : tr.querySelector<HTMLElement>('button, a[href], input, [role=checkbox], [tabindex]:not([tabindex="-1"])');
+      : tr.querySelector<HTMLElement>(
+          'button, a[href], input, [role=checkbox], [tabindex]:not([tabindex="-1"])',
+        );
     if (!target) return false;
     target.focus();
     return true;
@@ -1386,7 +1410,12 @@ function DataTable<TData>({
     if (target.closest("input, textarea, select, [contenteditable=true]")) return;
     const mod = e.metaKey || e.ctrlKey;
     const letter = e.key.toLowerCase();
-    if (mod && !e.altKey && ((letter === "z" && e.shiftKey) || (letter === "y" && e.ctrlKey && !e.metaKey)) && onRedo) {
+    if (
+      mod &&
+      !e.altKey &&
+      ((letter === "z" && e.shiftKey) || (letter === "y" && e.ctrlKey && !e.metaKey)) &&
+      onRedo
+    ) {
       e.preventDefault();
       onRedo();
       return;
@@ -1473,7 +1502,7 @@ function DataTable<TData>({
     }
     if (!["ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)) return;
     const bodyRows = Array.from((tr.parentElement as HTMLTableSectionElement).rows).filter(
-      (r) => r.dataset.rowId
+      (r) => r.dataset.rowId,
     );
     const from = bodyRows.indexOf(tr);
     const order =
@@ -1491,7 +1520,7 @@ function DataTable<TData>({
       onRow
         ? r
         : (r.cells[col]?.querySelector<HTMLElement>(
-            'button, a[href], input, [role=checkbox], [tabindex]:not([tabindex="-1"])'
+            'button, a[href], input, [role=checkbox], [tabindex]:not([tabindex="-1"])',
           ) ?? null);
     const next = order.find((r) => control(r));
     if (!next) return;
@@ -1531,7 +1560,21 @@ function DataTable<TData>({
       if (wrapRef.current?.contains(e.target as Node)) pointerFresh = true;
     };
     window.addEventListener("pointermove", onPointerMove, { passive: true });
-    const ROW_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "Enter", " ", "x", "X", "Escape", "a", "A"]);
+    const ROW_KEYS = new Set([
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      "Home",
+      "End",
+      "Enter",
+      " ",
+      "x",
+      "X",
+      "Escape",
+      "a",
+      "A",
+    ]);
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.defaultPrevented || e.isComposing || !ROW_KEYS.has(e.key)) return;
       const mod = e.metaKey || e.ctrlKey;
@@ -1568,7 +1611,7 @@ function DataTable<TData>({
           ctrlKey: e.ctrlKey,
           bubbles: true,
           cancelable: true,
-        })
+        }),
       );
     };
     window.addEventListener("keydown", onKey, true);
@@ -1636,7 +1679,7 @@ function DataTable<TData>({
 
   const headerMenu = useMemo(
     () => ({ table: table as TanStackTable<unknown>, reorder: reorderColumns }),
-    [table, reorderColumns]
+    [table, reorderColumns],
   );
   // The row a right-click opened the menu for.
   const rowMenu = table.getAllLeafColumns().find((c) => c.columnDef.meta?.rowMenu)?.columnDef.meta?.rowMenu;
@@ -1646,289 +1689,302 @@ function DataTable<TData>({
 
   const tableEl = (
     <EditContext.Provider value={stableEditing}>
-    <Table
-      size={size}
-      // Selected rows on this page get CheckboxGroup's merged fill.
-      selectedIndices={rows.flatMap((row, i) => (row.getIsSelected() ? [i] : []))}
-      snapKey={expandTick}
-      hideHeadHighlight={!!drag}
-      // The skeleton rows are aria-hidden; this tells assistive tech the
-      // table is loading rather than empty.
-      aria-busy={loading || undefined}
-      onKeyDown={onBodyKeyDown}
-      // Fixed layout keeps the widths you set. The min width is every
-      // column's width summed, so past the box the table scrolls instead of
-      // crushing the column that takes the rest.
-      className={cn(
-        sized && "table-fixed",
-        // Most of the gap between box and text (8px of its 12) belongs to
-        // the column after the boxes, not the boxes: its header fill then
-        // starts 8px before the label instead of on it.
-        "[&_[data-column-id=select]+[data-column-id]]:pl-2",
-        // Measuring (see `natural`): every cell at its one-line width.
-        "[&[data-measuring]_:is(th,td)]:!w-auto [&[data-measuring]_:is(th,td)]:!max-w-none [&[data-measuring]_*]:!whitespace-nowrap",
-        // The sub-row guides start from the first column's left padding.
-        sizeClasses.variant === "compact" ? "[--expander-pl:10px]" : "[--expander-pl:12px]",
-        "[&_[data-column-id=select]+[data-column-id]]:[--expander-pl:8px]",
-        className
-      )}
-      style={
-        sized
-          ? {
-              minWidth:
-                (resizeColumns
-                  ? table.getTotalSize()
-                  : Object.values(fitted ?? {}).reduce((sum, w) => sum + w, 0)) -
-                (actionsShown && sizeClasses.variant === "compact" ? ACTIONS_COMPACT_TRIM : 0),
-            }
-          : undefined
-      }
-    >
-      <HeaderMenuContext.Provider value={headerMenu}>
-      <TableHeader>
-        {table.getHeaderGroups().map((group) => (
-          // Sticky header rows ride above the body rows (both z-10 by
-          // default, and later rows would paint over earlier ones).
-          <TableRow key={group.id} ref={headRowRef} className={fill ? "z-20" : undefined}>
-            {group.headers.map((header, headerIndex) => {
-              const column = header.column;
-              const meta = column.columnDef.meta;
-              const sorted = column.getIsSorted();
-              const movable = reorderColumns && !header.isPlaceholder && canReorder(column);
-              // The flex column has a handle too: its width is the least it
-              // takes, so dragging it wider grows the table.
-              const resizable = resizeColumns && column.getCanResize();
-              const label = meta?.label ?? (typeof column.columnDef.header === "string" ? column.columnDef.header : column.id);
-              const dropSide = drag && drag.refId === column.id && drag.id !== column.id ? drag.place : undefined;
-              return (
-                <TableHead
-                  key={header.id}
-                  colSpan={header.colSpan}
-                  // Headers that act join the header row's gliding fill (a
-                  // filled table's sticky headers paint over it, so they
-                  // keep a fill of their own).
-                  hoverIndex={!fill && (movable || column.getCanSort() || !!column.accessorFn) ? headerIndex : undefined}
-                  aria-sort={
-                    sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : undefined
-                  }
-                  data-column-id={column.id}
-                  data-reorderable={movable || undefined}
-                  data-drop={dropSide}
-                  data-dragging={drag?.id === column.id || undefined}
-                  onPointerDown={movable ? (e) => startDrag(e, column.id, label, meta?.icon) : undefined}
-                  onKeyDown={movable ? (e) => moveByKey(e, column.id) : undefined}
-                  // The whole cell opens the header's menu, padding and the
-                  // space past the label included: a click anywhere else in
-                  // it goes to the header's button (shift kept, for a
-                  // multi-column sort).
-                  onClick={(e) => {
-                    const target = e.target as Element;
-                    // Only the cell's own clicks: React bubbles the header
-                    // menu's (portalled) item clicks up through here, and
-                    // reopening it made a pick look like it never closed.
-                    if (!e.currentTarget.contains(target)) return;
-                    if (target.closest("button, a, input, [role=checkbox], [data-resize-handle]")) return;
-                    const trigger = e.currentTarget.querySelector<HTMLButtonElement>("button[aria-haspopup=menu]:not([aria-hidden])");
-                    if (!trigger) return;
-                    const shiftKey = e.shiftKey;
-                    trigger.focus({ preventScroll: true });
-                    // After this click has finished: opened during it, the
-                    // menu would read the same click as one outside it and
-                    // close at once.
-                    setTimeout(() => trigger.dispatchEvent(new MouseEvent("click", { bubbles: true, shiftKey })));
-                  }}
-                  // A column with no width of its own (one shown after the
-                  // widths were read) shares what's left with the flex one.
-                  style={{
-                    ...(sized &&
-                    column.id !== restId &&
-                    (resizeColumns
-                      ? column.id in sizing || column.columnDef.size !== undefined
-                      : fitted?.[column.id] !== undefined)
-                      ? { width: widthOf(column.id, header.getSize()) }
-                      : undefined),
-                    ...pinProps(pins[column.id]).style,
-                  }}
-                  className={cn(
-                    // Headers step back to muted so the content leads.
-                    "group/th relative text-muted-foreground",
-                    pinProps(pins[column.id]).className,
-                    // Filled, the header stays put while the rows scroll,
-                    // and once they do, a hairline in the rows' rule color
-                    // (accent/40) separates it from the rows passing under.
-                    fill && [
-                      "sticky top-0 bg-background transition-shadow duration-80",
-                      "group-data-scrolled/scroll:shadow-[inset_0_-1px_0_color-mix(in_oklab,var(--accent)_40%,transparent)]",
-                    ],
-                    movable && "touch-none select-none",
-                    // The dragged header's label lifts out into the ghost, so
-                    // its slot shows empty; a 2px accent bar marks where it
-                    // lands.
-                    "data-dragging:[&>*:not([data-resize-handle])]:invisible",
-                    "before:pointer-events-none before:absolute before:inset-y-1.5 before:w-0.5 before:rounded-full before:bg-[var(--fluid-accent,#6B97FF)] before:opacity-0",
-                    "data-[drop=before]:before:-left-px data-[drop=before]:before:opacity-100",
-                    "data-[drop=after]:before:-right-px data-[drop=after]:before:opacity-100",
-                    // A header that sorts or moves behaves like a ghost
-                    // Button: its label lifts from muted to foreground on
-                    // hover. Its fill is the header row's gliding one,
-                    // which Table turns --active while pressed: one surface.
-                    (movable || column.getCanSort() || !!column.accessorFn) &&
-                      "cursor-pointer hover:text-foreground transition-colors duration-80",
-                    // Filled, the sticky header paints over that fill, so
-                    // the cell draws its own, the same way: --hover, then
-                    // --active, clear of the header's bottom line. Once it
-                    // drags, the ghost takes over and the slot stays empty.
-                    fill &&
-                      (movable || column.getCanSort() || !!column.accessorFn) && [
-                        "after:pointer-events-none after:absolute after:inset-x-0 after:top-0 after:bottom-px after:-z-10 after:bg-transparent after:transition-[background-color] after:duration-80",
-                        "not-data-dragging:hover:after:bg-hover not-data-dragging:active:after:bg-active",
-                        PRESS_RADIUS[shape.variant],
-                      ],
-                    meta?.className
-                  )}
-                >
-                  {pins[column.id] && (
-                    <PinLayers pin={pins[column.id]}>
-                      {/* Opaque, a pinned header covers the row's gliding
+      <Table
+        size={size}
+        // Selected rows on this page get CheckboxGroup's merged fill.
+        selectedIndices={rows.flatMap((row, i) => (row.getIsSelected() ? [i] : []))}
+        snapKey={expandTick}
+        hideHeadHighlight={!!drag}
+        // The skeleton rows are aria-hidden; this tells assistive tech the
+        // table is loading rather than empty.
+        aria-busy={loading || undefined}
+        onKeyDown={onBodyKeyDown}
+        // Fixed layout keeps the widths you set. The min width is every
+        // column's width summed, so past the box the table scrolls instead of
+        // crushing the column that takes the rest.
+        className={cn(
+          sized && "table-fixed",
+          // Most of the gap between box and text (8px of its 12) belongs to
+          // the column after the boxes, not the boxes: its header fill then
+          // starts 8px before the label instead of on it.
+          "[&_[data-column-id=select]+[data-column-id]]:pl-2",
+          // Measuring (see `natural`): every cell at its one-line width.
+          "[&[data-measuring]_*]:!whitespace-nowrap [&[data-measuring]_:is(th,td)]:!w-auto [&[data-measuring]_:is(th,td)]:!max-w-none",
+          // The sub-row guides start from the first column's left padding.
+          sizeClasses.variant === "compact" ? "[--expander-pl:10px]" : "[--expander-pl:12px]",
+          "[&_[data-column-id=select]+[data-column-id]]:[--expander-pl:8px]",
+          className,
+        )}
+        style={
+          sized
+            ? {
+                minWidth:
+                  (resizeColumns
+                    ? table.getTotalSize()
+                    : Object.values(fitted ?? {}).reduce((sum, w) => sum + w, 0)) -
+                  (actionsShown && sizeClasses.variant === "compact" ? ACTIONS_COMPACT_TRIM : 0),
+              }
+            : undefined
+        }
+      >
+        <HeaderMenuContext.Provider value={headerMenu}>
+          <TableHeader>
+            {table.getHeaderGroups().map((group) => (
+              // Sticky header rows ride above the body rows (both z-10 by
+              // default, and later rows would paint over earlier ones).
+              <TableRow key={group.id} ref={headRowRef} className={fill ? "z-20" : undefined}>
+                {group.headers.map((header, headerIndex) => {
+                  const column = header.column;
+                  const meta = column.columnDef.meta;
+                  const sorted = column.getIsSorted();
+                  const movable = reorderColumns && !header.isPlaceholder && canReorder(column);
+                  // The flex column has a handle too: its width is the least it
+                  // takes, so dragging it wider grows the table.
+                  const resizable = resizeColumns && column.getCanResize();
+                  const label =
+                    meta?.label ??
+                    (typeof column.columnDef.header === "string" ? column.columnDef.header : column.id);
+                  const dropSide =
+                    drag && drag.refId === column.id && drag.id !== column.id ? drag.place : undefined;
+                  return (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      // Headers that act join the header row's gliding fill (a
+                      // filled table's sticky headers paint over it, so they
+                      // keep a fill of their own).
+                      hoverIndex={
+                        !fill && (movable || column.getCanSort() || !!column.accessorFn)
+                          ? headerIndex
+                          : undefined
+                      }
+                      aria-sort={
+                        sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : undefined
+                      }
+                      data-column-id={column.id}
+                      data-reorderable={movable || undefined}
+                      data-drop={dropSide}
+                      data-dragging={drag?.id === column.id || undefined}
+                      onPointerDown={movable ? (e) => startDrag(e, column.id, label, meta?.icon) : undefined}
+                      onKeyDown={movable ? (e) => moveByKey(e, column.id) : undefined}
+                      // The whole cell opens the header's menu, padding and the
+                      // space past the label included: a click anywhere else in
+                      // it goes to the header's button (shift kept, for a
+                      // multi-column sort).
+                      onClick={(e) => {
+                        const target = e.target as Element;
+                        // Only the cell's own clicks: React bubbles the header
+                        // menu's (portalled) item clicks up through here, and
+                        // reopening it made a pick look like it never closed.
+                        if (!e.currentTarget.contains(target)) return;
+                        if (target.closest("button, a, input, [role=checkbox], [data-resize-handle]")) return;
+                        const trigger = e.currentTarget.querySelector<HTMLButtonElement>(
+                          "button[aria-haspopup=menu]:not([aria-hidden])",
+                        );
+                        if (!trigger) return;
+                        const shiftKey = e.shiftKey;
+                        trigger.focus({ preventScroll: true });
+                        // After this click has finished: opened during it, the
+                        // menu would read the same click as one outside it and
+                        // close at once.
+                        setTimeout(() =>
+                          trigger.dispatchEvent(new MouseEvent("click", { bubbles: true, shiftKey })),
+                        );
+                      }}
+                      // A column with no width of its own (one shown after the
+                      // widths were read) shares what's left with the flex one.
+                      style={{
+                        ...(sized &&
+                        column.id !== restId &&
+                        (resizeColumns
+                          ? column.id in sizing || column.columnDef.size !== undefined
+                          : fitted?.[column.id] !== undefined)
+                          ? { width: widthOf(column.id, header.getSize()) }
+                          : undefined),
+                        ...pinProps(pins[column.id]).style,
+                      }}
+                      className={cn(
+                        // Headers step back to muted so the content leads.
+                        "group/th text-muted-foreground relative",
+                        pinProps(pins[column.id]).className,
+                        // Filled, the header stays put while the rows scroll,
+                        // and once they do, a hairline in the rows' rule color
+                        // (accent/40) separates it from the rows passing under.
+                        fill && [
+                          "bg-background sticky top-0 transition-shadow duration-80",
+                          "group-data-scrolled/scroll:shadow-[inset_0_-1px_0_color-mix(in_oklab,var(--accent)_40%,transparent)]",
+                        ],
+                        movable && "touch-none select-none",
+                        // The dragged header's label lifts out into the ghost, so
+                        // its slot shows empty; a 2px accent bar marks where it
+                        // lands.
+                        "data-dragging:[&>*:not([data-resize-handle])]:invisible",
+                        "before:pointer-events-none before:absolute before:inset-y-1.5 before:w-0.5 before:rounded-full before:bg-[var(--fluid-accent,#6B97FF)] before:opacity-0",
+                        "data-[drop=before]:before:-left-px data-[drop=before]:before:opacity-100",
+                        "data-[drop=after]:before:-right-px data-[drop=after]:before:opacity-100",
+                        // A header that sorts or moves behaves like a ghost
+                        // Button: its label lifts from muted to foreground on
+                        // hover. Its fill is the header row's gliding one,
+                        // which Table turns --active while pressed: one surface.
+                        (movable || column.getCanSort() || !!column.accessorFn) &&
+                          "hover:text-foreground cursor-pointer transition-colors duration-80",
+                        // Filled, the sticky header paints over that fill, so
+                        // the cell draws its own, the same way: --hover, then
+                        // --active, clear of the header's bottom line. Once it
+                        // drags, the ghost takes over and the slot stays empty.
+                        fill &&
+                          (movable || column.getCanSort() || !!column.accessorFn) && [
+                            "after:pointer-events-none after:absolute after:inset-x-0 after:top-0 after:bottom-px after:-z-10 after:bg-transparent after:transition-[background-color] after:duration-80",
+                            "not-data-dragging:hover:after:bg-hover not-data-dragging:active:after:bg-active",
+                            PRESS_RADIUS[shape.variant],
+                          ],
+                        meta?.className,
+                      )}
+                    >
+                      {pins[column.id] && (
+                        <PinLayers pin={pins[column.id]}>
+                          {/* Opaque, a pinned header covers the row's gliding
                           fill: it draws its own, the same way. */}
-                      {!fill && (movable || column.getCanSort() || !!column.accessorFn) && (
-                        <span
-                          className={cn(
-                            "absolute inset-x-0 top-0 bottom-px bg-transparent transition-[background-color] duration-80",
-                            "group-hover/th:bg-hover group-active/th:bg-active",
-                            shape.bg
+                          {!fill && (movable || column.getCanSort() || !!column.accessorFn) && (
+                            <span
+                              className={cn(
+                                "absolute inset-x-0 top-0 bottom-px bg-transparent transition-[background-color] duration-80",
+                                "group-hover/th:bg-hover group-active/th:bg-active",
+                                shape.bg,
+                              )}
+                            />
                           )}
+                        </PinLayers>
+                      )}
+                      {header.isPlaceholder ? null : typeof column.columnDef.header === "string" &&
+                        column.accessorFn ? (
+                        // A plain-text header on a data column gets the same
+                        // header as DataTableColumnHeader: its menu (sort,
+                        // filter, move, freeze) and, if it sorts, the arrow.
+                        <DataTableColumnHeader column={column} title={column.columnDef.header} />
+                      ) : typeof column.columnDef.header === "string" && meta?.icon ? (
+                        <HeaderLabel icon={meta.icon} title={column.columnDef.header} />
+                      ) : (
+                        flexRender(column.columnDef.header, header.getContext())
+                      )}
+                      {resizable && (
+                        <ResizeHandle
+                          label={label}
+                          width={header.getSize()}
+                          resizing={column.getIsResizing()}
+                          onStart={(e) => {
+                            // The flex column can render wider than its size (it
+                            // fills the box). Starting from its size would make
+                            // the first pixels of a drag do nothing, so it takes
+                            // its rendered width first.
+                            if (column.id === flexId) {
+                              const th = (e.currentTarget as HTMLElement).closest("th");
+                              const rendered = Math.round(th?.getBoundingClientRect().width ?? 0);
+                              if (rendered > header.getSize())
+                                flushSync(() =>
+                                  table.setColumnSizing((old) => ({ ...old, [column.id]: rendered })),
+                                );
+                            }
+                            header.getResizeHandler()(e);
+                          }}
+                          onReset={() => column.resetSize()}
+                          onStep={(delta, handle) => {
+                            // As a drag does: the flex column steps from the
+                            // width it shows, not the smaller size it holds.
+                            const rendered =
+                              column.id === flexId
+                                ? Math.round(handle.closest("th")?.getBoundingClientRect().width ?? 0)
+                                : 0;
+                            const from = Math.max(header.getSize(), rendered);
+                            table.setColumnSizing((old) => ({
+                              ...old,
+                              [column.id]: Math.max(MIN_COLUMN_WIDTH, from + delta),
+                            }));
+                          }}
                         />
                       )}
-                    </PinLayers>
-                  )}
-                  {header.isPlaceholder ? null : typeof column.columnDef.header === "string" &&
-                    column.accessorFn ? (
-                    // A plain-text header on a data column gets the same
-                    // header as DataTableColumnHeader: its menu (sort,
-                    // filter, move, freeze) and, if it sorts, the arrow.
-                    <DataTableColumnHeader column={column} title={column.columnDef.header} />
-                  ) : typeof column.columnDef.header === "string" && meta?.icon ? (
-                    <HeaderLabel icon={meta.icon} title={column.columnDef.header} />
-                  ) : (
-                    flexRender(column.columnDef.header, header.getContext())
-                  )}
-                  {resizable && (
-                    <ResizeHandle
-                      label={label}
-                      width={header.getSize()}
-                      resizing={column.getIsResizing()}
-                      onStart={(e) => {
-                        // The flex column can render wider than its size (it
-                        // fills the box). Starting from its size would make
-                        // the first pixels of a drag do nothing, so it takes
-                        // its rendered width first.
-                        if (column.id === flexId) {
-                          const th = (e.currentTarget as HTMLElement).closest("th");
-                          const rendered = Math.round(th?.getBoundingClientRect().width ?? 0);
-                          if (rendered > header.getSize())
-                            flushSync(() =>
-                              table.setColumnSizing((old) => ({ ...old, [column.id]: rendered }))
-                            );
-                        }
-                        header.getResizeHandler()(e);
-                      }}
-                      onReset={() => column.resetSize()}
-                      onStep={(delta, handle) => {
-                        // As a drag does: the flex column steps from the
-                        // width it shows, not the smaller size it holds.
-                        const rendered =
-                          column.id === flexId
-                            ? Math.round(handle.closest("th")?.getBoundingClientRect().width ?? 0)
-                            : 0;
-                        const from = Math.max(header.getSize(), rendered);
-                        table.setColumnSizing((old) => ({
-                          ...old,
-                          [column.id]: Math.max(MIN_COLUMN_WIDTH, from + delta),
-                        }));
-                      }}
-                    />
-                  )}
-                </TableHead>
-              );
-            })}
-          </TableRow>
-        ))}
-      </TableHeader>
-      </HeaderMenuContext.Provider>
-      <TableBody>
-        {loading ? (
-          // Loading: a page of rows the real rows' size, each cell holding a
-          // skeleton bar in a reveal-swap (the reveal's delayed fade-in and
-          // pulse). The rows that replace them draw their own fading
-          // skeleton (see the swap below).
-          Array.from({ length: skeletonRows }, (_, i) => (
-            <TableRow key={`row-${i}`} aria-hidden>
-              {visible.map((column, c) => (
-                <TableCell
-                  key={column.id}
-                  data-column-id={column.id}
-                  className={cn("text-foreground", column.columnDef.meta?.className)}
-                >
-                  <span key="skeleton" className="reveal-swap">
-                    {skeletonFor(column.id, i, c, shape.variant, sizeClasses.variant === "compact")}
-                  </span>
-                </TableCell>
-              ))}
-            </TableRow>
-          ))
-        ) : rows.length > 0 ? (
-          rows.map((row, i) => (
-            <DataTableBodyRow
-              // Keyed by record, so state in a cell (an open row menu, a
-              // consumer's own input, focus) stays with its row through a
-              // sort, a search or a page turn.
-              key={row.id}
-              table={table}
-              row={row}
-              i={i}
-              selected={row.getIsSelected()}
-              runStart={row.getIsSelected() && !rows[i - 1]?.getIsSelected()}
-              runEnd={row.getIsSelected() && !rows[i + 1]?.getIsSelected()}
-              pins={pins}
-              menuOpen={menuOpen && menuRowId === row.id}
-              someSelected={row.getIsSomeSelected()}
-              expanded={row.getIsExpanded()}
-              grouped={(rows[i + 1]?.depth ?? 0) > 0}
-              expanderId={expanderId}
-              onToggleExpand={stableToggle}
-              columns={table.options.columns}
-              layoutKey={layoutKey}
-              onRowClick={onRowClick}
-              rowsFocusable={rowsFocusable}
-              editable={!!onCellEdit}
-              sized={sized}
-              alignTop={alignTop}
-              swapping={swapping}
-              compact={sizeClasses.variant === "compact"}
-              shapeVariant={shape.variant}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+        </HeaderMenuContext.Provider>
+        <TableBody>
+          {loading ? (
+            // Loading: a page of rows the real rows' size, each cell holding a
+            // skeleton bar in a reveal-swap (the reveal's delayed fade-in and
+            // pulse). The rows that replace them draw their own fading
+            // skeleton (see the swap below).
+            Array.from({ length: skeletonRows }, (_, i) => (
+              <TableRow key={`row-${i}`} aria-hidden>
+                {visible.map((column, c) => (
+                  <TableCell
+                    key={column.id}
+                    data-column-id={column.id}
+                    className={cn("text-foreground", column.columnDef.meta?.className)}
+                  >
+                    <span key="skeleton" className="reveal-swap">
+                      {skeletonFor(column.id, i, c, shape.variant, sizeClasses.variant === "compact")}
+                    </span>
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : rows.length > 0 ? (
+            rows.map((row, i) => (
+              <DataTableBodyRow
+                // Keyed by record, so state in a cell (an open row menu, a
+                // consumer's own input, focus) stays with its row through a
+                // sort, a search or a page turn.
+                key={row.id}
+                table={table}
+                row={row}
+                i={i}
+                selected={row.getIsSelected()}
+                runStart={row.getIsSelected() && !rows[i - 1]?.getIsSelected()}
+                runEnd={row.getIsSelected() && !rows[i + 1]?.getIsSelected()}
+                pins={pins}
+                menuOpen={menuOpen && menuRowId === row.id}
+                someSelected={row.getIsSomeSelected()}
+                expanded={row.getIsExpanded()}
+                grouped={(rows[i + 1]?.depth ?? 0) > 0}
+                expanderId={expanderId}
+                onToggleExpand={stableToggle}
+                columns={table.options.columns}
+                layoutKey={layoutKey}
+                onRowClick={onRowClick}
+                rowsFocusable={rowsFocusable}
+                editable={!!onCellEdit}
+                sized={sized}
+                alignTop={alignTop}
+                swapping={swapping}
+                compact={sizeClasses.variant === "compact"}
+                shapeVariant={shape.variant}
+              />
+            ))
+          ) : (
+            <TableEmpty
+              columns={columnCount}
+              rows={heldRows}
+              title={empty?.title ?? "No results"}
+              // With filters set, the way back is taking one off: unless you
+              // say otherwise, the body says so and offers to clear them.
+              description={
+                empty?.description ?? (filterCount > 0 ? "Remove a filter to see more." : undefined)
+              }
+              action={
+                empty?.action ??
+                (filterCount > 0 ? (
+                  <Button variant="ghost" size="compact" onClick={() => table.resetColumnFilters()}>
+                    {filterCount === 1 ? "Clear filter" : "Clear filters"}
+                  </Button>
+                ) : undefined)
+              }
             />
-          ))
-        ) : (
-          <TableEmpty
-            columns={columnCount}
-            rows={heldRows}
-            title={empty?.title ?? "No results"}
-            // With filters set, the way back is taking one off: unless you
-            // say otherwise, the body says so and offers to clear them.
-            description={empty?.description ?? (filterCount > 0 ? "Remove a filter to see more." : undefined)}
-            action={
-              empty?.action ??
-              (filterCount > 0 ? (
-                <Button variant="ghost" size="compact" onClick={() => table.resetColumnFilters()}>
-                  {filterCount === 1 ? "Clear filter" : "Clear filters"}
-                </Button>
-              ) : undefined)
-            }
-          />
-        )}
-      </TableBody>
-    </Table>
+          )}
+        </TableBody>
+      </Table>
     </EditContext.Provider>
   );
 
@@ -1958,7 +2014,7 @@ function DataTable<TData>({
         viewportClassName={cn(
           "scroll-fade-x",
           (pinnedLeft || pinnedRight) &&
-            "[mask-image:linear-gradient(to_right,#000_var(--pin-l),rgba(0,0,0,var(--sf-start))_var(--pin-l),#000_calc(var(--pin-l)+var(--scroll-fade-size)),#000_calc(100%-var(--pin-r)-var(--scroll-fade-size)),rgba(0,0,0,var(--sf-end))_calc(100%-var(--pin-r)),#000_calc(100%-var(--pin-r)))]! [-webkit-mask-image:linear-gradient(to_right,#000_var(--pin-l),rgba(0,0,0,var(--sf-start))_var(--pin-l),#000_calc(var(--pin-l)+var(--scroll-fade-size)),#000_calc(100%-var(--pin-r)-var(--scroll-fade-size)),rgba(0,0,0,var(--sf-end))_calc(100%-var(--pin-r)),#000_calc(100%-var(--pin-r)))]!"
+            "[mask-image:linear-gradient(to_right,#000_var(--pin-l),rgba(0,0,0,var(--sf-start))_var(--pin-l),#000_calc(var(--pin-l)+var(--scroll-fade-size)),#000_calc(100%-var(--pin-r)-var(--scroll-fade-size)),rgba(0,0,0,var(--sf-end))_calc(100%-var(--pin-r)),#000_calc(100%-var(--pin-r)))]! [-webkit-mask-image:linear-gradient(to_right,#000_var(--pin-l),rgba(0,0,0,var(--sf-start))_var(--pin-l),#000_calc(var(--pin-l)+var(--scroll-fade-size)),#000_calc(100%-var(--pin-r)-var(--scroll-fade-size)),rgba(0,0,0,var(--sf-end))_calc(100%-var(--pin-r)),#000_calc(100%-var(--pin-r)))]!",
         )}
       >
         {rowMenu ? (
@@ -1967,27 +2023,27 @@ function DataTable<TData>({
           // The row stays named through the menu's exit, so its items don't
           // empty while it fades; only the row's lit state drops at once.
           <>
-          <MenuShield open={menuOpen} />
-          <ContextMenu onOpenChange={setMenuOpen}>
-            <ContextMenuTrigger
-              className="contents"
-              filter={(target) => !!target.closest("tbody tr[data-row-id]")}
-              onContextMenu={(e) => {
-                const tr = (e.target as Element).closest<HTMLElement>("tbody tr[data-row-id]");
-                setMenuRowId(tr?.dataset.rowId ?? null);
-              }}
-              onKeyDown={(e) => {
-                // Only the keys that open the menu: naming the row on every
-                // key re-rendered the table with each arrow press.
-                if (e.key !== "ContextMenu" && !(e.shiftKey && e.key === "F10")) return;
-                const tr = (e.target as Element).closest<HTMLElement>("tbody tr[data-row-id]");
-                if (tr) setMenuRowId(tr.dataset.rowId ?? null);
-              }}
-            >
-              {tableEl}
-            </ContextMenuTrigger>
-            <ContextMenuContent className="w-56">{menuRow && rowMenu(menuRow)}</ContextMenuContent>
-          </ContextMenu>
+            <MenuShield open={menuOpen} />
+            <ContextMenu onOpenChange={setMenuOpen}>
+              <ContextMenuTrigger
+                className="contents"
+                filter={(target) => !!target.closest("tbody tr[data-row-id]")}
+                onContextMenu={(e) => {
+                  const tr = (e.target as Element).closest<HTMLElement>("tbody tr[data-row-id]");
+                  setMenuRowId(tr?.dataset.rowId ?? null);
+                }}
+                onKeyDown={(e) => {
+                  // Only the keys that open the menu: naming the row on every
+                  // key re-rendered the table with each arrow press.
+                  if (e.key !== "ContextMenu" && !(e.shiftKey && e.key === "F10")) return;
+                  const tr = (e.target as Element).closest<HTMLElement>("tbody tr[data-row-id]");
+                  if (tr) setMenuRowId(tr.dataset.rowId ?? null);
+                }}
+              >
+                {tableEl}
+              </ContextMenuTrigger>
+              <ContextMenuContent className="w-56">{menuRow && rowMenu(menuRow)}</ContextMenuContent>
+            </ContextMenu>
           </>
         ) : (
           tableEl
@@ -2002,10 +2058,10 @@ function DataTable<TData>({
               // The pressed header, lifted: the same --active fill over the
               // page background (opaque, so the table doesn't show through
               // the 80%), no border, no shadow.
-              "pointer-events-none fixed z-[var(--z-popover,60)] flex items-center bg-background bg-[linear-gradient(var(--active),var(--active))] text-foreground opacity-80",
+              "bg-background text-foreground pointer-events-none fixed z-[var(--z-popover,60)] flex items-center bg-[linear-gradient(var(--active),var(--active))] opacity-80",
               sizeClasses.variant === "compact" ? "px-2.5" : "px-3",
               sizeClasses.text,
-              shape.item
+              shape.item,
             )}
             style={{
               top: ghost.top,
@@ -2019,7 +2075,7 @@ function DataTable<TData>({
               <HeaderLabel icon={ghost.icon} title={ghost.label} />
             </span>
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -2061,12 +2117,12 @@ function ResizeHandle({ label, width, resizing, onStart, onReset, onStep }: Resi
         e.stopPropagation();
         onStep(e.key === "ArrowLeft" ? -RESIZE_STEP : RESIZE_STEP, e.currentTarget);
       }}
-      className="group/resize absolute inset-y-0 -right-1 z-20 w-2 cursor-col-resize touch-none select-none outline-none"
+      className="group/resize absolute inset-y-0 -right-1 z-20 w-2 cursor-col-resize touch-none outline-none select-none"
     >
       <span
         className={cn(
           "absolute inset-y-1.5 left-1/2 w-px -translate-x-1/2 transition-colors duration-80",
-          "bg-transparent group-hover/resize:bg-foreground/40 group-focus-visible/resize:bg-[var(--focus-ring,#6B97FF)] group-data-resizing/resize:bg-foreground/60"
+          "group-hover/resize:bg-foreground/40 group-data-resizing/resize:bg-foreground/60 bg-transparent group-focus-visible/resize:bg-[var(--focus-ring,#6B97FF)]",
         )}
       />
     </div>
@@ -2130,7 +2186,12 @@ function DataTableColumnHeader<TData, TValue>({
   // Moving follows the table's reorderColumns; the neighbors are the
   // visible columns that move too.
   const movable = !!table && !!ctx?.reorder && canReorder(col);
-  const order = movable ? table!.getVisibleLeafColumns().filter(canReorder).map((c) => c.id) : [];
+  const order = movable
+    ? table!
+        .getVisibleLeafColumns()
+        .filter(canReorder)
+        .map((c) => c.id)
+    : [];
   const at = order.indexOf(column.id);
   const canPin = !!table && column.getCanPin() && column.getIsPinned() !== "right";
   const leftPins = table?.getState().columnPinning.left ?? [];
@@ -2163,11 +2224,17 @@ function DataTableColumnHeader<TData, TValue>({
     (table as Partial<DataTableExtras>).captureLayout?.();
     if (frozenHere) {
       // Unfreeze: the selection boxes stay put, the rest scroll.
-      table.setColumnPinning((old) => ({ ...old, left: old.left?.includes("select") && column.id !== "select" ? ["select"] : [] }));
+      table.setColumnPinning((old) => ({
+        ...old,
+        left: old.left?.includes("select") && column.id !== "select" ? ["select"] : [],
+      }));
       return;
     }
     const right = new Set(table.getState().columnPinning.right ?? []);
-    const ids = table.getVisibleLeafColumns().map((c) => c.id).filter((id) => !right.has(id));
+    const ids = table
+      .getVisibleLeafColumns()
+      .map((c) => c.id)
+      .filter((id) => !right.has(id));
     table.setColumnPinning((old) => ({ ...old, left: ids.slice(0, ids.indexOf(column.id) + 1) }));
   };
 
@@ -2175,18 +2242,33 @@ function DataTableColumnHeader<TData, TValue>({
   if (canSort) {
     items.push(
       { label: "Sort ascending", icon: icons["arrow-up"], onSelect: () => column.toggleSorting(false) },
-      { label: "Sort descending", icon: icons["arrow-down"], onSelect: () => column.toggleSorting(true) }
+      { label: "Sort descending", icon: icons["arrow-down"], onSelect: () => column.toggleSorting(true) },
     );
     if (sorted) items.push({ label: "Clear sort", icon: icons.x, onSelect: () => column.clearSorting() });
   }
-  if (canFilter) items.push({ label: "Filter", icon: icons.filter, onSelect: () => (table as Partial<DataTableExtras>).openFilter?.(column.id) });
+  if (canFilter)
+    items.push({
+      label: "Filter",
+      icon: icons.filter,
+      onSelect: () => (table as Partial<DataTableExtras>).openFilter?.(column.id),
+    });
   if (movable) {
     items.push(
       { label: "Move left", icon: icons["arrow-left"], onSelect: () => move("before"), disabled: at <= 0 },
-      { label: "Move right", icon: icons["arrow-right"], onSelect: () => move("after"), disabled: at === -1 || at >= order.length - 1 }
+      {
+        label: "Move right",
+        icon: icons["arrow-right"],
+        onSelect: () => move("after"),
+        disabled: at === -1 || at >= order.length - 1,
+      },
     );
   }
-  if (canPin) items.push({ label: frozenHere ? "Unfreeze columns" : "Freeze up to here", icon: icons["panel-left"], onSelect: freeze });
+  if (canPin)
+    items.push({
+      label: frozenHere ? "Unfreeze columns" : "Freeze up to here",
+      icon: icons["panel-left"],
+      onSelect: freeze,
+    });
 
   const button = (
     <button
@@ -2202,12 +2284,12 @@ function DataTableColumnHeader<TData, TValue>({
         else column.toggleSorting();
       }}
       className={cn(
-        "group/sort inline-flex max-w-full cursor-pointer items-center gap-1 rounded-[4px] align-top outline-none transition-colors duration-80",
+        "group/sort inline-flex max-w-full cursor-pointer items-center gap-1 rounded-[4px] align-top transition-colors duration-80 outline-none",
         // The sorted column reads at full contrast, its icon and label with
         // the arrow, so the sort shows from across the table.
         (sorted || menuOpen) && "text-foreground",
-        "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        className
+        "focus-visible:ring-offset-background focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] focus-visible:ring-offset-2",
+        className,
       )}
     >
       {label}
@@ -2215,7 +2297,7 @@ function DataTableColumnHeader<TData, TValue>({
         // A 14px cell, empty until the column is sorted, so the label never
         // shifts and the column's width already holds the arrow. The arrow
         // turns over for descending instead of swapping glyphs.
-        <span aria-hidden className="grid size-3.5 shrink-0 text-foreground">
+        <span aria-hidden className="text-foreground grid size-3.5 shrink-0">
           <motion.span
             className="col-start-1 row-start-1 flex"
             initial={false}
@@ -2350,21 +2432,20 @@ const SelectHit = forwardRef<HTMLSpanElement, SelectHitProps>(
         onClick?.(e);
         // The box handles its own clicks; this catches the rest of the cell.
         // A handler above that took the click (a range) prevents it.
-        if (disabled || e.defaultPrevented || (e.target as Element).closest("[role=checkbox]"))
-          return;
+        if (disabled || e.defaultPrevented || (e.target as Element).closest("[role=checkbox]")) return;
         onToggle();
       }}
       className={cn(
-        "group/field -mx-2 my-[calc(-1*var(--table-cell-py))] flex select-none px-2 py-(--table-cell-py)",
+        "group/field -mx-2 my-[calc(-1*var(--table-cell-py))] flex px-2 py-(--table-cell-py) select-none",
         !disabled && "cursor-pointer",
-        className
+        className,
       )}
     >
       {/* The box is shorter than the line box, so it sits in a 1lh cell to
           keep the row on the ladder. */}
       <span className="flex h-[1lh] items-center">{children}</span>
     </span>
-  )
+  ),
 );
 SelectHit.displayName = "SelectHit";
 
@@ -2456,8 +2537,7 @@ function selectColumn<TData>(): ColumnDef<TData> {
           const anchor = selectionAnchors.get(table.getState);
           // A range needs its anchor on this page; otherwise the click is a
           // plain toggle (and becomes the new anchor).
-          const onPage =
-            !!anchor && table.getRowModel().rows.some((r) => r.id === anchor);
+          const onPage = !!anchor && table.getRowModel().rows.some((r) => r.id === anchor);
           if (e.shiftKey && anchor && onPage && anchor !== row.id) {
             e.preventDefault();
             selectRange(table, anchor, row.id, !row.getIsSelected());
@@ -2477,7 +2557,6 @@ function selectColumn<TData>(): ColumnDef<TData> {
     ),
   };
 }
-
 
 // ── Sub-rows ─────────────────────────────────────────────
 
@@ -2534,7 +2613,7 @@ function pinProps(pin: PinInfo | undefined) {
       // cell's own rule still draws over it.
       "bg-no-repeat [background-origin:border-box] [background-position:bottom] [background-size:100%_calc(var(--ff-pin)*1px)]",
       "[background-image:linear-gradient(var(--pin-strip,transparent),var(--pin-strip,transparent)),linear-gradient(var(--background),var(--background))]",
-      left ? "ff-pin-l group-data-x-start/pin:[--ff-pin:1]" : "ff-pin-r group-data-x-end/pin:[--ff-pin:1]"
+      left ? "ff-pin-l group-data-x-start/pin:[--ff-pin:1]" : "ff-pin-r group-data-x-end/pin:[--ff-pin:1]",
     ),
     style: left ? { left: pin.offset } : { right: pin.offset },
   };
@@ -2569,15 +2648,17 @@ function PinLayers({ pin, children }: { pin: PinInfo; children?: ReactNode }) {
           cut a 1px line of page color through its hover and selection. */}
       <span
         className={cn(
-          "absolute inset-y-0 left-0 right-0 bg-background",
+          "bg-background absolute inset-y-0 right-0 left-0",
           !(pin.side === "left" && pin.edge) && "-right-px",
-          pin.side === "left" && pin.outer && "-left-px"
+          pin.side === "left" && pin.outer && "-left-px",
         )}
       />
       {children}
       {pin.edge && (
         // The rule is a span inside the edge cell, in the rows' rule color.
-        <span className={cn("absolute inset-y-0 w-px bg-accent/40", pin.side === "left" ? "right-0" : "left-0")} />
+        <span
+          className={cn("bg-accent/40 absolute inset-y-0 w-px", pin.side === "left" ? "right-0" : "left-0")}
+        />
       )}
     </span>
   );
@@ -2610,18 +2691,18 @@ function PinFills({
       {selected && (
         <span
           className={cn(
-            "absolute inset-0 bg-active",
+            "bg-active absolute inset-0",
             reach,
             pin.outer && runStart && PIN_RADIUS[left ? "tl" : "tr"][shapeVariant],
-            pin.outer && runEnd && PIN_RADIUS[left ? "bl" : "br"][shapeVariant]
+            pin.outer && runEnd && PIN_RADIUS[left ? "bl" : "br"][shapeVariant],
           )}
         />
       )}
       <span
         className={cn(
-          "absolute inset-0 bg-hover opacity-0 transition-opacity duration-80 group-[.is-active]/row:opacity-100",
+          "bg-hover absolute inset-0 opacity-0 transition-opacity duration-80 group-[.is-active]/row:opacity-100",
           reach,
-          pin.outer && PIN_RADIUS[left ? "left" : "right"][shapeVariant]
+          pin.outer && PIN_RADIUS[left ? "left" : "right"][shapeVariant],
         )}
       />
     </PinLayers>
@@ -2656,14 +2737,22 @@ function SubRowGuides({
         // Each row's piece covers its own bottom rule (a pinned cell's fill
         // would paint over a piece reaching up from the row below); the
         // group's last row stops 8px short of its rule.
-        <span aria-hidden className={cn(rule, "top-0", grouped ? "-bottom-px" : "bottom-2")} style={{ left: x }} />
+        <span
+          aria-hidden
+          className={cn(rule, "top-0", grouped ? "-bottom-px" : "bottom-2")}
+          style={{ left: x }}
+        />
       )}
       {expanded && row.subRows.length > 0 && (
         // From 6px under the open chevron (12px, half its 24px, + 6) to the
         // row's bottom.
         <span
           aria-hidden
-          className={cn(rule, "-bottom-px", alignTop ? "top-[calc(var(--table-cell-py)+0.5lh+18px)]" : "top-[calc(50%+18px)]")}
+          className={cn(
+            rule,
+            "-bottom-px",
+            alignTop ? "top-[calc(var(--table-cell-py)+0.5lh+18px)]" : "top-[calc(50%+18px)]",
+          )}
           style={{ left: x }}
         />
       )}
@@ -2691,39 +2780,39 @@ function ExpandToggle({
   const action = expanded ? "Collapse" : "Expand";
   return (
     <Tooltip content={`${action} ${count}`} side="top">
-    <button
-      type="button"
-      tabIndex={-1}
-      aria-expanded={expanded}
-      aria-label={`${action} ${count} ${count === 1 ? "sub-row" : "sub-rows"}`}
-      onClick={(e) => {
-        e.stopPropagation();
-        onToggle();
-      }}
-      className={cn(
-        // 24px, a small ghost icon button (its hover fill and color, the
-        // 14px chevron), so it reads and hits like a button; above an
-        // editor's reach.
-        "relative z-[1] flex size-6 shrink-0 items-center justify-center text-muted-foreground outline-none",
-        "transition-colors duration-80 hover:bg-hover hover:text-foreground",
-        sharp ? "rounded-[1px]" : "rounded-[4px]"
-      )}
-    >
-      {/* A quarter turn over the moderate tier's 160ms, ease-out, as a
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-expanded={expanded}
+        aria-label={`${action} ${count} ${count === 1 ? "sub-row" : "sub-rows"}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+        className={cn(
+          // 24px, a small ghost icon button (its hover fill and color, the
+          // 14px chevron), so it reads and hits like a button; above an
+          // editor's reach.
+          "text-muted-foreground relative z-[1] flex size-6 shrink-0 items-center justify-center outline-none",
+          "hover:bg-hover hover:text-foreground transition-colors duration-80",
+          sharp ? "rounded-[1px]" : "rounded-[4px]",
+        )}
+      >
+        {/* A quarter turn over the moderate tier's 160ms, ease-out, as a
           transform string so it runs as a browser animation off the main
           thread: opening a row inserts its sub-rows in the same frame, and
           a JS-driven rotate stalled through it and jumped (0, 17, 67°). A
           tween, not the spring, so it lands on time instead of creeping
           the last degrees. */}
-      <motion.span
-        className="flex"
-        initial={false}
-        animate={{ transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
-        transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: spring.moderate.duration }}
-      >
-        <Chevron size={14} strokeWidth={1.75} />
-      </motion.span>
-    </button>
+        <motion.span
+          className="flex"
+          initial={false}
+          animate={{ transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
+          transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: spring.moderate.duration }}
+        >
+          <Chevron size={14} strokeWidth={1.75} />
+        </motion.span>
+      </button>
     </Tooltip>
   );
 }
@@ -2796,7 +2885,7 @@ const DataTableBodyRow = memo(
       compact,
       shapeVariant,
     },
-    ref
+    ref,
   ) {
     "use no memo";
     // The rule under a row that opens or closes its group switches in the
@@ -2809,7 +2898,7 @@ const DataTableBodyRow = memo(
         if (typeof ref === "function") ref(node);
         else if (ref) ref.current = node;
       },
-      [ref]
+      [ref],
     );
     useLayoutEffect(() => {
       const tr = rowRef.current;
@@ -2819,206 +2908,213 @@ const DataTableBodyRow = memo(
       return () => cancelAnimationFrame(frame);
     }, [grouped]);
     return (
-    <TableRow
-      ref={attachRow}
-      data-row-id={row.id}
-      index={i}
-      data-state={selected ? "selected" : undefined}
-      onClick={
-        onRowClick
-          ? (e: MouseEvent<HTMLTableRowElement>) => {
-              // React carries clicks up from portals (the row menu's
-              // popup) to this row; only clicks inside the row's own
-              // DOM count, and not those on a control in it.
-              if (!e.currentTarget.contains(e.target as Node)) return;
-              if ((e.target as Element).closest(CONTROL)) return;
-              onRowClick(row);
-            }
-          : undefined
-      }
-      // Rows that select or open are one tab stop for the whole body
-      // (roving: the row last focused, else the first), so they have
-      // a keyboard path without a stop per row. The stop moves in
-      // the DOM, not in state: a re-render of every row on every
-      // arrow press is what made held keys drag.
-      tabIndex={rowsFocusable ? (i === 0 ? 0 : -1) : undefined}
-      onFocus={
-        rowsFocusable
-          ? (e: FocusEvent<HTMLTableRowElement>) => {
-              const tr = e.currentTarget;
-              if (e.target !== tr || tr.tabIndex === 0) return;
-              tr.parentElement
-                ?.querySelectorAll<HTMLElement>("tr[data-row-id][tabindex='0']")
-                .forEach((other) => (other.tabIndex = -1));
-              tr.tabIndex = 0;
-            }
-          : undefined
-      }
-      className={cn(
-        onRowClick && "cursor-pointer",
-        rowsFocusable && "outline-none",
-        menuOpen && MENU_ROW[shapeVariant],
-        grouped && "*:border-transparent",
-        "data-snap-rule:*:duration-0",
-        // Rows each stack on their own (z-10); the one holding a raised
-        // editor lifts above the rows after it, so the field covers them.
-        "has-[[data-cell-expanded]]:z-30",
-        // A focused row looks hovered: Table moves its highlight to
-        // it, and its checkbox takes the hover border, in place of
-        // a blue ring around the row or the box.
-        "[&_[role=checkbox]:focus-visible]:ring-0",
-        "[&:is(:focus-visible,:has(:focus-visible))_[role=checkbox]]:border-foreground/40"
-      )}
-    >
-      {row.getVisibleCells().map((cell, c) => {
-        const meta = cell.column.columnDef.meta;
-        const lines = linesOf(table, cell.column);
-        const editor = editable ? meta?.editor : undefined;
-        const rendered = editor ? (
-          <EditableCell
-            editor={editor}
-            row={row}
-            columnId={cell.column.id}
-            label={meta?.label ?? (typeof cell.column.columnDef.header === "string" ? cell.column.columnDef.header : cell.column.id)}
-            lines={lines}
-            value={cell.getValue()}
-            display={
-              typeof editor === "object" && editor.type === "select"
-                ? flexRender(cell.column.columnDef.cell, cell.getContext())
-                : undefined
-            }
-          />
-        ) : (
-          flexRender(cell.column.columnDef.cell, cell.getContext())
-        );
-        // line-clamp needs a block of its own; a cell isn't one.
-        const fitted =
-          lines === 2 ? (
-            <div className="line-clamp-2 [overflow-wrap:anywhere]">{rendered}</div>
+      <TableRow
+        ref={attachRow}
+        data-row-id={row.id}
+        index={i}
+        data-state={selected ? "selected" : undefined}
+        onClick={
+          onRowClick
+            ? (e: MouseEvent<HTMLTableRowElement>) => {
+                // React carries clicks up from portals (the row menu's
+                // popup) to this row; only clicks inside the row's own
+                // DOM count, and not those on a control in it.
+                if (!e.currentTarget.contains(e.target as Node)) return;
+                if ((e.target as Element).closest(CONTROL)) return;
+                onRowClick(row);
+              }
+            : undefined
+        }
+        // Rows that select or open are one tab stop for the whole body
+        // (roving: the row last focused, else the first), so they have
+        // a keyboard path without a stop per row. The stop moves in
+        // the DOM, not in state: a re-render of every row on every
+        // arrow press is what made held keys drag.
+        tabIndex={rowsFocusable ? (i === 0 ? 0 : -1) : undefined}
+        onFocus={
+          rowsFocusable
+            ? (e: FocusEvent<HTMLTableRowElement>) => {
+                const tr = e.currentTarget;
+                if (e.target !== tr || tr.tabIndex === 0) return;
+                tr.parentElement
+                  ?.querySelectorAll<HTMLElement>("tr[data-row-id][tabindex='0']")
+                  .forEach((other) => (other.tabIndex = -1));
+                tr.tabIndex = 0;
+              }
+            : undefined
+        }
+        className={cn(
+          onRowClick && "cursor-pointer",
+          rowsFocusable && "outline-none",
+          menuOpen && MENU_ROW[shapeVariant],
+          grouped && "*:border-transparent",
+          "data-snap-rule:*:duration-0",
+          // Rows each stack on their own (z-10); the one holding a raised
+          // editor lifts above the rows after it, so the field covers them.
+          "has-[[data-cell-expanded]]:z-30",
+          // A focused row looks hovered: Table moves its highlight to
+          // it, and its checkbox takes the hover border, in place of
+          // a blue ring around the row or the box.
+          "[&_[role=checkbox]:focus-visible]:ring-0",
+          "[&:is(:focus-visible,:has(:focus-visible))_[role=checkbox]]:border-foreground/40",
+        )}
+      >
+        {row.getVisibleCells().map((cell, c) => {
+          const meta = cell.column.columnDef.meta;
+          const lines = linesOf(table, cell.column);
+          const editor = editable ? meta?.editor : undefined;
+          const rendered = editor ? (
+            <EditableCell
+              editor={editor}
+              row={row}
+              columnId={cell.column.id}
+              label={
+                meta?.label ??
+                (typeof cell.column.columnDef.header === "string"
+                  ? cell.column.columnDef.header
+                  : cell.column.id)
+              }
+              lines={lines}
+              value={cell.getValue()}
+              display={
+                typeof editor === "object" && editor.type === "select"
+                  ? flexRender(cell.column.columnDef.cell, cell.getContext())
+                  : undefined
+              }
+            />
           ) : (
-            rendered
+            flexRender(cell.column.columnDef.cell, cell.getContext())
           );
-        // With sub-rows, the first data column leads with the chevron (or
-        // its width, so every row's text lines up, sub-rows included).
-        const content =
-          cell.column.id === expanderId ? (
-            <span className="flex min-w-0 items-center gap-1">
-              {row.getCanExpand() ? (
-                <ExpandToggle
-                  expanded={expanded}
-                  count={row.subRows.length}
-                  sharp={shapeVariant === "sharp"}
-                  onToggle={() => onToggleExpand(row as Row<unknown>)}
-                />
-              ) : (
-                <span aria-hidden className="size-6 shrink-0" />
-              )}
-              <span
-                className={cn(
-                  "min-w-0 flex-1",
-                  // An editor cuts its own text short, and its raised field
-                  // must reach past this box.
-                  !editor && (lines === 1 || (sized && lines === undefined)) && "truncate"
+          // line-clamp needs a block of its own; a cell isn't one.
+          const fitted =
+            lines === 2 ? <div className="line-clamp-2 [overflow-wrap:anywhere]">{rendered}</div> : rendered;
+          // With sub-rows, the first data column leads with the chevron (or
+          // its width, so every row's text lines up, sub-rows included).
+          const content =
+            cell.column.id === expanderId ? (
+              <span className="flex min-w-0 items-center gap-1">
+                {row.getCanExpand() ? (
+                  <ExpandToggle
+                    expanded={expanded}
+                    count={row.subRows.length}
+                    sharp={shapeVariant === "sharp"}
+                    onToggle={() => onToggleExpand(row as Row<unknown>)}
+                  />
+                ) : (
+                  <span aria-hidden className="size-6 shrink-0" />
                 )}
-              >
-                {fitted}
-              </span>
-            </span>
-          ) : (
-            fitted
-          );
-        return (
-          <TableCell
-            key={cell.column.id}
-            data-column-id={cell.column.id}
-            className={cn(
-              // Content reads at full strength, above the muted
-              // headers.
-              "text-foreground",
-              // Anchors the skeleton that fades over it on landing, and
-              // the sub-row guides.
-              (swapping || cell.column.id === expanderId) && "relative",
-              pinProps(pins[cell.column.id]).className,
-              // The strip over its bottom border takes the row's fill
-              // (outer cells' fills round, so theirs stays the page color).
-              pins[cell.column.id] && !pins[cell.column.id].outer &&
-                (selected ? "[--pin-strip:var(--active)]" : "group-[.is-active]/row:[--pin-strip:var(--hover)]"),
-              alignTop && "align-top",
-              // A narrowed column cuts its text short instead of
-              // wrapping it onto a second line.
-              (lines === 1 || (sized && lines === undefined)) && "truncate",
-              // Pinned, the boxes' cell lets its fills reach over its
-              // bottom border (it has no text to cut).
-              pins[cell.column.id] && cell.column.id === "select" && "overflow-visible",
-              // Long unbroken text (a URL) breaks anywhere rather
-              // than running out of its column.
-              lines === "wrap" && "whitespace-normal [overflow-wrap:anywhere]",
-              // max-w-0 keeps long text from setting the column's
-              // width, so it fits the room the column is given.
-              lines !== undefined && "max-w-0",
-              // An editor raised past the column shows over its neighbors.
-              "has-[[data-cell-expanded]]:overflow-visible",
-              // The whole cell is the editor's: a row grown by a
-              // wrapped neighbor leaves room under the field, and a
-              // press there edits too (see pressCellEditor).
-              editor && (editorType(editor) === "text" ? "cursor-text" : "cursor-pointer"),
-              meta?.className
-            )}
-            onClick={editor ? pressCellEditor : undefined}
-            style={pinProps(pins[cell.column.id]).style}
-          >
-            {pins[cell.column.id] && (
-              <PinFills
-                pin={pins[cell.column.id]}
-                selected={selected}
-                runStart={runStart}
-                runEnd={runEnd}
-                shapeVariant={shapeVariant}
-                tall={cell.column.id === "select"}
-              />
-            )}
-            {cell.column.id === expanderId && <SubRowGuides row={row} expanded={expanded} grouped={grouped} alignTop={alignTop} />}
-            {swapping && (
-              // The hand-over: a skeleton over the cell's content box,
-              // shown at once (its delayed reveal and pulse turned
-              // off, since this row is new) and fading out as the
-              // content fades in under it, so the cell is never empty
-              // and the content keeps its real layout the whole time.
-              <span
-                key="skeleton"
-                aria-hidden
-                className="pointer-events-none absolute inset-0 animate-[reveal-out_120ms_ease-in_forwards] [&_[data-slot=skeleton]]:animate-none"
-                style={{ padding: "inherit" }}
-              >
-                {skeletonFor(cell.column.id, i, c, shapeVariant, compact)}
-              </span>
-            )}
-            {textCell(cell.column.id) && !editor ? (
-              // Text sits in a block that carries the cell's fitting
-              // (a block child escapes the cell's own ellipsis), so
-              // it can fade in on landing. Clipped sideways only, so
-              // a 24px badge still overhangs its 20px line.
-              <span
-                key="content"
-                className={cn(
-                  "block",
-                  (lines === 1 || (sized && lines === undefined)) &&
-                    "overflow-x-clip text-ellipsis whitespace-nowrap",
-                  lines === "wrap" && "whitespace-normal [overflow-wrap:anywhere]",
-                  // 160ms in, the moderate tier (CSS can't take the
-                  // spring token).
-                  swapping && "animate-[reveal-preset_160ms_ease-out_both]"
-                )}
-              >
-                {content}
+                <span
+                  className={cn(
+                    "min-w-0 flex-1",
+                    // An editor cuts its own text short, and its raised field
+                    // must reach past this box.
+                    !editor && (lines === 1 || (sized && lines === undefined)) && "truncate",
+                  )}
+                >
+                  {fitted}
+                </span>
               </span>
             ) : (
-              <Fragment key="content">{content}</Fragment>
-            )}
-          </TableCell>
-        );
-      })}
-    </TableRow>);
+              fitted
+            );
+          return (
+            <TableCell
+              key={cell.column.id}
+              data-column-id={cell.column.id}
+              className={cn(
+                // Content reads at full strength, above the muted
+                // headers.
+                "text-foreground",
+                // Anchors the skeleton that fades over it on landing, and
+                // the sub-row guides.
+                (swapping || cell.column.id === expanderId) && "relative",
+                pinProps(pins[cell.column.id]).className,
+                // The strip over its bottom border takes the row's fill
+                // (outer cells' fills round, so theirs stays the page color).
+                pins[cell.column.id] &&
+                  !pins[cell.column.id].outer &&
+                  (selected
+                    ? "[--pin-strip:var(--active)]"
+                    : "group-[.is-active]/row:[--pin-strip:var(--hover)]"),
+                alignTop && "align-top",
+                // A narrowed column cuts its text short instead of
+                // wrapping it onto a second line.
+                (lines === 1 || (sized && lines === undefined)) && "truncate",
+                // Pinned, the boxes' cell lets its fills reach over its
+                // bottom border (it has no text to cut).
+                pins[cell.column.id] && cell.column.id === "select" && "overflow-visible",
+                // Long unbroken text (a URL) breaks anywhere rather
+                // than running out of its column.
+                lines === "wrap" && "[overflow-wrap:anywhere] whitespace-normal",
+                // max-w-0 keeps long text from setting the column's
+                // width, so it fits the room the column is given.
+                lines !== undefined && "max-w-0",
+                // An editor raised past the column shows over its neighbors.
+                "has-[[data-cell-expanded]]:overflow-visible",
+                // The whole cell is the editor's: a row grown by a
+                // wrapped neighbor leaves room under the field, and a
+                // press there edits too (see pressCellEditor).
+                editor && (editorType(editor) === "text" ? "cursor-text" : "cursor-pointer"),
+                meta?.className,
+              )}
+              onClick={editor ? pressCellEditor : undefined}
+              style={pinProps(pins[cell.column.id]).style}
+            >
+              {pins[cell.column.id] && (
+                <PinFills
+                  pin={pins[cell.column.id]}
+                  selected={selected}
+                  runStart={runStart}
+                  runEnd={runEnd}
+                  shapeVariant={shapeVariant}
+                  tall={cell.column.id === "select"}
+                />
+              )}
+              {cell.column.id === expanderId && (
+                <SubRowGuides row={row} expanded={expanded} grouped={grouped} alignTop={alignTop} />
+              )}
+              {swapping && (
+                // The hand-over: a skeleton over the cell's content box,
+                // shown at once (its delayed reveal and pulse turned
+                // off, since this row is new) and fading out as the
+                // content fades in under it, so the cell is never empty
+                // and the content keeps its real layout the whole time.
+                <span
+                  key="skeleton"
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 animate-[reveal-out_120ms_ease-in_forwards] [&_[data-slot=skeleton]]:animate-none"
+                  style={{ padding: "inherit" }}
+                >
+                  {skeletonFor(cell.column.id, i, c, shapeVariant, compact)}
+                </span>
+              )}
+              {textCell(cell.column.id) && !editor ? (
+                // Text sits in a block that carries the cell's fitting
+                // (a block child escapes the cell's own ellipsis), so
+                // it can fade in on landing. Clipped sideways only, so
+                // a 24px badge still overhangs its 20px line.
+                <span
+                  key="content"
+                  className={cn(
+                    "block",
+                    (lines === 1 || (sized && lines === undefined)) &&
+                      "overflow-x-clip text-ellipsis whitespace-nowrap",
+                    lines === "wrap" && "[overflow-wrap:anywhere] whitespace-normal",
+                    // 160ms in, the moderate tier (CSS can't take the
+                    // spring token).
+                    swapping && "animate-[reveal-preset_160ms_ease-out_both]",
+                  )}
+                >
+                  {content}
+                </span>
+              ) : (
+                <Fragment key="content">{content}</Fragment>
+              )}
+            </TableCell>
+          );
+        })}
+      </TableRow>
+    );
   }),
   // Every prop that changes what a row draws, or a row keeps drawing its
   // last state: the pins (missing, a sticky switch moved only the header),
@@ -3044,7 +3140,7 @@ const DataTableBodyRow = memo(
     a.alignTop === b.alignTop &&
     a.swapping === b.swapping &&
     a.compact === b.compact &&
-    a.shapeVariant === b.shapeVariant
+    a.shapeVariant === b.shapeVariant,
 ) as <TData>(props: DataTableBodyRowProps<TData>) => ReactNode;
 
 // ── Editable cells ───────────────────────────────────────
@@ -3091,7 +3187,7 @@ function useEditHold(ctx: EditContextValue, ref: RefObject<HTMLDivElement | null
       if (active.current) release();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on unmount
-    []
+    [],
   );
   return {
     onFocus: enter,
@@ -3212,7 +3308,11 @@ const CELL_EDITOR_TARGETS = [
 function pressCellEditor(e: React.MouseEvent<HTMLElement>) {
   const target = e.target as Element;
   if (e.button !== 0 || e.defaultPrevented) return;
-  if (target.closest("input, textarea, button, a[href], [role=textbox], [role=combobox], [role=checkbox], [aria-haspopup]"))
+  if (
+    target.closest(
+      "input, textarea, button, a[href], [role=textbox], [role=combobox], [role=checkbox], [aria-haspopup]",
+    )
+  )
     return;
   // A raised field or an open popup already has the cell's attention.
   if (e.currentTarget.querySelector("[data-cell-expanded]")) return;
@@ -3241,11 +3341,22 @@ function pressCellEditor(e: React.MouseEvent<HTMLElement>) {
     if (field.getAttribute("role") !== "combobox") return;
   }
   const r = field.getBoundingClientRect();
-  const at = { bubbles: true, cancelable: true, composed: true, button: 0, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
-  field.dispatchEvent(new globalThis.PointerEvent("pointerdown", { ...at, pointerType: "mouse", isPrimary: true }));
+  const at = {
+    bubbles: true,
+    cancelable: true,
+    composed: true,
+    button: 0,
+    clientX: r.left + r.width / 2,
+    clientY: r.top + r.height / 2,
+  };
+  field.dispatchEvent(
+    new globalThis.PointerEvent("pointerdown", { ...at, pointerType: "mouse", isPrimary: true }),
+  );
   field.dispatchEvent(new globalThis.MouseEvent("mousedown", at));
   field.focus();
-  field.dispatchEvent(new globalThis.PointerEvent("pointerup", { ...at, pointerType: "mouse", isPrimary: true }));
+  field.dispatchEvent(
+    new globalThis.PointerEvent("pointerup", { ...at, pointerType: "mouse", isPrimary: true }),
+  );
   field.dispatchEvent(new globalThis.MouseEvent("mouseup", at));
   field.dispatchEvent(new globalThis.MouseEvent("click", at));
 }
@@ -3337,7 +3448,13 @@ function EditorBody<TData>({
         onBlur={onBlur}
         label={label}
         value={text}
-        href={typeof link === "function" ? link(text) : /^[a-z][a-z\d+.-]*:/i.test(text) ? text : `https://${text}`}
+        href={
+          typeof link === "function"
+            ? link(text)
+            : /^[a-z][a-z\d+.-]*:/i.test(text)
+              ? text
+              : `https://${text}`
+        }
         placeholder={options.placeholder}
         onChange={commit}
       />
@@ -3405,7 +3522,11 @@ function EditorBody<TData>({
             const day = next instanceof Date ? next : undefined;
             // A string keeps whatever follows its day (a timestamp's time).
             commit(
-              day ? (typeof value === "string" ? toIsoDay(day) + (dayOf(value) ? value.slice(10) : "") : day) : null
+              day
+                ? typeof value === "string"
+                  ? toIsoDay(day) + (dayOf(value) ? value.slice(10) : "")
+                  : day
+                : null,
             );
           }}
           className="min-w-0"
@@ -3515,19 +3636,19 @@ function CellTextEditor({
       onBlur={onDone}
       style={raised ? { width } : undefined}
       className={cn(
-        "block min-w-0 resize-none overflow-hidden text-foreground outline-none placeholder:text-muted-foreground",
+        "text-foreground placeholder:text-muted-foreground block min-w-0 resize-none overflow-hidden outline-none",
         raised
           ? [
               // Out 9px (8px padding, the hairline) and up to the row's top,
               // its padding putting the first line where the cell's was.
-              "absolute -left-[9px] -top-(--table-cell-py) z-30 border border-border bg-card",
+              "border-border bg-card absolute -top-(--table-cell-py) -left-[9px] z-30 border",
               "min-h-[calc(1lh+2*var(--table-cell-py))] px-2 py-[calc(var(--table-cell-py)-1px)]",
-              "whitespace-pre-wrap [overflow-wrap:anywhere]",
+              "[overflow-wrap:anywhere] whitespace-pre-wrap",
               shape.input,
             ]
-          : "h-[1lh] w-full whitespace-nowrap bg-transparent p-0",
+          : "h-[1lh] w-full bg-transparent p-0 whitespace-nowrap",
         // The touch size keeps iOS from zooming into the field.
-        sizeClasses.field
+        sizeClasses.field,
       )}
     />
   );
@@ -3569,7 +3690,7 @@ function PlainTextField({
       className={cn(
         "block h-[1lh] cursor-text truncate outline-none",
         "before:absolute before:inset-x-0 before:-inset-y-(--table-cell-py) before:content-['']",
-        !value && "text-muted-foreground"
+        !value && "text-muted-foreground",
       )}
     >
       {value || placeholder}
@@ -3616,7 +3737,7 @@ function LinkField({
       // the column.
       className={cn(
         "relative -my-(--table-cell-py) flex h-[calc(1lh+2*var(--table-cell-py))] min-w-0 cursor-text items-center",
-        sizeClasses.variant === "compact" ? "-mr-2.5 pr-2.5" : "-mr-3 pr-3"
+        sizeClasses.variant === "compact" ? "-mr-2.5 pr-2.5" : "-mr-3 pr-3",
       )}
     >
       {editing ? (
@@ -3640,8 +3761,8 @@ function LinkField({
           }}
           aria-keyshortcuts="F2"
           className={cn(
-            "min-w-0 cursor-pointer truncate underline decoration-foreground/30 underline-offset-2",
-            "transition-colors duration-80 hover:decoration-foreground"
+            "decoration-foreground/30 min-w-0 cursor-pointer truncate underline underline-offset-2",
+            "hover:decoration-foreground transition-colors duration-80",
           )}
         >
           {value || placeholder}
@@ -3690,11 +3811,13 @@ function WrappingField({
       className={cn(
         // The row's padding moves inside, so the whole cell takes the click.
         "-my-(--table-cell-py) block w-full min-w-0 resize-none bg-transparent px-0 py-(--table-cell-py)",
-        "cursor-text text-foreground outline-none placeholder:text-muted-foreground",
-        "whitespace-normal [overflow-wrap:anywhere]",
-        maxLines === 2 ? "max-h-[calc(2lh+2*var(--table-cell-py))] overflow-y-auto [scrollbar-width:none]" : "overflow-hidden",
+        "text-foreground placeholder:text-muted-foreground cursor-text outline-none",
+        "[overflow-wrap:anywhere] whitespace-normal",
+        maxLines === 2
+          ? "max-h-[calc(2lh+2*var(--table-cell-py))] [scrollbar-width:none] overflow-y-auto"
+          : "overflow-hidden",
         // The touch size keeps iOS from zooming into the field.
-        sizeClasses.field
+        sizeClasses.field,
       )}
     />
   );
@@ -3727,7 +3850,9 @@ function SelectEditor({
   onChange: (value: string) => void;
 }) {
   "use no memo";
-  const items = options.map((o) => (typeof o === "string" ? { value: o, label: o } : { label: o.value, ...o }));
+  const items = options.map((o) =>
+    typeof o === "string" ? { value: o, label: o } : { label: o.value, ...o },
+  );
   const checked = items.findIndex((o) => o.value === value);
   const [open, setOpen] = useState(false);
   return (
@@ -3815,7 +3940,7 @@ function NumberEditor({
         // The text field takes the column's width rather than setting it.
         "[&_input]:w-0",
         // No chevron: the list opens as you type or press ↓.
-        "[&_[aria-label=Open]]:hidden"
+        "[&_[aria-label=Open]]:hidden",
       )}
     >
       <Combobox
@@ -3906,11 +4031,12 @@ function TagsEditor({
         // sideways instead of wrapping (the field follows its caret). In a
         // column that wraps its text (`lines: "wrap"`), the chips wrap too
         // and the row grows with them, like its text.
-        !wrap && "[&_.flex-wrap]:flex-nowrap [&_.flex-wrap]:overflow-x-auto [&_.flex-wrap]:[scrollbar-width:none]",
+        !wrap &&
+          "[&_.flex-wrap]:[scrollbar-width:none] [&_.flex-wrap]:flex-nowrap [&_.flex-wrap]:overflow-x-auto",
         // On one line, a chip cut at the cell's edge fades out over its last
         // 16px, as truncated text ends in an ellipsis.
         !wrap && "[&_.flex-wrap]:[mask-image:linear-gradient(to_right,black_calc(100%-16px),transparent)]",
-        "[&_[aria-label=Open]]:hidden"
+        "[&_[aria-label=Open]]:hidden",
       )}
     >
       <Combobox
@@ -4034,8 +4160,8 @@ function DataTableSearch<TData>({
         aria-hidden
         // Centered in the button's square (16px in 36, 14px in 28).
         className={cn(
-          "pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2 text-muted-foreground",
-          compact ? "left-[7px]" : "left-2.5"
+          "text-muted-foreground pointer-events-none absolute top-1/2 z-[1] -translate-y-1/2",
+          compact ? "left-[7px]" : "left-2.5",
         )}
       />
       {!expanded && (
@@ -4093,8 +4219,8 @@ function DataTableSearch<TData>({
         // button.
         className={cn(
           compact ? "pl-[28px]" : "pl-9",
-          "border-transparent focus:border-transparent aria-invalid:focus:border-transparent focus:bg-hover focus:hover:bg-hover",
-          !expanded && "pointer-events-none opacity-0"
+          "focus:bg-hover focus:hover:bg-hover border-transparent focus:border-transparent aria-invalid:focus:border-transparent",
+          !expanded && "pointer-events-none opacity-0",
         )}
       />
     </motion.span>
@@ -4145,13 +4271,18 @@ function useUndoableRows<T>(initial: T[] | (() => T[]), { getId, limit = 100 }: 
         const now = Date.now();
         const last = s.past[s.past.length - 1];
         if (mergeKey && last?.mergeKey === mergeKey && now - last.at < MERGE_MS)
-          return { ...s, rows: after, past: [...s.past.slice(0, -1), { ...last, after, at: now }], future: [] };
+          return {
+            ...s,
+            rows: after,
+            past: [...s.past.slice(0, -1), { ...last, after, at: now }],
+            future: [],
+          };
         const step = { label, before: s.rows, after, mergeKey, at: now };
         const past = [...s.past, step];
         const over = Math.max(0, past.length - limit);
         return { rows: after, past: past.slice(over), future: [], dropped: s.dropped + over };
       }),
-    [limit]
+    [limit],
   );
 
   const edit = useCallback(
@@ -4160,9 +4291,9 @@ function useUndoableRows<T>(initial: T[] | (() => T[]), { getId, limit = 100 }: 
         label,
         (rows) => rows.map((r) => (getId(r) === id ? { ...r, ...change } : r)),
         // One cell's burst merges: the same row and the same fields.
-        `${id}:${Object.keys(change).sort().join(",")}`
+        `${id}:${Object.keys(change).sort().join(",")}`,
       ),
-    [apply, getId]
+    [apply, getId],
   );
 
   const remove = useCallback(
@@ -4171,16 +4302,20 @@ function useUndoableRows<T>(initial: T[] | (() => T[]), { getId, limit = 100 }: 
         const next = rows.filter((r) => !ids.includes(getId(r)));
         return next.length === rows.length ? rows : next;
       }),
-    [apply, getId]
+    [apply, getId],
   );
 
   const insert = useCallback(
-    (items: readonly T[], index?: number, label = `Added ${items.length} ${items.length === 1 ? "row" : "rows"}`) =>
+    (
+      items: readonly T[],
+      index?: number,
+      label = `Added ${items.length} ${items.length === 1 ? "row" : "rows"}`,
+    ) =>
       apply(label, (rows) => {
         const at = index === undefined ? rows.length : index;
         return [...rows.slice(0, at), ...items, ...rows.slice(at)];
       }),
-    [apply]
+    [apply],
   );
 
   const undo = useCallback(
@@ -4190,7 +4325,7 @@ function useUndoableRows<T>(initial: T[] | (() => T[]), { getId, limit = 100 }: 
         if (!step) return s;
         return { ...s, rows: step.before, past: s.past.slice(0, -1), future: [step, ...s.future] };
       }),
-    []
+    [],
   );
 
   // Back to how the rows were with `count` steps behind them: a toast's
@@ -4206,7 +4341,7 @@ function useUndoableRows<T>(initial: T[] | (() => T[]), { getId, limit = 100 }: 
         const undone = s.past.slice(at);
         return { ...s, rows: undone[0].before, past: s.past.slice(0, at), future: [...undone, ...s.future] };
       }),
-    []
+    [],
   );
 
   const redo = useCallback(
@@ -4216,7 +4351,7 @@ function useUndoableRows<T>(initial: T[] | (() => T[]), { getId, limit = 100 }: 
         if (!step) return s;
         return { ...s, rows: step.after, past: [...s.past, step], future: s.future.slice(1) };
       }),
-    []
+    [],
   );
 
   return {
@@ -4256,7 +4391,10 @@ function DataTableTitle({ as: Tag = "h1", table, size, className, style, ...prop
   "use no memo";
   const compact = useSize(size).variant === "compact";
   // Looked up among the columns (getColumn warns about a missing id).
-  const boxes = !!table?.getAllLeafColumns().find((c) => c.id === "select")?.getIsVisible();
+  const boxes = !!table
+    ?.getAllLeafColumns()
+    .find((c) => c.id === "select")
+    ?.getIsVisible();
   return (
     <Tag
       data-slot="data-table-title"
@@ -4264,7 +4402,7 @@ function DataTableTitle({ as: Tag = "h1", table, size, className, style, ...prop
         typeClass("display", compact ? "compact" : "default"),
         "text-foreground",
         boxes && "pl-7",
-        className
+        className,
       )}
       style={{ fontVariationSettings: fontWeights.semibold, ...style }}
       {...props}
@@ -4331,7 +4469,9 @@ type ResolvedFilter =
   | { type: "options"; options: { value: string; label: string; color?: BadgeColor }[] };
 
 const optionOf = (o: DataTableSelectOption) =>
-  typeof o === "string" ? { value: o, label: o } : { value: o.value, label: o.label ?? o.value, color: o.color };
+  typeof o === "string"
+    ? { value: o, label: o }
+    : { value: o.value, label: o.label ?? o.value, color: o.color };
 
 /** How a column filters: its `meta.filter`, else its editor, else what its
  *  values look like. */
@@ -4402,7 +4542,7 @@ function useFilters<TData>(table: TanStackTable<TData>) {
     () => new Map(table.getAllLeafColumns().map((c) => [c.id, filterOf(table, c)] as const)),
     // table is a new view on every state change; the kinds follow data and defs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, defs]
+    [data, defs],
   );
   const active = table
     .getState()
@@ -4490,7 +4630,11 @@ function DataTableFilters<TData>({
  *  the parent's gap folded in so the table below glides instead of
  *  jumping. On the page's first render it is simply there. */
 function RowReveal({ show, children }: { show: boolean; children: ReactNode }) {
-  return <AnimatePresence initial={false}>{show && <RowRevealPart key="row">{children}</RowRevealPart>}</AnimatePresence>;
+  return (
+    <AnimatePresence initial={false}>
+      {show && <RowRevealPart key="row">{children}</RowRevealPart>}
+    </AnimatePresence>
+  );
 }
 
 function RowRevealPart({ children }: { children: ReactNode }) {
@@ -4530,7 +4674,11 @@ function RowRevealPart({ children }: { children: ReactNode }) {
     }
     const run = isPresent
       ? animate(el, { height: [0, height], marginTop: [-gap, 0], opacity: [0, 1] }, { ...spring.moderate })
-      : animate(el, { height: [height, 0], marginTop: [0, -gap], opacity: [1, 0] }, { ...spring.moderate, ...spring.moderate.exit });
+      : animate(
+          el,
+          { height: [height, 0], marginTop: [0, -gap], opacity: [1, 0] },
+          { ...spring.moderate, ...spring.moderate.exit },
+        );
     run.then(() => (isPresent ? clear() : safeToRemove?.()));
     // Stopped early (a re-run, Strict Mode's double effect): back to its
     // natural size, so the next run measures the real height.
@@ -4577,7 +4725,10 @@ function DataTableFilterChips<TData>({
   };
   // Past a selection column, the row steps in with the title, to the first
   // data column's text.
-  const boxes = !!table.getAllLeafColumns().find((c) => c.id === "select")?.getIsVisible();
+  const boxes = !!table
+    .getAllLeafColumns()
+    .find((c) => c.id === "select")
+    ?.getIsVisible();
 
   return (
     <RowReveal show={active.length > 0 || Children.toArray(children).length > 0}>
@@ -4655,7 +4806,10 @@ function datePresets() {
     { label: "Last 7 days", range: { from: back(6), to: today } },
     { label: "Last 30 days", range: { from: back(29), to: today } },
     { label: "This month", range: { from: new Date(today.getFullYear(), today.getMonth(), 1), to: today } },
-    { label: "Last 3 months", range: { from: new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()), to: today } },
+    {
+      label: "Last 3 months",
+      range: { from: new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()), to: today },
+    },
     { label: "This year", range: { from: new Date(today.getFullYear(), 0, 1), to: today } },
   ];
 }
@@ -4697,13 +4851,15 @@ function FilterChip({ label, filter, value, autoOpen, compact, size, onChange, o
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  const innerRadius = { rounded: "rounded-[5px]", pill: "rounded-[17px]", sharp: "rounded-none" }[shape.variant];
+  const innerRadius = { rounded: "rounded-[5px]", pill: "rounded-[17px]", sharp: "rounded-none" }[
+    shape.variant
+  ];
   const segment = cn(
     "relative z-[1] inline-flex h-full min-w-0 items-center gap-1 outline-none",
     // 4px around the word and the value (the × keeps its square).
     "px-1",
     "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
-    innerRadius
+    innerRadius,
   );
 
   let op: string;
@@ -4726,17 +4882,18 @@ function FilterChip({ label, filter, value, autoOpen, compact, size, onChange, o
       />
     );
     // "Is empty" and "is not empty" need no text.
-    control = textOp === "is empty" || textOp === "is not empty" ? null : (
-      <input
-        aria-label={`${label} ${textOp}`}
-        autoFocus={autoOpen}
-        value={value.query}
-        placeholder="text"
-        onChange={(e) => onChange({ ...value, query: e.target.value })}
-        // Hugs what's typed (the placeholder when empty).
-        className={cn(CHIP_FIELD, sizeClasses.field, "[field-sizing:content] max-w-48 min-w-6")}
-      />
-    );
+    control =
+      textOp === "is empty" || textOp === "is not empty" ? null : (
+        <input
+          aria-label={`${label} ${textOp}`}
+          autoFocus={autoOpen}
+          value={value.query}
+          placeholder="text"
+          onChange={(e) => onChange({ ...value, query: e.target.value })}
+          // Hugs what's typed (the placeholder when empty).
+          className={cn(CHIP_FIELD, sizeClasses.field, "[field-sizing:content] max-w-48 min-w-6")}
+        />
+      );
   } else if (value.kind === "number") {
     op = "from";
     const num = (raw: string) => (raw === "" || Number.isNaN(Number(raw)) ? undefined : Number(raw));
@@ -4780,7 +4937,7 @@ function FilterChip({ label, filter, value, autoOpen, compact, size, onChange, o
           ? { kind: "date", op: next, to: day }
           : next === "after"
             ? { kind: "date", op: next, from: day }
-            : { kind: "date", op: next, from: day }
+            : { kind: "date", op: next, from: day },
       );
     };
     opControl = (
@@ -4832,7 +4989,11 @@ function FilterChip({ label, filter, value, autoOpen, compact, size, onChange, o
           typeable
           onValueChange={(next) => {
             const day = next instanceof Date ? toIsoDay(next) : undefined;
-            onChange(dateOp === "before" ? { kind: "date", op: "before", to: day } : { kind: "date", op: "after", from: day });
+            onChange(
+              dateOp === "before"
+                ? { kind: "date", op: "before", to: day }
+                : { kind: "date", op: "after", from: day },
+            );
           }}
           // The chip's inner row, like its other parts: 2px inside its
           // border, so the date's fill sits where the word's does.
@@ -4864,58 +5025,65 @@ function FilterChip({ label, filter, value, autoOpen, compact, size, onChange, o
     );
     control = (
       <>
-      <MenuShield open={open} />
-      <DropdownMenu size={size} open={open} onOpenChange={setOpen}>
-        <DropdownTrigger
-          render={
-            <button
-              ref={valueRef as RefObject<HTMLButtonElement>}
-              type="button"
-              aria-label={`${label} ${op} ${picked.length ? picked.map((o) => o.label).join(", ") : "any"}`}
-              className={cn(segment, "max-w-56 cursor-pointer")}
-            >
-              {/* One value reads in full, cut short when it's long; more
+        <MenuShield open={open} />
+        <DropdownMenu size={size} open={open} onOpenChange={setOpen}>
+          <DropdownTrigger
+            render={
+              <button
+                ref={valueRef as RefObject<HTMLButtonElement>}
+                type="button"
+                aria-label={`${label} ${op} ${picked.length ? picked.map((o) => o.label).join(", ") : "any"}`}
+                className={cn(segment, "max-w-56 cursor-pointer")}
+              >
+                {/* One value reads in full, cut short when it's long; more
                   read as their dots and a count, so the chip keeps its
                   width. */}
-              <span className={cn("flex min-w-0 items-center gap-1.5", picked.length ? "text-foreground" : "text-muted-foreground")}>
-                {picked.length === 0 && "any"}
-                {picked.length === 1 && (
-                  <>
-                    {picked[0].color && <BadgeDot color={picked[0].color} />}
-                    <span className="min-w-0 truncate">{picked[0].label}</span>
-                  </>
-                )}
-                {picked.length > 1 && (
-                  <>
-                    {picked.some((o) => o.color) && (
-                      <span className="flex shrink-0 items-center -space-x-0.5">
-                        {picked.slice(0, 4).map((o) => (o.color ? <BadgeDot key={o.value} color={o.color} /> : null))}
-                      </span>
-                    )}
-                    <span className="shrink-0 whitespace-nowrap">{picked.length} items</span>
-                  </>
-                )}
-              </span>
-            </button>
-          }
-        />
-        <DropdownContent
-          className="w-48"
-          checkedIndices={options.flatMap((o, i) => (value.values.includes(o.value) ? [i] : []))}
-        >
-          {options.map((o, i) => (
-            <MenuItem
-              key={o.value}
-              index={i}
-              label={o.label}
-              // Options with a Badge color show its dot, as the cells do.
-              leading={o.color ? <BadgeDot color={o.color} /> : undefined}
-              checked={value.values.includes(o.value)}
-              onSelect={() => toggle(o.value)}
-            />
-          ))}
-        </DropdownContent>
-      </DropdownMenu>
+                <span
+                  className={cn(
+                    "flex min-w-0 items-center gap-1.5",
+                    picked.length ? "text-foreground" : "text-muted-foreground",
+                  )}
+                >
+                  {picked.length === 0 && "any"}
+                  {picked.length === 1 && (
+                    <>
+                      {picked[0].color && <BadgeDot color={picked[0].color} />}
+                      <span className="min-w-0 truncate">{picked[0].label}</span>
+                    </>
+                  )}
+                  {picked.length > 1 && (
+                    <>
+                      {picked.some((o) => o.color) && (
+                        <span className="flex shrink-0 items-center -space-x-0.5">
+                          {picked
+                            .slice(0, 4)
+                            .map((o) => (o.color ? <BadgeDot key={o.value} color={o.color} /> : null))}
+                        </span>
+                      )}
+                      <span className="shrink-0 whitespace-nowrap">{picked.length} items</span>
+                    </>
+                  )}
+                </span>
+              </button>
+            }
+          />
+          <DropdownContent
+            className="w-48"
+            checkedIndices={options.flatMap((o, i) => (value.values.includes(o.value) ? [i] : []))}
+          >
+            {options.map((o, i) => (
+              <MenuItem
+                key={o.value}
+                index={i}
+                label={o.label}
+                // Options with a Badge color show its dot, as the cells do.
+                leading={o.color ? <BadgeDot color={o.color} /> : undefined}
+                checked={value.values.includes(o.value)}
+                onSelect={() => toggle(o.value)}
+              />
+            ))}
+          </DropdownContent>
+        </DropdownMenu>
       </>
     );
   }
@@ -4931,11 +5099,11 @@ function FilterChip({ label, filter, value, autoOpen, compact, size, onChange, o
         // Field's border: `border-border` at rest, darker only while a text
         // field in it has focus. A menu trigger keeps focus after its menu
         // closes, so focus anywhere in the chip left it dark.
-        "relative inline-flex max-w-full items-center overflow-hidden border border-border p-0.5 text-muted-foreground transition-colors duration-80",
+        "border-border text-muted-foreground relative inline-flex max-w-full items-center overflow-hidden border p-0.5 transition-colors duration-80",
         "data-typing:border-foreground/40",
         sizeClasses.control,
         sizeClasses.text,
-        shape.input
+        shape.input,
       )}
       initial={false}
       animate={contentWidth === null ? undefined : { width: contentWidth + 6 }}
@@ -4948,7 +5116,12 @@ function FilterChip({ label, filter, value, autoOpen, compact, size, onChange, o
       <FluidHoverHighlight hover={hover} className={cn("z-0", innerRadius)} />
       <span ref={contentRef} className="inline-flex h-full w-max shrink-0 items-center">
         {/* The column, then the word, the value and the ×, each a stop. */}
-        <span className={cn("relative z-[1] shrink-0 whitespace-nowrap text-foreground", compact ? "pl-1.5" : "pl-2")}>
+        <span
+          className={cn(
+            "text-foreground relative z-[1] shrink-0 whitespace-nowrap",
+            compact ? "pl-1.5" : "pl-2",
+          )}
+        >
           {label}
         </span>
         {opControl ?? <span className={cn("relative z-[1] shrink-0 whitespace-nowrap", "pl-1")}>{op}</span>}
@@ -4969,20 +5142,20 @@ function FilterChip({ label, filter, value, autoOpen, compact, size, onChange, o
           </label>
         )}
         <Tooltip content="Remove filter">
-        <button
-          ref={clearRef}
-          type="button"
-          aria-label={`Remove the ${label} filter`}
-          onClick={onRemove}
-          className={cn(
-            "relative z-[1] inline-flex h-full shrink-0 cursor-pointer items-center justify-center text-muted-foreground outline-none hover:text-foreground",
-            "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
-            compact ? "w-6" : "w-7",
-            innerRadius
-          )}
-        >
-          <X size={sizeClasses.icon} strokeWidth={1.5} />
-        </button>
+          <button
+            ref={clearRef}
+            type="button"
+            aria-label={`Remove the ${label} filter`}
+            onClick={onRemove}
+            className={cn(
+              "text-muted-foreground hover:text-foreground relative z-[1] inline-flex h-full shrink-0 cursor-pointer items-center justify-center outline-none",
+              "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
+              compact ? "w-6" : "w-7",
+              innerRadius,
+            )}
+          >
+            <X size={sizeClasses.icon} strokeWidth={1.5} />
+          </button>
         </Tooltip>
       </span>
     </motion.span>
@@ -5013,32 +5186,35 @@ function OpMenu({
   const [open, setOpen] = useState(false);
   return (
     <>
-    <MenuShield open={open} />
-    <DropdownMenu size={size} onOpenChange={setOpen}>
-      <DropdownTrigger
-        render={
-          <button
-            ref={triggerRef}
-            type="button"
-            aria-label={`${label}: ${word}`}
-            className={cn("shrink-0 cursor-pointer whitespace-nowrap transition-colors duration-80 hover:text-foreground", className)}
-          >
-            {word}
-          </button>
-        }
-      />
-      <DropdownContent align="start" className="w-36" checkedIndex={ops.indexOf(current)}>
-        {ops.map((o, i) => (
-          <MenuItem
-            key={o}
-            index={i}
-            label={o.charAt(0).toUpperCase() + o.slice(1)}
-            checked={o === current}
-            onSelect={() => onPick(o)}
-          />
-        ))}
-      </DropdownContent>
-    </DropdownMenu>
+      <MenuShield open={open} />
+      <DropdownMenu size={size} onOpenChange={setOpen}>
+        <DropdownTrigger
+          render={
+            <button
+              ref={triggerRef}
+              type="button"
+              aria-label={`${label}: ${word}`}
+              className={cn(
+                "hover:text-foreground shrink-0 cursor-pointer whitespace-nowrap transition-colors duration-80",
+                className,
+              )}
+            >
+              {word}
+            </button>
+          }
+        />
+        <DropdownContent align="start" className="w-36" checkedIndex={ops.indexOf(current)}>
+          {ops.map((o, i) => (
+            <MenuItem
+              key={o}
+              index={i}
+              label={o.charAt(0).toUpperCase() + o.slice(1)}
+              checked={o === current}
+              onSelect={() => onPick(o)}
+            />
+          ))}
+        </DropdownContent>
+      </DropdownMenu>
     </>
   );
 }
@@ -5060,7 +5236,10 @@ function columnLabel<TData>(column: Column<TData, unknown>) {
   const header = column.columnDef.header;
   if (column.columnDef.meta?.label) return column.columnDef.meta.label;
   if (typeof header === "string") return header;
-  const words = column.id.replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ").toLowerCase();
+  const words = column.id
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .toLowerCase();
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
@@ -5154,7 +5333,7 @@ function ColumnMenuRow<TData>({
               e.preventDefault();
               controls.start(e);
             }}
-            className="-ml-1 flex cursor-grab touch-none items-center text-muted-foreground transition-colors duration-80 hover:text-foreground active:cursor-grabbing"
+            className="text-muted-foreground hover:text-foreground -ml-1 flex cursor-grab touch-none items-center transition-colors duration-80 active:cursor-grabbing"
           >
             <Grip size={14} />
           </span>
@@ -5188,9 +5367,7 @@ function DataTableViewOptions<TData>({
   const [dragOrder, setDragOrder] = useState<string[] | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const dragOrderRef = useRef<string[] | null>(null);
-  const listed = dragOrder
-    ? dragOrder.flatMap((id) => columns.filter((c) => c.id === id))
-    : columns;
+  const listed = dragOrder ? dragOrder.flatMap((id) => columns.filter((c) => c.id === id)) : columns;
   const commitDrag = () => {
     const ids = dragOrderRef.current;
     dragOrderRef.current = null;
@@ -5205,8 +5382,7 @@ function DataTableViewOptions<TData>({
   // One switch wraps every text column, or hands each its own lines back
   // (a column that wraps on its own drops to one line).
   const setLines = (table as Partial<DataTableExtras>).setColumnLines;
-  const wrapped =
-    textColumns.length > 0 && textColumns.every((column) => linesOf(table, column) === "wrap");
+  const wrapped = textColumns.length > 0 && textColumns.every((column) => linesOf(table, column) === "wrap");
   const toggleWrap = () => {
     if (!setLines) return;
     for (const column of textColumns) {
@@ -5320,7 +5496,12 @@ function DataTableRowActions({ children, label = "Row actions" }: DataTableRowAc
           render={
             // Its ring drawn inside: flush with the cell's edge in compact,
             // an outer ring was cut off by the cell and the scroll box.
-            <Button variant="ghost" size="icon-compact" aria-label={label} className="focus-visible:ring-inset">
+            <Button
+              variant="ghost"
+              size="icon-compact"
+              aria-label={label}
+              className="focus-visible:ring-inset"
+            >
               <More />
             </Button>
           }
@@ -5341,7 +5522,7 @@ function DataTableRowActions({ children, label = "Row actions" }: DataTableRowAc
  *  your `columns`. */
 function rowActionsColumn<TData>(
   items: (row: Row<TData>) => ReactNode,
-  { label }: { label?: string } = {}
+  { label }: { label?: string } = {},
 ): ColumnDef<TData> {
   return {
     id: "actions",
@@ -5387,16 +5568,14 @@ function DataTablePagination<TData>({
   const pageCount = Math.max(1, table.getPageCount());
   const page = Math.min(table.getState().pagination.pageIndex + 1, pageCount);
   const pageSize = table.getState().pagination.pageSize;
-  const sizes = pageSizes.length
-    ? [...new Set([...pageSizes, pageSize])].sort((a, b) => a - b)
-    : [];
+  const sizes = pageSizes.length ? [...new Set([...pageSizes, pageSize])].sort((a, b) => a - b) : [];
 
   const bar = (
     <div
       className={cn(
-        "flex flex-wrap items-center justify-between gap-x-4 gap-y-2 tabular-nums text-muted-foreground",
+        "text-muted-foreground flex flex-wrap items-center justify-between gap-x-4 gap-y-2 tabular-nums",
         sizeClasses.text,
-        className
+        className,
       )}
     >
       {/* 8px in, on the selection checkbox's line, like the search icon. */}
@@ -5415,7 +5594,11 @@ function DataTablePagination<TData>({
           <span className="flex items-center gap-1">
             Rows per page
             <Select value={String(pageSize)} onValueChange={(v) => table.setPageSize(Number(v))}>
-              <SelectTrigger variant="borderless" aria-label="Rows per page" className="w-auto min-w-0 gap-1 px-2" />
+              <SelectTrigger
+                variant="borderless"
+                aria-label="Rows per page"
+                className="w-auto min-w-0 gap-1 px-2"
+              />
               <SelectContent>
                 {sizes.map((n, i) => (
                   <SelectItem key={n} value={String(n)} index={i}>
@@ -5521,7 +5704,11 @@ function DataTableSelectionBar<TData>({
   const barRef = useRef<HTMLDivElement>(null);
   // The portal needs document.body: false on the server and in hydration,
   // true once in the browser.
-  const mounted = useSyncExternalStore(subscribeNever, () => true, () => false);
+  const mounted = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
   useLayoutEffect(() => {
     if (count === 0) return;
     let frame = 0;
@@ -5590,7 +5777,11 @@ function DataTableSelectionBar<TData>({
           exit={
             reduceMotion
               ? { opacity: 0, transition: { type: "tween", ease: "easeOut", ...spring.moderate.exit } }
-              : { opacity: 0, y: "100%", transition: { type: "tween", ease: "easeOut", ...spring.moderate.exit } }
+              : {
+                  opacity: 0,
+                  y: "100%",
+                  transition: { type: "tween", ease: "easeOut", ...spring.moderate.exit },
+                }
           }
           transition={{
             y: spring.moderate,
@@ -5611,12 +5802,16 @@ function DataTableSelectionBar<TData>({
             className={cn(
               "flex items-center whitespace-nowrap",
               compact ? "gap-1 p-1 pl-3" : "gap-1.5 p-1.5 pl-4",
-              shape.variant === "sharp" ? "rounded-[1px]" : shape.variant === "pill" ? "rounded-full" : "rounded-xl",
+              shape.variant === "sharp"
+                ? "rounded-[1px]"
+                : shape.variant === "pill"
+                  ? "rounded-full"
+                  : "rounded-xl",
               sizeClasses.text,
-              className
+              className,
             )}
           >
-            <span aria-live="polite" className="tabular-nums text-foreground">
+            <span aria-live="polite" className="text-foreground tabular-nums">
               {shown} selected
             </span>
             {items.length > 0 && (
@@ -5637,7 +5832,7 @@ function DataTableSelectionBar<TData>({
                   Clear selection
                   {/* A key cap in the tooltip's inverted colors, as the
                       Sidebar's tooltips draw theirs. */}
-                  <kbd className="-my-1 flex h-4 min-w-4 items-center justify-center rounded border border-background/30 px-1 font-sans text-[length:var(--fs-micro-compact,10px)] leading-[var(--lh-micro-compact,12px)] text-background">
+                  <kbd className="border-background/30 text-background -my-1 flex h-4 min-w-4 items-center justify-center rounded border px-1 font-sans text-[length:var(--fs-micro-compact,10px)] leading-[var(--lh-micro-compact,12px)]">
                     Esc
                   </kbd>
                 </span>

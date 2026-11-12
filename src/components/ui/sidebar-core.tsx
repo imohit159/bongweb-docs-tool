@@ -34,8 +34,7 @@ import { Button, type ButtonProps } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
 
 // SSR-safe layout effect (client components still server-render in Next).
-const useIsoLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -136,7 +135,11 @@ const subscribeNever = () => () => {};
 /** False on the server and while hydrating, true after: a client-only value
  *  without a hydration mismatch. */
 function useIsClient() {
-  return useSyncExternalStore(subscribeNever, () => true, () => false);
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
 }
 
 // ─── SidebarProvider ─────────────────────────────────────────────────────────
@@ -178,7 +181,7 @@ const SidebarProvider = forwardRef<HTMLDivElement, SidebarProviderProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const isMobile = useIsMobile(mobileBreakpoint);
     const [openMobile, setOpenMobile] = useState(false);
@@ -230,7 +233,7 @@ const SidebarProvider = forwardRef<HTMLDivElement, SidebarProviderProps>(
           document.cookie = `${SIDEBAR_COOKIE_NAME}=${next}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
         }
       },
-      [onOpenChange, persist]
+      [onOpenChange, persist],
     );
 
     const toggleSidebar = useCallback(() => {
@@ -294,18 +297,12 @@ const SidebarProvider = forwardRef<HTMLDivElement, SidebarProviderProps>(
         const scope = target.closest?.("[data-keyboard-scope]");
         if (scope && !scope.contains(root)) return;
         if (root.contains(target)) {
-          if (
-            mountedProviders.some(
-              (el) => el !== root && root.contains(el) && el.contains(target)
-            )
-          )
-            return;
+          if (mountedProviders.some((el) => el !== root && root.contains(el) && el.contains(target))) return;
           // The focused element itself WRAPS another provider (a docs
           // preview frame holding keyboard scope for the demo inside it —
           // see click-to-focus): the wrapped provider answers, not this
           // ancestor shell.
-          if (mountedProviders.some((el) => el !== root && target.contains(el)))
-            return;
+          if (mountedProviders.some((el) => el !== root && target.contains(el))) return;
         } else {
           // Focus outside this provider. A focused element that WRAPS
           // providers — a docs preview frame holding keyboard scope for the
@@ -321,15 +318,13 @@ const SidebarProvider = forwardRef<HTMLDivElement, SidebarProviderProps>(
           const wrapped = mountedProviders.filter((el) => target.contains(el));
           if (wrapped.length > 0) {
             const outermost = wrapped.find(
-              (el) => !wrapped.some((other) => other !== el && other.contains(el))
+              (el) => !wrapped.some((other) => other !== el && other.contains(el)),
             );
             if (outermost !== root) return;
           } else {
-            if (mountedProviders.some((el) => el !== root && el.contains(target)))
-              return;
+            if (mountedProviders.some((el) => el !== root && el.contains(target))) return;
             const outermost = mountedProviders.find(
-              (el) =>
-                !mountedProviders.some((other) => other !== el && other.contains(el))
+              (el) => !mountedProviders.some((other) => other !== el && other.contains(el)),
             );
             if (outermost !== root) return;
           }
@@ -384,7 +379,7 @@ const SidebarProvider = forwardRef<HTMLDivElement, SidebarProviderProps>(
         scheduleDismissPeek,
         cancelPeekTimer,
         isResizing,
-      ]
+      ],
     );
 
     return (
@@ -410,7 +405,7 @@ const SidebarProvider = forwardRef<HTMLDivElement, SidebarProviderProps>(
         </div>
       </SidebarContext.Provider>
     );
-  }
+  },
 );
 SidebarProvider.displayName = "SidebarProvider";
 
@@ -455,7 +450,7 @@ export function useTriggerOpen(onToggle: ((open: boolean) => void) | undefined) 
       if (w.open) toggleRef.current?.(false);
       watch.current = { el: null, observer: null, open: false };
     },
-    []
+    [],
   );
   // Slot templates hand the ref a fresh callback each render (null, then
   // the same node): only a new element starts a new watch.
@@ -474,7 +469,10 @@ export function useTriggerOpen(onToggle: ((open: boolean) => void) | undefined) 
     };
     w.el = el;
     w.observer = new MutationObserver(read);
-    w.observer.observe(el, { attributes: true, attributeFilter: ["data-state", "data-popup-open", "aria-expanded"] });
+    w.observer.observe(el, {
+      attributes: true,
+      attributeFilter: ["data-state", "data-popup-open", "aria-expanded"],
+    });
     read();
   }, []);
 }
@@ -485,7 +483,7 @@ export function useTriggerOpen(onToggle: ((open: boolean) => void) | undefined) 
 export function resolveSlotTemplate(
   render: ReactElement | undefined,
   asChild: boolean | undefined,
-  children: ReactNode
+  children: ReactNode,
 ): { template: ReactElement<SlotProps> | null; content: ReactNode } {
   if (render && isValidElement(render)) {
     return { template: render as ReactElement<SlotProps>, content: children };
@@ -597,12 +595,7 @@ const BREAKPOINT_FADE: Record<number, string> = {
 // be forwarded onto a motion.div.
 type MotionSafeDivProps = Omit<
   HTMLAttributes<HTMLDivElement>,
-  | "onDrag"
-  | "onDragStart"
-  | "onDragEnd"
-  | "onAnimationStart"
-  | "onAnimationEnd"
-  | "onAnimationIteration"
+  "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart" | "onAnimationEnd" | "onAnimationIteration"
 >;
 
 export interface SidebarShellProps extends MotionSafeDivProps {
@@ -664,8 +657,7 @@ const SidebarShell = forwardRef<HTMLDivElement, SidebarShellProps>(
       // a little margin), and disarmed the moment it crosses back.
       let wasInside = true;
       const onPointerMove = (event: PointerEvent) => {
-        const overlay =
-          shellRef.current?.querySelector('[data-sidebar="peek"]') ?? shellRef.current;
+        const overlay = shellRef.current?.querySelector('[data-sidebar="peek"]') ?? shellRef.current;
         if (!overlay) return;
         const box = overlay.getBoundingClientRect();
         const inside =
@@ -772,7 +764,7 @@ const SidebarShell = forwardRef<HTMLDivElement, SidebarShellProps>(
           // No bare `group` here: an unnamed group on the whole rail would
           // fire every descendant's group-hover (Button fills, icon strokes)
           // on rail hover. Named groups (menu-item etc.) handle row states.
-          "peer shrink-0 sticky top-0 h-svh",
+          "peer sticky top-0 h-svh shrink-0",
           // While peek is armed the 0-width shell must not clip the edge
           // strip or the overlay card — and the shell must rise above the
           // inset (a later sibling) so the card paints over it. Pinning from
@@ -789,7 +781,7 @@ const SidebarShell = forwardRef<HTMLDivElement, SidebarShellProps>(
           // A non-standard breakpoint has no literal utility in the map, so
           // JS hides the shell (no fade, but never rail + drawer at once).
           !BREAKPOINT_HIDDEN[mobileBreakpoint] && isMobile && "hidden",
-          className
+          className,
         )}
         initial={false}
         animate={{ width: shown ? width : "0rem" }}
@@ -823,7 +815,7 @@ const SidebarShell = forwardRef<HTMLDivElement, SidebarShellProps>(
               aria-expanded={isPeeking}
               className={cn(
                 "group/peek-strip absolute inset-y-0 z-40 w-3 cursor-pointer outline-none",
-                side === "left" ? "left-0" : "right-0"
+                side === "left" ? "left-0" : "right-0",
               )}
               onPointerEnter={
                 peek === "hover"
@@ -840,8 +832,8 @@ const SidebarShell = forwardRef<HTMLDivElement, SidebarShellProps>(
               <span
                 aria-hidden="true"
                 className={cn(
-                  "absolute inset-y-0 w-px bg-border opacity-0 transition-opacity duration-80 group-hover/peek-strip:opacity-100 group-focus-visible/peek-strip:opacity-100",
-                  side === "left" ? "left-0" : "right-0"
+                  "bg-border absolute inset-y-0 w-px opacity-0 transition-opacity duration-80 group-hover/peek-strip:opacity-100 group-focus-visible/peek-strip:opacity-100",
+                  side === "left" ? "left-0" : "right-0",
                 )}
               />
             </button>
@@ -863,7 +855,7 @@ const SidebarShell = forwardRef<HTMLDivElement, SidebarShellProps>(
                         ? "right-2"
                         : "right-0",
                     shape.container,
-                    surfaceClasses(floatingLevel, 3)
+                    surfaceClasses(floatingLevel, 3),
                   )}
                   style={{
                     width: `calc(${width} - ${variant === "floating" ? "1rem" : "0.5rem"})`,
@@ -882,75 +874,75 @@ const SidebarShell = forwardRef<HTMLDivElement, SidebarShellProps>(
             </AnimatePresence>
           </>
         ) : (
-        <motion.div
-          className={cn(
-            "absolute inset-y-0 flex h-full flex-col",
-            side === "left" ? "left-0" : "right-0",
-            // Floating floats its card inside a full gutter; inset only needs
-            // the vertical inset (horizontal room belongs to the nav rows).
-            variant === "floating" && "p-2",
-            variant === "inset" && "py-2"
-          )}
-          style={{ width }}
-          initial={false}
-          animate={{ x: open ? "0%" : side === "left" ? "-100%" : "100%" }}
-          transition={widthTransition}
-        >
-          {variant === "floating" ? (
-            <div
-              data-sidebar="sidebar"
-              className={cn(
-                "flex h-full w-full min-h-0 flex-col",
-                shape.container,
-                surfaceClasses(floatingLevel, 3)
-              )}
-            >
-              <SurfaceProvider value={floatingLevel}>{children}</SurfaceProvider>
-            </div>
-          ) : (
-            <div
-              data-sidebar="sidebar"
-              className={cn(
-                "flex h-full w-full min-h-0 flex-col",
-                bordered &&
-                  variant === "sidebar" &&
-                  (side === "left" ? "border-r border-border" : "border-l border-border")
-              )}
-            >
-              {children}
-            </div>
-          )}
-          {rail && (
-          <SidebarRail
-            tooltipOpen={railTooltipOpen}
+          <motion.div
             className={cn(
-              // The floating card sits inside the panel's p-2 gutter, so the
-              // grab strip (and its hover hairline) moves in to straddle the
-              // card's edge instead of the panel's.
-              variant === "floating" &&
-                (side === "left" ? "right-1 after:right-[3.5px]" : "left-1 after:left-[3.5px]"),
-              // Cards are vertically inset and rounded — the hover hairline
-              // hugs the card's straight run: fully transparent through the
-              // corner radius, then fading in over 24px (mirrored at the
-              // bottom). The radius rides the shape system via CSS vars.
-              variant !== "sidebar" &&
-                "after:inset-y-2 after:[mask-image:linear-gradient(to_bottom,transparent_var(--rail-fade-start),black_var(--rail-fade-end),black_calc(100%-var(--rail-fade-end)),transparent_calc(100%-var(--rail-fade-start)))]"
+              "absolute inset-y-0 flex h-full flex-col",
+              side === "left" ? "left-0" : "right-0",
+              // Floating floats its card inside a full gutter; inset only needs
+              // the vertical inset (horizontal room belongs to the nav rows).
+              variant === "floating" && "p-2",
+              variant === "inset" && "py-2",
             )}
-            style={
-              variant !== "sidebar"
-                ? ({
-                    "--rail-fade-start": `${shape.containerRadius}px`,
-                    "--rail-fade-end": `${shape.containerRadius + 24}px`,
-                  } as CSSProperties)
-                : undefined
-            }
-          />
-          )}
-        </motion.div>
+            style={{ width }}
+            initial={false}
+            animate={{ x: open ? "0%" : side === "left" ? "-100%" : "100%" }}
+            transition={widthTransition}
+          >
+            {variant === "floating" ? (
+              <div
+                data-sidebar="sidebar"
+                className={cn(
+                  "flex h-full min-h-0 w-full flex-col",
+                  shape.container,
+                  surfaceClasses(floatingLevel, 3),
+                )}
+              >
+                <SurfaceProvider value={floatingLevel}>{children}</SurfaceProvider>
+              </div>
+            ) : (
+              <div
+                data-sidebar="sidebar"
+                className={cn(
+                  "flex h-full min-h-0 w-full flex-col",
+                  bordered &&
+                    variant === "sidebar" &&
+                    (side === "left" ? "border-border border-r" : "border-border border-l"),
+                )}
+              >
+                {children}
+              </div>
+            )}
+            {rail && (
+              <SidebarRail
+                tooltipOpen={railTooltipOpen}
+                className={cn(
+                  // The floating card sits inside the panel's p-2 gutter, so the
+                  // grab strip (and its hover hairline) moves in to straddle the
+                  // card's edge instead of the panel's.
+                  variant === "floating" &&
+                    (side === "left" ? "right-1 after:right-[3.5px]" : "left-1 after:left-[3.5px]"),
+                  // Cards are vertically inset and rounded — the hover hairline
+                  // hugs the card's straight run: fully transparent through the
+                  // corner radius, then fading in over 24px (mirrored at the
+                  // bottom). The radius rides the shape system via CSS vars.
+                  variant !== "sidebar" &&
+                    "after:inset-y-2 after:[mask-image:linear-gradient(to_bottom,transparent_var(--rail-fade-start),black_var(--rail-fade-end),black_calc(100%-var(--rail-fade-end)),transparent_calc(100%-var(--rail-fade-start)))]",
+                )}
+                style={
+                  variant !== "sidebar"
+                    ? ({
+                        "--rail-fade-start": `${shape.containerRadius}px`,
+                        "--rail-fade-end": `${shape.containerRadius + 24}px`,
+                      } as CSSProperties)
+                    : undefined
+                }
+              />
+            )}
+          </motion.div>
         )}
       </motion.div>
     );
-  }
+  },
 );
 SidebarShell.displayName = "SidebarShell";
 
@@ -961,7 +953,7 @@ export type SidebarTriggerProps = ButtonProps;
 /** Keystroke chip rendered inside the (inverted) tooltip surface. */
 function ShortcutKbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="-my-1 flex h-4 min-w-4 items-center justify-center rounded border border-background/30 px-1 font-sans text-[length:var(--fs-micro-compact,10px)] leading-[var(--lh-micro-compact,12px)] text-background">
+    <kbd className="border-background/30 text-background -my-1 flex h-4 min-w-4 items-center justify-center rounded border px-1 font-sans text-[length:var(--fs-micro-compact,10px)] leading-[var(--lh-micro-compact,12px)]">
       {children}
     </kbd>
   );
@@ -971,10 +963,7 @@ function ShortcutKbd({ children }: { children: ReactNode }) {
  *  side's default key even when the provider's binding is disabled. */
 function useShortcutKey(): string {
   const { side, shortcut } = useSidebar();
-  return (
-    shortcut ??
-    (side === "right" ? SIDEBAR_KEYBOARD_SHORTCUT_RIGHT : SIDEBAR_KEYBOARD_SHORTCUT)
-  );
+  return shortcut ?? (side === "right" ? SIDEBAR_KEYBOARD_SHORTCUT_RIGHT : SIDEBAR_KEYBOARD_SHORTCUT);
 }
 
 /** Ghost icon button calling toggleSidebar(). The icon mirrors the
@@ -982,13 +971,7 @@ function useShortcutKey(): string {
  *  keystroke by default. */
 const SidebarTrigger = forwardRef<HTMLButtonElement, SidebarTriggerProps>(
   ({ onClick, size, children, ...props }, ref) => {
-    const {
-      toggleSidebar,
-      open,
-      openMobile,
-      isMobile,
-      side,
-    } = useSidebar();
+    const { toggleSidebar, open, openMobile, isMobile, side } = useSidebar();
     const shortcutKey = useShortcutKey();
     // Bongweb change: the trigger is never a hover-peek target. The peek card
     // floats over the trigger's position, so a peek started by resting on the
@@ -1032,7 +1015,7 @@ const SidebarTrigger = forwardRef<HTMLButtonElement, SidebarTriggerProps>(
         </Button>
       </Tooltip>
     );
-  }
+  },
 );
 SidebarTrigger.displayName = "SidebarTrigger";
 
@@ -1052,13 +1035,20 @@ const SidebarRail = forwardRef<HTMLButtonElement, SidebarRailProps>(
     const { toggleSidebar, setOpen, setWidth, side, setIsResizing } = useSidebar();
     const shortcutKey = useShortcutKey();
     const railRef = useRef<HTMLButtonElement | null>(null);
-    const dragRef = useRef<{ startX: number; startWidth: number; moved: boolean; collapsed: boolean } | null>(null);
+    const dragRef = useRef<{ startX: number; startWidth: number; moved: boolean; collapsed: boolean } | null>(
+      null,
+    );
     const [dragging, setDragging] = useState(false);
 
     const onPointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
       const panel = railRef.current?.closest('[data-slot="sidebar"]') as HTMLElement | null;
       if (!panel) return;
-      dragRef.current = { startX: event.clientX, startWidth: panel.offsetWidth, moved: false, collapsed: false };
+      dragRef.current = {
+        startX: event.clientX,
+        startWidth: panel.offsetWidth,
+        moved: false,
+        collapsed: false,
+      };
       event.currentTarget.setPointerCapture(event.pointerId);
     };
 
@@ -1161,16 +1151,16 @@ const SidebarRail = forwardRef<HTMLButtonElement, SidebarRailProps>(
             // Hovering brightens the edge border the shell draws by default;
             // a pinned tooltip brightens it too, so the spotlight reads as
             // the hover it stands in for.
-            "after:absolute after:inset-y-0 after:w-px after:bg-transparent hover:after:bg-foreground/25 after:transition-colors after:duration-80",
+            "hover:after:bg-foreground/25 after:absolute after:inset-y-0 after:w-px after:bg-transparent after:transition-colors after:duration-80",
             tooltipOpen && "after:bg-foreground/25",
             side === "left" ? "after:right-0" : "after:left-0",
-            className
+            className,
           )}
           {...props}
         />
       </Tooltip>
     );
-  }
+  },
 );
 SidebarRail.displayName = "SidebarRail";
 
@@ -1178,109 +1168,99 @@ SidebarRail.displayName = "SidebarRail";
 
 export type SidebarInsetProps = HTMLAttributes<HTMLElement>;
 
-const SidebarInset = forwardRef<HTMLElement, SidebarInsetProps>(
-  ({ className, ...props }, ref) => {
-    const shape = useShape();
-    return (
-      <main
-        ref={ref}
-        data-slot="sidebar-inset"
-        className={cn(
-          "relative flex min-h-0 w-full min-w-0 flex-1 flex-col bg-background",
-          "peer-data-[variant=inset]:m-2 peer-data-[variant=inset]:peer-data-[side=left]:ml-0 peer-data-[variant=inset]:peer-data-[side=right]:mr-0",
-          // With the rail collapsed away, restore the sidebar-side margin so
-          // the card keeps symmetric insets.
-          "peer-data-[variant=inset]:peer-data-[state=collapsed]:peer-data-[side=left]:ml-2 peer-data-[variant=inset]:peer-data-[state=collapsed]:peer-data-[side=right]:mr-2",
-          "transition-[margin] duration-80",
-          // Container radius follows the shape system (literal classes so
-          // Tailwind's scanner emits both).
-          {
-            pill: "peer-data-[variant=inset]:rounded-3xl",
-            rounded: "peer-data-[variant=inset]:rounded-xl",
-            sharp: "peer-data-[variant=inset]:rounded-[1px]",
-          }[shape.variant],
-          "peer-data-[variant=inset]:bg-surface-2 peer-data-[variant=inset]:shadow-surface-2",
-          className
-        )}
-        {...props}
-      />
-    );
-  }
-);
+const SidebarInset = forwardRef<HTMLElement, SidebarInsetProps>(({ className, ...props }, ref) => {
+  const shape = useShape();
+  return (
+    <main
+      ref={ref}
+      data-slot="sidebar-inset"
+      className={cn(
+        "bg-background relative flex min-h-0 w-full min-w-0 flex-1 flex-col",
+        "peer-data-[variant=inset]:m-2 peer-data-[variant=inset]:peer-data-[side=left]:ml-0 peer-data-[variant=inset]:peer-data-[side=right]:mr-0",
+        // With the rail collapsed away, restore the sidebar-side margin so
+        // the card keeps symmetric insets.
+        "peer-data-[variant=inset]:peer-data-[state=collapsed]:peer-data-[side=left]:ml-2 peer-data-[variant=inset]:peer-data-[state=collapsed]:peer-data-[side=right]:mr-2",
+        "transition-[margin] duration-80",
+        // Container radius follows the shape system (literal classes so
+        // Tailwind's scanner emits both).
+        {
+          pill: "peer-data-[variant=inset]:rounded-3xl",
+          rounded: "peer-data-[variant=inset]:rounded-xl",
+          sharp: "peer-data-[variant=inset]:rounded-[1px]",
+        }[shape.variant],
+        "peer-data-[variant=inset]:bg-surface-2 peer-data-[variant=inset]:shadow-surface-2",
+        className,
+      )}
+      {...props}
+    />
+  );
+});
 SidebarInset.displayName = "SidebarInset";
 
 // ─── SidebarInput ────────────────────────────────────────────────────────────
 
 export type SidebarInputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
-const SidebarInput = forwardRef<HTMLInputElement, SidebarInputProps>(
-  ({ className, ...props }, ref) => {
-    const shape = useShape();
-    const size = useSize();
-    return (
-      <input
-        ref={ref}
-        data-sidebar="input"
-        className={cn(
-          // Mirrors the InputGroup field ladder: transparent at rest,
-          // muted fill + border ring on hover, card fill when focused.
-          "w-full bg-transparent px-3 text-foreground placeholder:text-muted-foreground outline-none",
-          "ring-1 ring-transparent transition-[background-color,box-shadow] duration-80",
-          "hover:bg-muted/50 hover:ring-border",
-          "focus:bg-card focus:ring-border",
-          "focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
-          size.variant === "compact" ? "h-7" : "h-8",
-          size.field,
-          shape.input,
-          className
-        )}
-        {...props}
-      />
-    );
-  }
-);
+const SidebarInput = forwardRef<HTMLInputElement, SidebarInputProps>(({ className, ...props }, ref) => {
+  const shape = useShape();
+  const size = useSize();
+  return (
+    <input
+      ref={ref}
+      data-sidebar="input"
+      className={cn(
+        // Mirrors the InputGroup field ladder: transparent at rest,
+        // muted fill + border ring on hover, card fill when focused.
+        "text-foreground placeholder:text-muted-foreground w-full bg-transparent px-3 outline-none",
+        "ring-1 ring-transparent transition-[background-color,box-shadow] duration-80",
+        "hover:bg-muted/50 hover:ring-border",
+        "focus:bg-card focus:ring-border",
+        "focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
+        size.variant === "compact" ? "h-7" : "h-8",
+        size.field,
+        shape.input,
+        className,
+      )}
+      {...props}
+    />
+  );
+});
 SidebarInput.displayName = "SidebarInput";
 
 // ─── SidebarHeader / SidebarFooter / SidebarSeparator ────────────────────────
 
 export type SidebarSectionProps = HTMLAttributes<HTMLDivElement>;
 
-const SidebarHeader = forwardRef<HTMLDivElement, SidebarSectionProps>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      data-sidebar="header"
-      className={cn("flex shrink-0 flex-col gap-2 p-2", className)}
-      {...props}
-    />
-  )
-);
+const SidebarHeader = forwardRef<HTMLDivElement, SidebarSectionProps>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    data-sidebar="header"
+    className={cn("flex shrink-0 flex-col gap-2 p-2", className)}
+    {...props}
+  />
+));
 SidebarHeader.displayName = "SidebarHeader";
 
-const SidebarFooter = forwardRef<HTMLDivElement, SidebarSectionProps>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      data-sidebar="footer"
-      className={cn("mt-auto flex shrink-0 flex-col gap-2 p-2", className)}
-      {...props}
-    />
-  )
-);
+const SidebarFooter = forwardRef<HTMLDivElement, SidebarSectionProps>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    data-sidebar="footer"
+    className={cn("mt-auto flex shrink-0 flex-col gap-2 p-2", className)}
+    {...props}
+  />
+));
 SidebarFooter.displayName = "SidebarFooter";
 
-const SidebarSeparator = forwardRef<HTMLDivElement, SidebarSectionProps>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      data-sidebar="separator"
-      role="separator"
-      aria-orientation="horizontal"
-      className={cn("mx-2 h-px shrink-0 bg-border", className)}
-      {...props}
-    />
-  )
-);
+const SidebarSeparator = forwardRef<HTMLDivElement, SidebarSectionProps>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    data-sidebar="separator"
+    role="separator"
+    aria-orientation="horizontal"
+    className={cn("bg-border mx-2 h-px shrink-0", className)}
+    {...props}
+  />
+));
 SidebarSeparator.displayName = "SidebarSeparator";
 
 // ─── SidebarGroup family ─────────────────────────────────────────────────────
@@ -1311,16 +1291,8 @@ export interface SidebarGroupProps extends SidebarSectionProps {
 
 const SidebarGroup = forwardRef<HTMLDivElement, SidebarGroupProps>(
   (
-    {
-      className,
-      collapsible = false,
-      open: openProp,
-      defaultOpen = true,
-      onOpenChange,
-      children,
-      ...props
-    },
-    ref
+    { className, collapsible = false, open: openProp, defaultOpen = true, onOpenChange, children, ...props },
+    ref,
   ) => {
     const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
     const open = openProp ?? uncontrolledOpen;
@@ -1370,15 +1342,12 @@ const SidebarGroup = forwardRef<HTMLDivElement, SidebarGroupProps>(
     // label rides in the collapse wrapper. If no SidebarGroupLabel child is
     // found the group renders untouched.
     const isHeaderAction = (k: ReactNode) =>
-      isValidElement(k) &&
-      (k.type === SidebarGroupAction || k.type === SidebarGroupActions);
+      isValidElement(k) && (k.type === SidebarGroupAction || k.type === SidebarGroupActions);
     let inner: ReactNode = children;
     let actionsCount = 0;
     if (collapsible) {
       const kids = Children.toArray(children);
-      const labelIdx = kids.findIndex(
-        (k) => isValidElement(k) && k.type === SidebarGroupLabel
-      );
+      const labelIdx = kids.findIndex((k) => isValidElement(k) && k.type === SidebarGroupLabel);
       if (labelIdx !== -1) {
         const tail = kids.slice(labelIdx + 1);
         const headerActions = tail.filter(isHeaderAction);
@@ -1387,11 +1356,9 @@ const SidebarGroup = forwardRef<HTMLDivElement, SidebarGroupProps>(
           (n, k) =>
             n +
             (isValidElement(k) && k.type === SidebarGroupActions
-              ? Children.count(
-                  (k.props as { children?: ReactNode }).children
-                )
+              ? Children.count((k.props as { children?: ReactNode }).children)
               : 1),
-          0
+          0,
         );
         inner = (
           <>
@@ -1410,7 +1377,7 @@ const SidebarGroup = forwardRef<HTMLDivElement, SidebarGroupProps>(
               aria-hidden={open ? undefined : true}
               className={cn(
                 open && settled ? "overflow-visible" : "overflow-hidden",
-                !measured && !open && "h-0"
+                !measured && !open && "h-0",
               )}
               initial={false}
               animate={
@@ -1422,13 +1389,7 @@ const SidebarGroup = forwardRef<HTMLDivElement, SidebarGroupProps>(
               // toggling arm is what stops a re-measure from springing —
               // without it a nested collapse makes this wrapper chase its own
               // child and everything below the group moves late.
-              transition={
-                toggling
-                  ? open
-                    ? spring.moderate
-                    : spring.moderate.exit
-                  : { duration: 0 }
-              }
+              transition={toggling ? (open ? spring.moderate : spring.moderate.exit) : { duration: 0 }}
               onAnimationComplete={() => {
                 setToggling(false);
                 if (open) setSettled(true);
@@ -1446,12 +1407,12 @@ const SidebarGroup = forwardRef<HTMLDivElement, SidebarGroupProps>(
     const [openActions, setOpenActions] = useState(0);
     const onActionToggle = useCallback(
       (next: boolean) => setOpenActions((n) => Math.max(0, n + (next ? 1 : -1))),
-      []
+      [],
     );
     const actionOpen = openActions > 0;
     const ctx = useMemo(
       () => ({ open, toggle, contentId, actionsCount, actionOpen, onActionToggle }),
-      [open, toggle, contentId, actionsCount, actionOpen, onActionToggle]
+      [open, toggle, contentId, actionsCount, actionOpen, onActionToggle],
     );
 
     return (
@@ -1462,12 +1423,10 @@ const SidebarGroup = forwardRef<HTMLDivElement, SidebarGroupProps>(
         className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
         {...props}
       >
-        <SidebarGroupContext.Provider value={collapsible ? ctx : null}>
-          {inner}
-        </SidebarGroupContext.Provider>
+        <SidebarGroupContext.Provider value={collapsible ? ctx : null}>{inner}</SidebarGroupContext.Provider>
       </div>
     );
-  }
+  },
 );
 SidebarGroup.displayName = "SidebarGroup";
 
@@ -1540,7 +1499,7 @@ const SidebarGroupLabel = forwardRef<HTMLDivElement, SidebarGroupLabelProps>(
               "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
               shape.item,
               typeClass("caption", sizeVariant),
-              className
+              className,
             ),
             ...props,
           }}
@@ -1565,8 +1524,8 @@ const SidebarGroupLabel = forwardRef<HTMLDivElement, SidebarGroupLabelProps>(
                 group.open && group.actionOpen
                   ? "w-6 opacity-100"
                   : group.open
-                  ? "w-0 opacity-0 group-hover/group-header:w-6 group-hover/group-header:opacity-100 group-focus-within/group-header:w-6 group-focus-within/group-header:opacity-100 pointer-coarse:w-6 pointer-coarse:opacity-100"
-                  : "w-6 opacity-100"
+                    ? "w-0 opacity-0 group-focus-within/group-header:w-6 group-focus-within/group-header:opacity-100 group-hover/group-header:w-6 group-hover/group-header:opacity-100 pointer-coarse:w-6 pointer-coarse:opacity-100"
+                    : "w-6 opacity-100",
               )}
             >
               <motion.span
@@ -1574,11 +1533,7 @@ const SidebarGroupLabel = forwardRef<HTMLDivElement, SidebarGroupLabelProps>(
                 animate={{ rotate: group.open ? 90 : 0 }}
                 transition={spring.fast}
               >
-                <ChevronRightIcon
-                  size={sizeClasses.icon}
-                  strokeWidth={1.5}
-                  className="shrink-0"
-                />
+                <ChevronRightIcon size={sizeClasses.icon} strokeWidth={1.5} className="shrink-0" />
               </motion.span>
             </span>
           </>
@@ -1596,7 +1551,7 @@ const SidebarGroupLabel = forwardRef<HTMLDivElement, SidebarGroupLabelProps>(
           className: cn(
             "flex h-8 shrink-0 items-center gap-2 px-2 text-muted-foreground outline-none",
             typeClass("caption", sizeVariant),
-            className
+            className,
           ),
           ...props,
         }}
@@ -1604,7 +1559,7 @@ const SidebarGroupLabel = forwardRef<HTMLDivElement, SidebarGroupLabelProps>(
         {labelContent}
       </SlotElement>
     );
-  }
+  },
 );
 SidebarGroupLabel.displayName = "SidebarGroupLabel";
 
@@ -1640,10 +1595,10 @@ const SidebarGroupAction = forwardRef<HTMLButtonElement, SidebarGroupActionProps
           className: cn(
             inCluster
               ? "relative flex size-6 items-center justify-center text-muted-foreground outline-none"
-              // size-6 matches the rows' action hit-box, and right-3.5 puts that
-              // 24px box's centre 26px from the sidebar's inner edge — the axis
-              // the rows' badges and actions already sit on.
-              : "absolute right-3.5 top-3 flex size-6 items-center justify-center text-muted-foreground outline-none",
+              : // size-6 matches the rows' action hit-box, and right-3.5 puts that
+                // 24px box's centre 26px from the sidebar's inner edge — the axis
+                // the rows' badges and actions already sit on.
+                "absolute right-3.5 top-3 flex size-6 items-center justify-center text-muted-foreground outline-none",
             "hover:bg-hover hover:text-foreground transition-colors duration-80",
             "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
             // Normalize bare icons to the site's 1.5 stroke (library defaults
@@ -1651,7 +1606,7 @@ const SidebarGroupAction = forwardRef<HTMLButtonElement, SidebarGroupActionProps
             // icon-only span applies.
             "[&_svg]:size-[var(--icon-size)] [&_svg]:shrink-0 [&_svg]:stroke-[1.5] [&_svg]:transition-[stroke-width] [&_svg]:duration-80 hover:[&_svg]:stroke-[2]",
             shape.item,
-            className
+            className,
           ),
           ...props,
           // After ...props: the spread would otherwise replace this object
@@ -1665,7 +1620,7 @@ const SidebarGroupAction = forwardRef<HTMLButtonElement, SidebarGroupActionProps
         {content}
       </SlotElement>
     );
-  }
+  },
 );
 SidebarGroupAction.displayName = "SidebarGroupAction";
 
@@ -1684,29 +1639,22 @@ const SidebarGroupActions = forwardRef<HTMLDivElement, SidebarGroupActionsProps>
           // right-3.5 lands the last 24px action's centre 26px from the
           // sidebar's inner edge — the rows' badge/action axis, so the header's
           // controls line up with the column below them.
-          "absolute right-3.5 top-2 z-10 flex h-8 items-center gap-1",
-          className
+          "absolute top-2 right-3.5 z-10 flex h-8 items-center gap-1",
+          className,
         )}
         {...props}
       >
-        <GroupActionsContext.Provider value={true}>
-          {children}
-        </GroupActionsContext.Provider>
+        <GroupActionsContext.Provider value={true}>{children}</GroupActionsContext.Provider>
       </div>
     );
-  }
+  },
 );
 SidebarGroupActions.displayName = "SidebarGroupActions";
 
 const SidebarGroupContent = forwardRef<HTMLDivElement, SidebarSectionProps>(
   ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      data-sidebar="group-content"
-      className={cn("w-full", className)}
-      {...props}
-    />
-  )
+    <div ref={ref} data-sidebar="group-content" className={cn("w-full", className)} {...props} />
+  ),
 );
 SidebarGroupContent.displayName = "SidebarGroupContent";
 

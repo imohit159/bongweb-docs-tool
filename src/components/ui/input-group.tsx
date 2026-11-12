@@ -36,8 +36,7 @@ const InputGroupContext = createContext<InputGroupContextValue | null>(null);
 
 function useInputGroup() {
   const ctx = useContext(InputGroupContext);
-  if (!ctx)
-    throw new Error("useInputGroup must be used within an InputGroup");
+  if (!ctx) throw new Error("useInputGroup must be used within an InputGroup");
   return ctx;
 }
 
@@ -52,13 +51,9 @@ const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>(
   ({ children, size, className, ...props }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const { activeIndex, handlers, registerItem } =
-      useFluidHover(containerRef);
+    const { activeIndex, handlers, registerItem } = useFluidHover(containerRef);
 
-    const contextValue = useMemo(
-      () => ({ registerItem, activeIndex }),
-      [registerItem, activeIndex]
-    );
+    const contextValue = useMemo(() => ({ registerItem, activeIndex }), [registerItem, activeIndex]);
 
     const group = (
       <InputGroupContext.Provider value={contextValue}>
@@ -75,7 +70,7 @@ const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>(
           // hook measures items via offsetTop and compares against
           // container-relative mouse coords, so the two coordinate spaces must
           // share this origin (same as every other fluid hover consumer).
-          className={cn("relative flex flex-col gap-3 w-72 max-w-full", className)}
+          className={cn("relative flex w-72 max-w-full flex-col gap-3", className)}
           {...props}
         >
           {children}
@@ -85,13 +80,12 @@ const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>(
 
     // A size prop pins every field in the group to one ladder step.
     return size ? <SizeProvider size={size}>{group}</SizeProvider> : group;
-  }
+  },
 );
 
 InputGroup.displayName = "InputGroup";
 
-interface InputFieldProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "index"> {
+interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "index"> {
   label: string;
   /** Keep the label for assistive tech but don't render it — for inline
    *  fields (a toolbar search) where the placeholder carries the meaning. */
@@ -121,7 +115,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
       className,
       ...props
     },
-    ref
+    ref,
   ) => {
     const internalRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLElement | null>(null);
@@ -150,11 +144,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
     // The ring never moves at rest, like the Select trigger's border. Focus
     // darkens it to a neutral 40% and wins over the error tint while the
     // value is being fixed; hover only adds the fill.
-    const ringClass = isFocused && !disabled
-      ? "ring-foreground/40"
-      : error
-        ? "ring-destructive/50"
-        : "ring-border";
+    const ringClass =
+      isFocused && !disabled ? "ring-foreground/40" : error ? "ring-destructive/50" : "ring-border";
     const bgClass = isActive && !isFocused && !disabled ? "bg-hover" : "bg-transparent";
 
     return (
@@ -170,33 +161,25 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
         invalid={!!error}
         disabled={disabled}
         className={cn(
-          "flex flex-col gap-1 cursor-text",
-          disabled && "opacity-50 pointer-events-none",
-          className
+          "flex cursor-text flex-col gap-1",
+          disabled && "pointer-events-none opacity-50",
+          className,
         )}
       >
         {/* Label — sr-only when hidden so the field keeps its accessible
             name and the htmlFor wiring. */}
-        <Field.Label
-          className={cn(
-            labelHidden ? "sr-only" : "inline-grid",
-            sizeClasses.text
-          )}
-        >
+        <Field.Label className={cn(labelHidden ? "sr-only" : "inline-grid", sizeClasses.text)}>
           {/* An invisible semibold copy shares the grid cell and reserves the
               bold width, so a heavier label never shifts the layout. */}
           <span
-            className="col-start-1 row-start-1 invisible"
+            className="invisible col-start-1 row-start-1"
             style={{ fontVariationSettings: fontWeights.semibold }}
             aria-hidden="true"
           >
             {label}
           </span>
           <span
-            className={cn(
-              "col-start-1 row-start-1",
-              error ? "text-destructive" : "text-muted-foreground"
-            )}
+            className={cn("col-start-1 row-start-1", error ? "text-destructive" : "text-muted-foreground")}
             style={{
               fontVariationSettings: fontWeights.normal,
             }}
@@ -218,9 +201,9 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
           className={cn(
             // Fixed height (was py-2 around the line box) so the field sits
             // exactly on the ladder's control height.
-            `flex items-center ${sizeClasses.gap} ${shape.input} ${sizeClasses.px} ${sizeClasses.control} ring-1 ring-inset transition-[color,background-color,border-radius,box-shadow] duration-80`,
+            `flex items-center ${sizeClasses.gap} ${shape.input} ${sizeClasses.px} ${sizeClasses.control} ring-1 transition-[color,background-color,border-radius,box-shadow] duration-80 ring-inset`,
             bgClass,
-            ringClass
+            ringClass,
           )}
         >
           {/* The icon wakes with the field: muted → foreground and stroke
@@ -231,9 +214,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
               strokeWidth={labelActive ? 2 : 1.5}
               className={cn(
                 "shrink-0 transition-[color,stroke-width] duration-80",
-                labelActive
-                  ? "text-foreground"
-                  : "text-muted-foreground"
+                labelActive ? "text-foreground" : "text-muted-foreground",
               )}
             />
           )}
@@ -246,8 +227,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
             onBlur={handleBlur}
             placeholder={placeholder}
             className={cn(
-              "w-full rounded-none bg-transparent text-foreground placeholder:text-muted-foreground outline-none font-[inherit]",
-              sizeClasses.field
+              "text-foreground placeholder:text-muted-foreground w-full rounded-none bg-transparent font-[inherit] outline-none",
+              sizeClasses.field,
             )}
             style={{ fontVariationSettings: fontWeights.normal }}
             {...props}
@@ -259,11 +240,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
         {error && (
           <Field.Error
             match
-            className={cn(
-              "flex items-center text-destructive",
-              sizeClasses.gap,
-              sizeClasses.type.caption
-            )}
+            className={cn("text-destructive flex items-center", sizeClasses.gap, sizeClasses.type.caption)}
             style={{ fontVariationSettings: fontWeights.normal }}
           >
             <AlertIcon size={compact ? 12 : 14} strokeWidth={1.75} className="shrink-0" aria-hidden />
@@ -272,7 +249,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps>(
         )}
       </Field.Root>
     );
-  }
+  },
 );
 
 InputField.displayName = "InputField";

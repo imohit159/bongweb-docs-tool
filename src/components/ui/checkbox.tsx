@@ -14,11 +14,10 @@ import { useShape } from "@/lib/shape-context";
 // alone marks the state. Pair it with Field and FieldLabel for its text.
 // ---------------------------------------------------------------------------
 
-interface CheckboxProps
-  extends Omit<
-    CheckboxPrimitive.Root.Props,
-    "checked" | "defaultChecked" | "onCheckedChange" | "className"
-  > {
+interface CheckboxProps extends Omit<
+  CheckboxPrimitive.Root.Props,
+  "checked" | "defaultChecked" | "onCheckedChange" | "className"
+> {
   checked?: boolean;
   defaultChecked?: boolean;
   /** Shows a dash instead of the check: some, not all, of what this box
@@ -33,7 +32,19 @@ interface CheckboxProps
 }
 
 const Checkbox = forwardRef<HTMLElement, CheckboxProps>(
-  ({ className, checked, defaultChecked = false, indeterminate = false, onCheckedChange, onKeyDown, size, ...props }, ref) => {
+  (
+    {
+      className,
+      checked,
+      defaultChecked = false,
+      indeterminate = false,
+      onCheckedChange,
+      onKeyDown,
+      size,
+      ...props
+    },
+    ref,
+  ) => {
     // Controlled or not, the check's enter and exit need the state in
     // render, so the uncontrolled value is mirrored here.
     const [uncontrolled, setUncontrolled] = useState(defaultChecked);
@@ -66,7 +77,7 @@ const Checkbox = forwardRef<HTMLElement, CheckboxProps>(
           onKeyDown?.(e);
         }}
         className={cn(
-          "relative inline-block shrink-0 cursor-pointer border-[1.5px] border-solid border-border bg-transparent p-0 outline-none",
+          "border-border relative inline-block shrink-0 cursor-pointer border-[1.5px] border-solid bg-transparent p-0 outline-none",
           "transition-[border-color] duration-80",
           // Hovering the box, or the Field row it sits in, darkens the
           // border; a checked box keeps it clear at rest and brings it back
@@ -79,7 +90,7 @@ const Checkbox = forwardRef<HTMLElement, CheckboxProps>(
           "data-disabled:pointer-events-none data-disabled:opacity-50",
           compact ? "size-[14px]" : "size-4",
           sharp ? "rounded-none" : compact ? "rounded-[4px]" : "rounded-[5px]",
-          className
+          className,
         )}
         {...props}
       >
@@ -111,7 +122,7 @@ const Checkbox = forwardRef<HTMLElement, CheckboxProps>(
                     strokeWidth={2}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground"
+                    className="text-foreground pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                     initial={{ opacity: 1 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 1 }}
@@ -133,7 +144,7 @@ const Checkbox = forwardRef<HTMLElement, CheckboxProps>(
         </AnimatePresence>
       </CheckboxPrimitive.Root>
     );
-  }
+  },
 );
 
 Checkbox.displayName = "Checkbox";

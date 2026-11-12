@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import { Banner, BannerAction, BannerActions, BannerDescription, BannerTitle } from "@/components/ui/banner";
@@ -80,7 +80,7 @@ function EditPanel({ className }: { className?: string }) {
               <Button
                 variant="ghost"
                 size="compact"
-                leadingIcon={ChevronLeft}
+                leadingIcon={IconChevronLeft}
                 onClick={() => setActive(prev.id)}
               >
                 {prev.label}
@@ -92,7 +92,7 @@ function EditPanel({ className }: { className?: string }) {
               <Button
                 variant="tertiary"
                 size="compact"
-                trailingIcon={ChevronRight}
+                trailingIcon={IconChevronRight}
                 onClick={() => setActive(next.id)}
               >
                 {next.label}

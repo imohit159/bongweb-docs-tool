@@ -1,7 +1,7 @@
 "use client";
 
 import type { Draft } from "immer";
-import { Plus } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -73,7 +73,7 @@ export function ListField({
         <Button
           variant="ghost"
           size="compact"
-          leadingIcon={Plus}
+          leadingIcon={IconPlus}
           className="self-start"
           onClick={() => update((draft) => void draft.push({ id: newRowId(), text: "" }))}
         >

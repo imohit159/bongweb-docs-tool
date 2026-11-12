@@ -1,7 +1,7 @@
 "use client";
 
 import type { Draft } from "immer";
-import { Plus } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -139,7 +139,7 @@ export function PlanComparisonField({
         <Button
           variant="ghost"
           size="compact"
-          leadingIcon={Plus}
+          leadingIcon={IconPlus}
           className="self-start"
           onClick={() =>
             update(

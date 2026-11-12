@@ -72,8 +72,7 @@ function ContextMenu({ children, onOpenChange, disabled = false, size }: Context
     open: (at, from) => {
       if (disabled) return;
       const active = document.activeElement;
-      returnTo.current =
-        active instanceof HTMLElement && active !== document.body ? active : from;
+      returnTo.current = active instanceof HTMLElement && active !== document.body ? active : from;
       setPoint(at);
       change(true);
     },
@@ -99,7 +98,7 @@ function ContextMenu({ children, onOpenChange, disabled = false, size }: Context
                 />
               }
             />,
-            document.body
+            document.body,
           )}
       </DropdownMenu>
     </ContextMenuContext.Provider>

@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  forwardRef,
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-  useId,
-  type HTMLAttributes,
-} from "react";
+import { forwardRef, useRef, useState, useEffect, useCallback, useId, type HTMLAttributes } from "react";
 import { motion, useMotionValue, animate, type Transition } from "motion/react";
 import { Switch as SwitchPrimitive } from "@base-ui/react/switch";
 import { cn } from "@/lib/utils";
@@ -97,9 +89,7 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
     // pointermove without re-rendering, and springs pick up from wherever it
     // was left. It starts at the resting spot for `checked`, so a switch that
     // mounts on doesn't slide across.
-    const motionX = useMotionValue(
-      checked ? THUMB_OFFSET + thumbTravel : THUMB_OFFSET
-    );
+    const motionX = useMotionValue(checked ? THUMB_OFFSET + thumbTravel : THUMB_OFFSET);
 
     useEffect(() => {
       hasMounted.current = true;
@@ -119,9 +109,7 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
     // so the outer edge stays pinned 2px from the track end instead of
     // poking past it.
     const extraWidth = thumbWidth - m.thumbSize;
-    const thumbX = checked
-      ? THUMB_OFFSET + thumbTravel - extraWidth
-      : THUMB_OFFSET;
+    const thumbX = checked ? THUMB_OFFSET + thumbTravel - extraWidth : THUMB_OFFSET;
 
     // Sync motionX when thumbX changes (hover, press, checked). Mid-drag the
     // pointer owns x, so this stands down; otherwise x springs on
@@ -154,7 +142,7 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
         // leaves it, so a drag can overshoot the track and still release.
         (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
       },
-      [disabled, motionX]
+      [disabled, motionX],
     );
 
     const handlePointerMove = useCallback(
@@ -177,72 +165,62 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
         const rawX = pointerStart.current.originX + delta;
         motionX.set(Math.max(dragMin, Math.min(dragMax, rawX)));
       },
-      [motionX, m]
+      [motionX, m],
     );
 
-    const handlePointerUp = useCallback(
-      () => {
-        if (!pointerStart.current) return;
-        setPressed(false);
+    const handlePointerUp = useCallback(() => {
+      if (!pointerStart.current) return;
+      setPressed(false);
 
-        if (dragging.current) {
-          // The release that ends a drag still fires a click; the row's
-          // onClick and the primitive's onCheckedChange both check didDrag,
-          // so a drag never toggles twice.
-          didDrag.current = true;
-          dragging.current = false;
+      if (dragging.current) {
+        // The release that ends a drag still fires a click; the row's
+        // onClick and the primitive's onCheckedChange both check didDrag,
+        // so a drag never toggles twice.
+        didDrag.current = true;
+        dragging.current = false;
 
-          const currentX = motionX.get();
-          const dragMin = THUMB_OFFSET;
-          const pressedThumbWidth = m.thumbSize + m.pressExtend;
-          const dragMax = m.trackWidth - THUMB_OFFSET - pressedThumbWidth;
-          const midpoint = (dragMin + dragMax) / 2;
+        const currentX = motionX.get();
+        const dragMin = THUMB_OFFSET;
+        const pressedThumbWidth = m.thumbSize + m.pressExtend;
+        const dragMax = m.trackWidth - THUMB_OFFSET - pressedThumbWidth;
+        const midpoint = (dragMin + dragMax) / 2;
 
-          // Past the midpoint of the drag range means on, short of it means
-          // off, whichever side the drag started from.
-          const shouldBeOn = currentX > midpoint;
+        // Past the midpoint of the drag range means on, short of it means
+        // off, whichever side the drag started from.
+        const shouldBeOn = currentX > midpoint;
 
-          // A side change toggles, and the parent's new `checked` moves
-          // thumbX, so the sync effect springs on from where the drag let go.
-          // On the same side thumbX may not change at all, so spring home here.
-          if (shouldBeOn !== checked) {
-            onToggle();
-          } else {
-            // Snap back to current resting position (un-pressed)
-            const snapTarget = checked
-              ? THUMB_OFFSET + thumbTravel
-              : THUMB_OFFSET;
-            animate(motionX, snapTarget, thumbTransition ?? spring.moderate);
-          }
-
-          requestAnimationFrame(() => {
-            didDrag.current = false;
-          });
-        }
-
-        pointerStart.current = null;
-      },
-      [checked, onToggle, motionX, thumbTransition, m, thumbTravel]
-    );
-
-    const handlePointerCancel = useCallback(
-      () => {
-        if (!pointerStart.current) return;
-        setPressed(false);
-
-        if (dragging.current) {
-          dragging.current = false;
-          // Gesture cancelled by the system: snap back without toggling
-          const snapTarget = checked
-            ? THUMB_OFFSET + thumbTravel
-            : THUMB_OFFSET;
+        // A side change toggles, and the parent's new `checked` moves
+        // thumbX, so the sync effect springs on from where the drag let go.
+        // On the same side thumbX may not change at all, so spring home here.
+        if (shouldBeOn !== checked) {
+          onToggle();
+        } else {
+          // Snap back to current resting position (un-pressed)
+          const snapTarget = checked ? THUMB_OFFSET + thumbTravel : THUMB_OFFSET;
           animate(motionX, snapTarget, thumbTransition ?? spring.moderate);
         }
 
-        pointerStart.current = null;
-      },
-      [checked, motionX, thumbTransition, thumbTravel]
-    );
+        requestAnimationFrame(() => {
+          didDrag.current = false;
+        });
+      }
+
+      pointerStart.current = null;
+    }, [checked, onToggle, motionX, thumbTransition, m, thumbTravel]);
+
+    const handlePointerCancel = useCallback(() => {
+      if (!pointerStart.current) return;
+      setPressed(false);
+
+      if (dragging.current) {
+        dragging.current = false;
+        // Gesture cancelled by the system: snap back without toggling
+        const snapTarget = checked ? THUMB_OFFSET + thumbTravel : THUMB_OFFSET;
+        animate(motionX, snapTarget, thumbTransition ?? spring.moderate);
+      }
+
+      pointerStart.current = null;
+    }, [checked, motionX, thumbTransition, thumbTravel]);
 
     return (
       <div
@@ -251,12 +229,12 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
           // The whole row is the pointer target. touch-none stops the browser
           // from claiming a horizontal drag as a scroll (which would cancel
           // it); select-none keeps a drag from selecting the label.
-          "relative z-10 flex items-center cursor-pointer select-none touch-none",
+          "relative z-10 flex cursor-pointer touch-none items-center select-none",
           sizeClasses.gap,
           sizeClasses.px,
           sizeClasses.variant === "compact" ? "py-1" : "py-2",
-          disabled && "opacity-50 pointer-events-none",
-          className
+          disabled && "pointer-events-none opacity-50",
+          className,
         )}
         // Hover is mouse-only: a finger has no hover, so on touch the thumb
         // only ever takes the press shape.
@@ -288,12 +266,12 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
           disabled={disabled}
           tabIndex={0}
           className={cn(
-            "relative shrink-0 outline-none cursor-pointer",
+            "relative shrink-0 cursor-pointer outline-none",
             sharp ? "rounded-none" : "rounded-full",
             "transition-colors duration-80",
             // Only on :focus-visible, so a click leaves no ring. The 2px
             // offset is filled with the background to part it from the track.
-            "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            "focus-visible:ring-offset-background focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] focus-visible:ring-offset-2",
           )}
           style={{
             width: m.trackWidth,
@@ -320,8 +298,7 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
             // and animation handlers are dropped before spreading the rest; Base
             // UI's style is kept and x is layered on top.
             render={(props) => {
-              const { style: baseStyle, ...baseProps } =
-                props as React.HTMLAttributes<HTMLSpanElement>;
+              const { style: baseStyle, ...baseProps } = props as React.HTMLAttributes<HTMLSpanElement>;
               const rest = omit(baseProps, [
                 "onDrag",
                 "onDragStart",
@@ -335,7 +312,10 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
                   {...rest}
                   // Pinned to the top-left and placed only by the x and y transforms;
                   // width and height carry the hover and press shapes.
-                  className={cn("absolute top-0 left-0 block bg-white shadow-sm", sharp ? "rounded-none" : "rounded-full")}
+                  className={cn(
+                    "absolute top-0 left-0 block bg-white shadow-sm",
+                    sharp ? "rounded-none" : "rounded-full",
+                  )}
                   initial={false}
                   style={{
                     ...(baseStyle as React.CSSProperties | undefined),
@@ -361,18 +341,18 @@ const Switch = forwardRef<HTMLDivElement, SwitchProps>(
           className={cn(
             // text-box trim recenters the letterforms against the track; the
             // track is taller than the label, so layout doesn't change.
-            "[text-box:trim-both_cap_alphabetic] transition-[color] duration-80",
+            "transition-[color] duration-80 [text-box:trim-both_cap_alphabetic]",
             sizeClasses.text,
             // Brightens when on (muted → foreground over 80ms), so
             // on/off reads in the label as well as the track color.
-            checked ? "text-foreground" : "text-muted-foreground"
+            checked ? "text-foreground" : "text-muted-foreground",
           )}
         >
           {label}
         </span>
       </div>
     );
-  }
+  },
 );
 
 Switch.displayName = "Switch";

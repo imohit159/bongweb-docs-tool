@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, RotateCw } from "lucide-react";
+import { IconArrowLeft, IconRefresh } from "@tabler/icons-react";
 import { useEffect } from "react";
 import { Banner, BannerAction, BannerActions, BannerDescription, BannerTitle } from "@/components/ui/banner";
 
@@ -19,10 +19,10 @@ export default function ProposalEditorError({ error, retry }: { error: unknown; 
           details are in the browser console.
         </BannerDescription>
         <BannerActions>
-          <BannerAction variant="primary" leadingIcon={RotateCw} onClick={() => retry()}>
+          <BannerAction variant="primary" leadingIcon={IconRefresh} onClick={() => retry()}>
             Try again
           </BannerAction>
-          <BannerAction variant="secondary" leadingIcon={ArrowLeft} href="/proposals">
+          <BannerAction variant="secondary" leadingIcon={IconArrowLeft} href="/proposals">
             Back to proposals
           </BannerAction>
         </BannerActions>

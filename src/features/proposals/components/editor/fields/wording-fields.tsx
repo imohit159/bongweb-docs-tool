@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
+import { IconRotate } from "@tabler/icons-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import type { WordingDefinition } from "../../../schema";
@@ -42,7 +42,7 @@ export function WordingFields<K extends string>({
                     <Button
                       variant="ghost"
                       size="compact"
-                      leadingIcon={RotateCcw}
+                      leadingIcon={IconRotate}
                       className="self-start"
                       onClick={() => onChange(key, undefined)}
                     >

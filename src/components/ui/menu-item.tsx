@@ -106,7 +106,7 @@ export function useDropdownMaybe() {
 export function useControllableOpen(
   openProp: boolean | undefined,
   defaultOpen: boolean,
-  onOpenChange?: (open: boolean) => void
+  onOpenChange?: (open: boolean) => void,
 ) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const open = openProp !== undefined ? openProp : internalOpen;
@@ -115,7 +115,7 @@ export function useControllableOpen(
       if (openProp === undefined) setInternalOpen(next);
       onOpenChange?.(next);
     },
-    [openProp, onOpenChange]
+    [openProp, onOpenChange],
   );
   return [open, setOpen] as const;
 }
@@ -159,18 +159,12 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
       onClick,
       ...props
     },
-    ref
+    ref,
   ) => {
     const shape = usePopupShape();
     const internalRef = useRef<HTMLDivElement>(null);
-    const {
-      registerItem,
-      activeStore,
-      checkedIndex,
-      multiple,
-      checkedIndices,
-      renderMenuItem,
-    } = useDropdown();
+    const { registerItem, activeStore, checkedIndex, multiple, checkedIndices, renderMenuItem } =
+      useDropdown();
     const isCheckbox = !!multiple && typeof checked === "boolean";
 
     useRegisterFluidHoverItem(registerItem, index, internalRef);
@@ -198,22 +192,19 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
       // compresses rows to fit instead of scrolling.
       `relative z-10 flex ${sizeClasses.control} shrink-0 items-center ${sizeClasses.gap} ${shape.item} ${sizeClasses.itemPx} cursor-pointer outline-none`,
       disabled && "opacity-50 pointer-events-none",
-      className
+      className,
     );
 
     const content = (
       <>
         {leading && (
-          <span
-            className="flex shrink-0 items-center"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <span className="flex shrink-0 items-center" onClick={(e) => e.stopPropagation()}>
             {leading}
           </span>
         )}
         {Icon && (
           <span className="inline-grid shrink-0">
-            <span className="col-start-1 row-start-1 invisible">
+            <span className="invisible col-start-1 row-start-1">
               <Icon size={sizeClasses.icon} strokeWidth={2} />
             </span>
             <Icon
@@ -227,7 +218,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
                     : "text-destructive/80"
                   : isActive || checked
                     ? "text-foreground"
-                    : "text-muted-foreground"
+                    : "text-muted-foreground",
               )}
             />
           </span>
@@ -240,7 +231,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
             ascenders and descenders aren't shaved. */}
         <span className={cn("inline-grid min-w-0 flex-1", sizeClasses.text)}>
           <span
-            className="col-start-1 row-start-1 invisible truncate pt-[0.25em] -mt-[0.25em] pb-[0.25em] -mb-[0.25em] [text-box:trim-both_cap_alphabetic]"
+            className="invisible col-start-1 row-start-1 -mt-[0.25em] -mb-[0.25em] truncate pt-[0.25em] pb-[0.25em] [text-box:trim-both_cap_alphabetic]"
             style={{ fontVariationSettings: fontWeights.semibold }}
             aria-hidden="true"
           >
@@ -248,19 +239,17 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
           </span>
           <span
             className={cn(
-              "col-start-1 row-start-1 truncate pt-[0.25em] -mt-[0.25em] pb-[0.25em] -mb-[0.25em] transition-[color,font-variation-settings] duration-80 [text-box:trim-both_cap_alphabetic]",
+              "col-start-1 row-start-1 -mt-[0.25em] -mb-[0.25em] truncate pt-[0.25em] pb-[0.25em] transition-[color,font-variation-settings] duration-80 [text-box:trim-both_cap_alphabetic]",
               destructive
                 ? isActive
                   ? "text-destructive"
                   : "text-destructive/80"
                 : isActive || checked
                   ? "text-foreground"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground",
             )}
             style={{
-              fontVariationSettings: checked
-                ? fontWeights.semibold
-                : fontWeights.normal,
+              fontVariationSettings: checked ? fontWeights.semibold : fontWeights.normal,
             }}
           >
             {label}
@@ -340,16 +329,8 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
         ref={mergeRef}
         data-fluid-hover-index={index}
         // Disabled items are never the roving tab stop.
-        tabIndex={
-          !disabled && index === (checkedIndex ?? checkedIndices?.[0] ?? 0) ? 0 : -1
-        }
-        role={
-          isCheckbox
-            ? "menuitemcheckbox"
-            : typeof checked === "boolean"
-              ? "menuitemradio"
-              : "menuitem"
-        }
+        tabIndex={!disabled && index === (checkedIndex ?? checkedIndices?.[0] ?? 0) ? 0 : -1}
+        role={isCheckbox ? "menuitemcheckbox" : typeof checked === "boolean" ? "menuitemradio" : "menuitem"}
         aria-checked={typeof checked === "boolean" ? checked : undefined}
         aria-disabled={disabled || undefined}
         aria-label={label}
@@ -367,7 +348,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
         {content}
       </div>
     );
-  }
+  },
 );
 
 MenuItem.displayName = "MenuItem";

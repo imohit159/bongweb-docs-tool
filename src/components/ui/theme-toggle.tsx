@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ export function ThemeToggle() {
         disabled={!ready}
         onClick={() => setTheme(dark ? "light" : "dark")}
       >
-        {dark ? <Sun /> : <Moon />}
+        {dark ? <IconSun /> : <IconMoon />}
       </Button>
     </Tooltip>
   );

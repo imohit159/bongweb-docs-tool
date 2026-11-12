@@ -92,14 +92,7 @@ type ColoredStatus = Exclude<BannerStatus, "default">;
 
 function StatusGlyph({ status, size }: { status: ColoredStatus; size: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-      className="shrink-0"
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
       {status === "warning" ? (
         <path
           d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
@@ -111,12 +104,7 @@ function StatusGlyph({ status, size }: { status: ColoredStatus; size: number }) 
       ) : (
         <circle cx="12" cy="12" r="10.5" fill="currentColor" />
       )}
-      <g
-        className="stroke-background"
-        strokeWidth={2.25}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <g className="stroke-background" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round">
         {status === "success" ? (
           <path d="m8.5 12.25 2.5 2.5 4.5-5" />
         ) : status === "warning" ? (
@@ -203,10 +191,10 @@ const FOCUSABLE =
  *  focusable element after the banner, else the last one before it. */
 function focusNeighbour(banner: HTMLElement) {
   const candidates = Array.from(document.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-    (el) => !banner.contains(el) && (el.checkVisibility?.() ?? true)
+    (el) => !banner.contains(el) && (el.checkVisibility?.() ?? true),
   );
   const after = candidates.find(
-    (el) => banner.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING
+    (el) => banner.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING,
   );
   const before = candidates
     .filter((el) => banner.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING)
@@ -327,8 +315,7 @@ function BannerMotion({ fixed, reduceMotion, config, children }: BannerMotionPro
     const shownFrom = shown.get();
     const scaleFrom = scale.get();
     const unfollow = row.on("change", (v) => {
-      const left =
-        rowFrom > end ? (v - end) / (rowFrom - end) : rowFrom > 0 ? v / rowFrom : 0;
+      const left = rowFrom > end ? (v - end) / (rowFrom - end) : rowFrom > 0 ? v / rowFrom : 0;
       shown.set(shownFrom * Math.min(1, Math.max(0, left)));
       if (scaled) scale.set(Math.min(scaleFrom, Math.max(v, end)));
     });
@@ -413,7 +400,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const shape = useShape();
     const sizeClasses = useSize(size);
@@ -441,7 +428,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
     // selector made Chrome restyle the whole page on every DOM insertion
     // anywhere (each menu opening, about 25ms on a long page).
     const described = Children.toArray(children).some(
-      (child) => isValidElement(child) && child.type === BannerDescription
+      (child) => isValidElement(child) && child.type === BannerDescription,
     );
 
     const body = (
@@ -456,7 +443,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
         data-variant={variant}
         data-described={described ? "" : undefined}
         className={cn(
-          "group/banner @container/banner relative grid w-full grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center text-foreground",
+          "group/banner text-foreground @container/banner relative grid w-full grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center",
           // With a description the icon and ✕ hold to the title line instead
           // of centring on the whole block.
           "data-described:items-start",
@@ -464,7 +451,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
           compact ? "p-3" : "p-4",
           // A fixed bar runs edge to edge: square corners, no frame.
           !fixed && shape.container,
-          className
+          className,
         )}
         style={
           {
@@ -485,7 +472,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
           aria-hidden="true"
           className={cn(
             "col-start-1 row-start-1 flex items-center justify-center text-[color:var(--banner-tone)]",
-            compact ? "mr-2.5 h-[18px]" : "mr-3 h-5"
+            compact ? "mr-2.5 h-[18px]" : "mr-3 h-5",
           )}
         >
           {OutlineIcon ? (
@@ -503,11 +490,11 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
             onClick={handleDismiss}
             aria-label={dismissLabel}
             className={cn(
-              "col-start-4 row-start-1 flex size-7 cursor-pointer items-center justify-center text-muted-foreground outline-none transition-colors duration-80 hover:bg-hover hover:text-foreground focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
+              "text-muted-foreground hover:bg-hover hover:text-foreground col-start-4 row-start-1 flex size-7 cursor-pointer items-center justify-center transition-colors duration-80 outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
               // Pulled into the padding so the glyph, not the 28px box, sits
               // on the title line and the inset edge.
               compact ? "-my-[5px] -mr-1.5 ml-1.5" : "-my-1 -mr-1.5 ml-2",
-              shape.button
+              shape.button,
             )}
           >
             <XIcon size={compact ? 13 : 15} strokeWidth={1.5} />
@@ -519,12 +506,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
     const banner = (
       <AnimatePresence initial={false}>
         {open && (
-          <BannerMotion
-            key="banner"
-            fixed={fixed}
-            reduceMotion={reduceMotion}
-            config={motionConfig}
-          >
+          <BannerMotion key="banner" fixed={fixed} reduceMotion={reduceMotion} config={motionConfig}>
             {body}
           </BannerMotion>
         )}
@@ -532,7 +514,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
     );
 
     return size ? <SizeProvider size={size}>{banner}</SizeProvider> : banner;
-  }
+  },
 );
 
 Banner.displayName = "Banner";
@@ -547,15 +529,15 @@ const BannerTitle = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagrap
         ref={ref}
         data-slot="banner-title"
         className={cn(
-          "col-start-2 row-start-1 min-w-0 text-foreground",
+          "text-foreground col-start-2 row-start-1 min-w-0",
           typeClass("subtitle", compact ? "compact" : "default"),
-          className
+          className,
         )}
         style={{ fontVariationSettings: fontWeights.semibold, ...style }}
         {...props}
       />
     );
-  }
+  },
 );
 
 BannerTitle.displayName = "BannerTitle";
@@ -564,24 +546,23 @@ BannerTitle.displayName = "BannerTitle";
 // Foreground, like the title: muted grey drops under 4.5:1 on the tinted
 // and neutral fills, and the title already stands apart by its weight.
 
-const BannerDescription = forwardRef<
-  HTMLParagraphElement,
-  HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => {
-  const compact = useSize().variant === "compact";
-  return (
-    <p
-      ref={ref}
-      data-slot="banner-description"
-      className={cn(
-        "col-start-2 row-start-2 mt-0.5 min-w-0 text-foreground",
-        typeClass("subtitle", compact ? "compact" : "default"),
-        className
-      )}
-      {...props}
-    />
-  );
-});
+const BannerDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagraphElement>>(
+  ({ className, ...props }, ref) => {
+    const compact = useSize().variant === "compact";
+    return (
+      <p
+        ref={ref}
+        data-slot="banner-description"
+        className={cn(
+          "text-foreground col-start-2 row-start-2 mt-0.5 min-w-0",
+          typeClass("subtitle", compact ? "compact" : "default"),
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 
 BannerDescription.displayName = "BannerDescription";
 
@@ -604,18 +585,16 @@ const BannerActions = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>
           compact ? "-my-[5px] ml-2.5" : "-my-1 ml-3",
           // With a description
           "group-data-described/banner:col-start-2 group-data-described/banner:row-start-3 group-data-described/banner:my-0 group-data-described/banner:ml-0",
-          compact
-            ? "group-data-described/banner:mt-1.5"
-            : "group-data-described/banner:mt-2",
+          compact ? "group-data-described/banner:mt-1.5" : "group-data-described/banner:mt-2",
           // Narrow banner
           "@max-sm/banner:col-start-2 @max-sm/banner:row-start-3 @max-sm/banner:my-0 @max-sm/banner:ml-0",
           compact ? "@max-sm/banner:mt-1.5" : "@max-sm/banner:mt-2",
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 
 BannerActions.displayName = "BannerActions";
@@ -635,15 +614,15 @@ type BannerActionVariant = "primary" | "secondary" | "ghost";
 // primary, secondary, ghost. Tab order follows the markup, so write primary
 // first.
 const BANNER_ACTION_ORDER: Record<BannerActionVariant, string> = {
-  primary:
-    "order-3 group-data-described/banner:order-1 @max-sm/banner:order-1",
+  primary: "order-3 group-data-described/banner:order-1 @max-sm/banner:order-1",
   secondary: "order-2",
-  ghost:
-    "order-1 group-data-described/banner:order-3 @max-sm/banner:order-3",
+  ghost: "order-1 group-data-described/banner:order-3 @max-sm/banner:order-3",
 };
 
-interface BannerActionProps
-  extends Omit<ButtonProps, "variant" | "size" | "asChild" | "render" | "nativeButton"> {
+interface BannerActionProps extends Omit<
+  ButtonProps,
+  "variant" | "size" | "asChild" | "render" | "nativeButton"
+> {
   /** @default "secondary" */
   variant?: BannerActionVariant;
   /** Renders a link instead of a button. */
@@ -654,15 +633,28 @@ interface BannerActionProps
 
 const BannerAction = forwardRef<HTMLButtonElement, BannerActionProps>(
   ({ variant = "secondary", href, external = false, className, children, ...props }, ref) => {
-    const classes = cn(
-      BANNER_ACTION_ORDER[variant],
-      variant === "ghost" && "text-foreground",
-      className
-    );
+    const classes = cn(BANNER_ACTION_ORDER[variant], variant === "ghost" && "text-foreground", className);
 
     if (href) {
       return (
-        <Button ref={ref} variant={variant} size="compact" data-slot="banner-action" className={classes} {...props} render={<a href={href} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined} />} nativeButton={false}>{children}</Button>
+        <Button
+          ref={ref}
+          variant={variant}
+          size="compact"
+          data-slot="banner-action"
+          className={classes}
+          {...props}
+          render={
+            <a
+              href={href}
+              target={external ? "_blank" : undefined}
+              rel={external ? "noopener noreferrer" : undefined}
+            />
+          }
+          nativeButton={false}
+        >
+          {children}
+        </Button>
       );
     }
 
@@ -679,7 +671,7 @@ const BannerAction = forwardRef<HTMLButtonElement, BannerActionProps>(
         {children}
       </Button>
     );
-  }
+  },
 );
 
 BannerAction.displayName = "BannerAction";

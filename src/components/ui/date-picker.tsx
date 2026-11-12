@@ -39,10 +39,7 @@ function usePopupExit(open: boolean, setOpen: (open: boolean) => void) {
     if (actionsRef.current) actionsRef.current.close();
     else setRootOpen(false);
   }, [open, rootOpen]);
-  const onOpenChange = (
-    next: boolean,
-    details: { preventUnmountOnClose: () => void }
-  ) => {
+  const onOpenChange = (next: boolean, details: { preventUnmountOnClose: () => void }) => {
     if (!next) {
       details.preventUnmountOnClose();
       setRootOpen(false);
@@ -64,10 +61,7 @@ function DatePickerPopover({
   className,
   children,
 }: DatePickerPopoverProps) {
-  const { actionsRef, rootOpen, onOpenChange: handleOpenChange } = usePopupExit(
-    open,
-    onOpenChange
-  );
+  const { actionsRef, rootOpen, onOpenChange: handleOpenChange } = usePopupExit(open, onOpenChange);
 
   // Fallback release for the deferred unmount, for throttled tabs where the
   // exit's animation callback stalls.

@@ -105,7 +105,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             // 4 + 28 + 28 + 8, 2 + 24 + 24 + 4 compact.
             compact ? "pr-[54px]" : "pr-[68px]",
           ],
-          className
+          className,
         )}
         style={{ fontVariationSettings: fontWeights.normal, ...style }}
         onChange={(e) => {
@@ -128,7 +128,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             className={cn(
               "pointer-events-none absolute top-1/2 -translate-y-1/2 transition-colors duration-80",
               compact ? "left-2.5" : "left-3",
-              hasFile ? "text-foreground" : "text-muted-foreground"
+              hasFile ? "text-foreground" : "text-muted-foreground",
             )}
           />
           {input}
@@ -150,10 +150,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => step(direction)}
             className={cn(
-              "group/step flex shrink-0 cursor-pointer items-center justify-center text-muted-foreground outline-none",
-              "transition-colors duration-80 hover:bg-hover hover:text-foreground",
+              "group/step text-muted-foreground flex shrink-0 cursor-pointer items-center justify-center outline-none",
+              "hover:bg-hover hover:text-foreground transition-colors duration-80",
               "disabled:pointer-events-none",
-              compact ? "size-6" : "size-7"
+              compact ? "size-6" : "size-7",
             )}
             style={{ borderRadius: stepRadius }}
           >
@@ -165,10 +165,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       return (
         <span data-slot="input-number" className="relative block w-full min-w-0">
           {input}
-          <span
-            className="absolute inset-y-0 flex items-center"
-            style={{ right: stepInset }}
-          >
+          <span className="absolute inset-y-0 flex items-center" style={{ right: stepInset }}>
             {stepButton(-1)}
             {stepButton(1)}
           </span>
@@ -177,7 +174,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     }
 
     return input;
-  }
+  },
 );
 
 Input.displayName = "Input";

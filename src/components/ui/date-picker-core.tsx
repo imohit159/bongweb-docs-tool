@@ -203,12 +203,11 @@ function rangeLabelOptions(withYear: boolean): Intl.DateTimeFormatOptions {
 /** A date's label as parts, in the locale's order. */
 function labelParts(date: Date, locale: string | undefined, options: Intl.DateTimeFormatOptions) {
   const parts = new Intl.DateTimeFormat(locale, options).formatToParts(date);
-  return parts.map(
-    (part, i): LabelPart =>
-      // Drop the comma English puts after the weekday: "Wed Oct 21".
-      part.type === "literal" && parts[i - 1]?.type === "weekday"
-        ? { type: part.type, value: part.value.replace(",", "") }
-        : { type: part.type, value: part.value }
+  return parts.map((part, i): LabelPart =>
+    // Drop the comma English puts after the weekday: "Wed Oct 21".
+    part.type === "literal" && parts[i - 1]?.type === "weekday"
+      ? { type: part.type, value: part.value.replace(",", "") }
+      : { type: part.type, value: part.value },
   );
 }
 
@@ -237,7 +236,10 @@ function monthNames(locale?: string): Map<string, number> {
     for (const month of ["long", "short"] as const) {
       const fmt = new Intl.DateTimeFormat(loc, { month });
       for (let m = 0; m < 12; m++) {
-        const name = fmt.format(new Date(2000, m, 1)).toLowerCase().replace(/\.$/, "");
+        const name = fmt
+          .format(new Date(2000, m, 1))
+          .toLowerCase()
+          .replace(/\.$/, "");
         if (!names.has(name)) names.set(name, m);
       }
     }
@@ -305,7 +307,7 @@ export function parseDateInput(
   text: string,
   mode: "single" | "range",
   locale?: string,
-  now = new Date()
+  now = new Date(),
 ): Date | DateRange | null {
   if (mode === "single") return parseDay(text, locale, now);
   const sides = text.split(/\s*(?:→|->|–|—|\bto\b|\s-\s)\s*/i).filter((side) => side.trim() !== "");
@@ -330,7 +332,7 @@ function isoDate(date: Date) {
 export function formValue(
   value: Date | DateRange | undefined,
   time?: string | null,
-  timeRange?: TimeRange | null
+  timeRange?: TimeRange | null,
 ): string {
   if (value instanceof Date) {
     const day = isoDate(value);
@@ -344,8 +346,7 @@ export function formValue(
 function rangeWithYear(range: DateRange, now: Date) {
   const year = now.getFullYear();
   return (
-    (!!range.from && range.from.getFullYear() !== year) ||
-    (!!range.to && range.to.getFullYear() !== year)
+    (!!range.from && range.from.getFullYear() !== year) || (!!range.to && range.to.getFullYear() !== year)
   );
 }
 
@@ -358,7 +359,7 @@ function rangeWithYear(range: DateRange, now: Date) {
 export function widestLabelParts(
   sample: LabelPart[],
   locale: string | undefined,
-  options: Intl.DateTimeFormatOptions
+  options: Intl.DateTimeFormatOptions,
 ): string[][] {
   const fmt = new Intl.DateTimeFormat(locale, options);
   const pick = (date: Date, type: Intl.DateTimeFormatPartTypes) =>
@@ -374,7 +375,7 @@ export function widestLabelParts(
         ? [...new Set(months)]
         : part.type === "day"
           ? day
-          : [part.value]
+          : [part.value],
   );
 }
 
@@ -416,29 +417,27 @@ export const DatePickerPopupFrame = forwardRef<
 >(({ open, onExitComplete, className, children }, ref) => {
   const shape = usePopupShape();
   return (
-  <motion.div
-    className={cn("outline-none", popupMotionClass)}
-    initial={{ opacity: 0, y: "var(--popup-enter-y)", scaleY: 0.96 }}
-    animate={
-      open
-        ? { opacity: 1, y: 0, scaleY: 1 }
-        : { opacity: 0, y: "var(--popup-enter-y)", scaleY: 0.96 }
-    }
-    transition={open ? spring.fast : spring.fast.exit}
-    onAnimationComplete={() => {
-      if (!open) onExitComplete();
-    }}
-  >
-    <Elevated
-      ref={ref}
-      offset={2}
-      shadowLevel={3}
-      data-slot="date-picker-popup"
-      className={cn(shape.container, "outline-none select-none", className)}
+    <motion.div
+      className={cn("outline-none", popupMotionClass)}
+      initial={{ opacity: 0, y: "var(--popup-enter-y)", scaleY: 0.96 }}
+      animate={
+        open ? { opacity: 1, y: 0, scaleY: 1 } : { opacity: 0, y: "var(--popup-enter-y)", scaleY: 0.96 }
+      }
+      transition={open ? spring.fast : spring.fast.exit}
+      onAnimationComplete={() => {
+        if (!open) onExitComplete();
+      }}
     >
-      {children}
-    </Elevated>
-  </motion.div>
+      <Elevated
+        ref={ref}
+        offset={2}
+        shadowLevel={3}
+        data-slot="date-picker-popup"
+        className={cn(shape.container, "outline-none select-none", className)}
+      >
+        {children}
+      </Elevated>
+    </motion.div>
   );
 });
 DatePickerPopupFrame.displayName = "DatePickerPopupFrame";
@@ -509,7 +508,7 @@ function TimeField({
   // is the widest; its AM/PM twin is measured too, as the letters differ.
   const labels = useMemo(
     () => slots.map((slot) => formatTime(slot.minutes, hourCycle, locale)),
-    [slots, hourCycle, locale]
+    [slots, hourCycle, locale],
   );
   const widestLabels = useMemo(() => {
     const longest = labels.reduce((a, b) => (b.length > a.length ? b : a), "");
@@ -650,74 +649,70 @@ function TimeField({
         // Icon-to-text gap matches Button's, at both sizes.
         compact ? "gap-1" : "gap-1.5",
         "cursor-text has-[input:focus-visible]:ring-1 has-[input:focus-visible]:ring-[color:var(--focus-ring,#6B97FF)]",
-        sizeClasses.field
+        sizeClasses.field,
       )}
       onClick={() => inputRef.current?.focus()}
     >
       {prefix}
       <span className="inline-grid">
-      <span aria-hidden className="invisible col-start-1 row-start-1 whitespace-pre tabular-nums">
-        {text || placeholder}
-      </span>
-      {/* The field keeps the width of its longest time, so picking 1:00 or
-          12:30 never moves what follows it. */}
-      {widestLabels.map((w) => (
-        <span
-          key={w}
-          aria-hidden
-          className="invisible col-start-1 row-start-1 whitespace-pre tabular-nums"
-        >
-          {w}
+        <span aria-hidden className="invisible col-start-1 row-start-1 whitespace-pre tabular-nums">
+          {text || placeholder}
         </span>
-      ))}
-    <input
-      ref={inputRef}
-      type="text"
-      inputMode="text"
-      // A text input's intrinsic width (~20ch) would size the grid cell;
-      // size 1 drops it so the invisible text copy decides the width.
-      size={1}
-      role="combobox"
-      aria-label={label}
-      aria-expanded={open}
-      aria-controls={open ? listId : undefined}
-      aria-activedescendant={activeId}
-      aria-autocomplete="list"
-      autoComplete="off"
-      spellCheck={false}
-      disabled={disabled}
-      placeholder={placeholder}
-      value={text}
-      className={cn(
-        "col-start-1 row-start-1 w-full min-w-0 bg-transparent p-0 text-left tabular-nums text-inherit outline-none placeholder:text-muted-foreground",
-        sizeClasses.field,
-        // The field's shape radius would clip the text selection's corners;
-        // the rounded focus ring belongs to the whole segment instead.
-        "rounded-none"
-      )}
-      onFocus={(e) => {
-        e.currentTarget.select();
-        openList();
-      }}
-      onClick={openList}
-      onBlur={(e) => {
-        if (listRef.current?.contains(e.relatedTarget as Node)) return;
-        commitDraft();
-        closeList();
-      }}
-      onChange={(e) => {
-        const next = e.target.value;
-        setDraft(next);
-        if (!open) setOpen(true);
-        const parsed = parseTime(next);
-        if (parsed !== null) {
-          const i = nearestSlotIndex(slots, parsed);
-          setActiveIndex(i >= 0 ? i : null);
-          requestAnimationFrame(() => scrollToActive(true));
-        }
-      }}
-      onKeyDown={onKeyDown}
-    />
+        {/* The field keeps the width of its longest time, so picking 1:00 or
+          12:30 never moves what follows it. */}
+        {widestLabels.map((w) => (
+          <span key={w} aria-hidden className="invisible col-start-1 row-start-1 whitespace-pre tabular-nums">
+            {w}
+          </span>
+        ))}
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="text"
+          // A text input's intrinsic width (~20ch) would size the grid cell;
+          // size 1 drops it so the invisible text copy decides the width.
+          size={1}
+          role="combobox"
+          aria-label={label}
+          aria-expanded={open}
+          aria-controls={open ? listId : undefined}
+          aria-activedescendant={activeId}
+          aria-autocomplete="list"
+          autoComplete="off"
+          spellCheck={false}
+          disabled={disabled}
+          placeholder={placeholder}
+          value={text}
+          className={cn(
+            "placeholder:text-muted-foreground col-start-1 row-start-1 w-full min-w-0 bg-transparent p-0 text-left text-inherit tabular-nums outline-none",
+            sizeClasses.field,
+            // The field's shape radius would clip the text selection's corners;
+            // the rounded focus ring belongs to the whole segment instead.
+            "rounded-none",
+          )}
+          onFocus={(e) => {
+            e.currentTarget.select();
+            openList();
+          }}
+          onClick={openList}
+          onBlur={(e) => {
+            if (listRef.current?.contains(e.relatedTarget as Node)) return;
+            commitDraft();
+            closeList();
+          }}
+          onChange={(e) => {
+            const next = e.target.value;
+            setDraft(next);
+            if (!open) setOpen(true);
+            const parsed = parseTime(next);
+            if (parsed !== null) {
+              const i = nearestSlotIndex(slots, parsed);
+              setActiveIndex(i >= 0 ? i : null);
+              requestAnimationFrame(() => scrollToActive(true));
+            }
+          }}
+          onKeyDown={onKeyDown}
+        />
       </span>
       {/* The note steps aside while the time is being edited, keeping its
           space so the field doesn't shrink under the cursor. */}
@@ -750,7 +745,10 @@ function TimeField({
           id={listId}
           role="listbox"
           aria-label={label}
-          className={cn("relative flex flex-col p-1", slots.some((s) => s.duration !== undefined) ? "min-w-[180px]" : "min-w-[112px]")}
+          className={cn(
+            "relative flex flex-col p-1",
+            slots.some((s) => s.duration !== undefined) ? "min-w-[180px]" : "min-w-[112px]",
+          )}
           // Rows never take focus: the field keeps it while the list moves.
           onMouseDown={(e) => e.preventDefault()}
           onMouseEnter={onMouseEnter}
@@ -826,7 +824,7 @@ function TimeRow({
         sizeClasses.itemPx,
         typeClass("body", compact ? "compact" : "default"),
         "transition-[color] duration-80",
-        selected || active ? "text-foreground" : "text-muted-foreground"
+        selected || active ? "text-foreground" : "text-muted-foreground",
       )}
       onClick={onPick}
     >
@@ -959,7 +957,7 @@ function PresetRow({
         sizeClasses.itemPx,
         sizeClasses.text,
         "transition-[color] duration-80",
-        selected || active ? "text-foreground" : "text-muted-foreground"
+        selected || active ? "text-foreground" : "text-muted-foreground",
       )}
     >
       <span className="inline-grid">
@@ -1081,7 +1079,12 @@ type DatePickerProps = DatePickerSingleProps | DatePickerRangeProps;
 const pickAckMs = 200;
 const PRESETS_WIDTH = 152;
 
-function useControllable<T>(value: T | undefined, defaultValue: T | undefined, onChange?: (v: T) => void, controlled?: boolean) {
+function useControllable<T>(
+  value: T | undefined,
+  defaultValue: T | undefined,
+  onChange?: (v: T) => void,
+  controlled?: boolean,
+) {
   const [internal, setInternal] = useState<T | undefined>(defaultValue);
   const isControlled = controlled ?? value !== undefined;
   const current = isControlled ? value : internal;
@@ -1090,7 +1093,7 @@ function useControllable<T>(value: T | undefined, defaultValue: T | undefined, o
       if (!isControlled) setInternal(next);
       onChange?.(next);
     },
-    [isControlled, onChange]
+    [isControlled, onChange],
   );
   return [current, set] as const;
 }
@@ -1124,7 +1127,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
     props.value,
     props.defaultValue,
     props.onValueChange as ((v: Date | DateRange | undefined) => void) | undefined,
-    "value" in props
+    "value" in props,
   );
   const hasTime = "time" in props || "defaultTime" in props;
   const hasTimeRange = "timeRange" in props || "defaultTimeRange" in props;
@@ -1132,19 +1135,19 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
     props.time,
     props.defaultTime ?? null,
     props.onTimeChange,
-    "time" in props
+    "time" in props,
   );
   const [timeRange, setTimeRange] = useControllable<TimeRange | null>(
     props.timeRange,
     props.defaultTimeRange ?? null,
     props.onTimeRangeChange,
-    "timeRange" in props
+    "timeRange" in props,
   );
   const [open, setOpenState] = useControllable<boolean>(
     props.open,
     props.defaultOpen ?? false,
     props.onOpenChange,
-    "open" in props
+    "open" in props,
   );
 
   const shape = useShape();
@@ -1157,12 +1160,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
   const ArrowIcon = icons["arrow-right"];
   // Time fields lead with a decorative icon, drawn like the date's calendar.
   const timeIcon = (Icon: typeof CalendarIcon) => (
-    <Icon
-      aria-hidden
-      size={sizeClasses.icon}
-      strokeWidth={1.5}
-      className="shrink-0 text-muted-foreground"
-    />
+    <Icon aria-hidden size={sizeClasses.icon} strokeWidth={1.5} className="text-muted-foreground shrink-0" />
   );
   const ClearIcon = icons.x;
   const hourCycle = useMemo(() => resolveHourCycle(locale, hourCycleProp), [locale, hourCycleProp]);
@@ -1173,9 +1171,12 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
   const [month, setMonth] = useState<Date | undefined>(undefined);
   const [layout, setLayout] = useState<"horizontal" | "vertical">("horizontal");
   const ackRef = useRef<number | null>(null);
-  useEffect(() => () => {
-    if (ackRef.current !== null) clearTimeout(ackRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (ackRef.current !== null) clearTimeout(ackRef.current);
+    },
+    [],
+  );
 
   const cellSize = calendarProps?.cellSize ?? (compact ? 32 : 36);
   const setOpen = (next: boolean) => {
@@ -1189,7 +1190,9 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
       setMonth(anchor ?? new Date());
       if (orientation === "auto" && numberOfMonths > 1 && typeof window !== "undefined") {
         const needed =
-          (7 + (calendarProps?.showWeekNumber ? WEEK_COL_RATIO : 0)) * cellSize * 2 + 24 + 24 +
+          (7 + (calendarProps?.showWeekNumber ? WEEK_COL_RATIO : 0)) * cellSize * 2 +
+          24 +
+          24 +
           (presets?.length ? PRESETS_WIDTH : 0);
         setLayout(window.innerWidth - 16 >= needed ? "horizontal" : "vertical");
       }
@@ -1243,8 +1246,8 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
       const options = rangeLabelOptions(
         rangeWithYear(
           { from: fromTime !== undefined ? from : undefined, to: toTime !== undefined ? to : undefined },
-          new Date(year, 0, 1)
-        )
+          new Date(year, 0, 1),
+        ),
       );
       const sample: LabelPart[] = [
         ...labelParts(from, locale, options),
@@ -1257,8 +1260,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
     const options = singleLabelOptions(date.getFullYear() !== year);
     return widestLabelParts(labelParts(date, locale, options), locale, options);
   }, [mode, fromTime, toTime, singleTime, year, locale]);
-  const labelPlaceholder =
-    placeholder ?? (mode === "range" ? "Pick dates" : "Pick a date");
+  const labelPlaceholder = placeholder ?? (mode === "range" ? "Pick dates" : "Pick a date");
 
   // Segment hover scope: date, time(s), clear.
   const segmentsRef = useRef<HTMLDivElement>(null);
@@ -1282,8 +1284,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
         rowWidthRef.current = el.scrollWidth + el.offsetWidth - el.clientWidth;
       }
       const cs = getComputedStyle(parent);
-      const room =
-        parent.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const room = parent.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       setTwoRows(rowWidthRef.current > room + 0.5);
     };
     measure();
@@ -1300,18 +1301,13 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
   // first registration pass, so it registers through a callback ref: the
   // highlight then glides behind it like any segment.
   const { registerItem: registerSegment } = segmentHover;
-  const clearRef = useCallback(
-    (el: HTMLButtonElement | null) => registerSegment(9, el),
-    [registerSegment]
-  );
+  const clearRef = useCallback((el: HTMLButtonElement | null) => registerSegment(9, el), [registerSegment]);
 
   const field = variant === "outline";
   // Segments sit 2px inside the field (plus its 1px border); their corners
   // nest inside its radius: 8 - 3 = 5px rounded, 20 - 3 = 17px pill, 0 sharp.
   const innerRadius = field
-    ? { rounded: "rounded-[5px]", pill: "rounded-[17px]", sharp: "rounded-none" }[
-        shape.variant
-      ]
+    ? { rounded: "rounded-[5px]", pill: "rounded-[17px]", sharp: "rounded-none" }[shape.variant]
     : shape.bg;
   const segmentClass = cn(
     "relative z-[1] inline-flex h-full items-center outline-none",
@@ -1320,7 +1316,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
     // Two rows take the compact inset, so the time row still fits a phone
     // inside the roomier field padding.
     compact || twoRows ? "px-1.5" : "px-2",
-    innerRadius
+    innerRadius,
   );
 
   const dateTrigger = (
@@ -1339,49 +1335,40 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
         "cursor-pointer whitespace-nowrap",
         field && !hasTime && !hasTimeRange && "flex-1",
         hasValue ? "text-foreground" : "text-muted-foreground",
-        open && "text-foreground"
+        open && "text-foreground",
       )}
     >
       {field && (
-        <CalendarIcon
-          size={sizeClasses.icon}
-          strokeWidth={1.5}
-          className="shrink-0 text-muted-foreground"
-        />
+        <CalendarIcon size={sizeClasses.icon} strokeWidth={1.5} className="text-muted-foreground shrink-0" />
       )}
       {/* Left-aligned: a button centers its text, which would float the date
           inside its fixed width. */}
       <span className="inline-grid text-left tabular-nums">
-        <span className="col-start-1 row-start-1 [text-box:trim-both_cap_alphabetic]">
-          {dateLabel}
-        </span>
+        <span className="col-start-1 row-start-1 [text-box:trim-both_cap_alphabetic]">{dateLabel}</span>
         {!fitLabel && (
-        <span
-          aria-hidden
-          className="invisible col-start-1 row-start-1 inline-flex whitespace-pre"
-        >
-          {labelSizer.map((options, i) => (
-            <span key={i} className="inline-grid">
-              {options.map((option) => (
-                <span
-                  key={option}
-                  // Trimmed per part: text-box trim skips flex containers.
-                  className="col-start-1 row-start-1 [text-box:trim-both_cap_alphabetic]"
-                >
-                  {option}
-                </span>
-              ))}
-            </span>
-          ))}
-        </span>
+          <span aria-hidden className="invisible col-start-1 row-start-1 inline-flex whitespace-pre">
+            {labelSizer.map((options, i) => (
+              <span key={i} className="inline-grid">
+                {options.map((option) => (
+                  <span
+                    key={option}
+                    // Trimmed per part: text-box trim skips flex containers.
+                    className="col-start-1 row-start-1 [text-box:trim-both_cap_alphabetic]"
+                  >
+                    {option}
+                  </span>
+                ))}
+              </span>
+            ))}
+          </span>
         )}
         {!fitLabel && (
-        <span
-          aria-hidden
-          className="invisible col-start-1 row-start-1 whitespace-pre [text-box:trim-both_cap_alphabetic]"
-        >
-          {labelPlaceholder}
-        </span>
+          <span
+            aria-hidden
+            className="invisible col-start-1 row-start-1 whitespace-pre [text-box:trim-both_cap_alphabetic]"
+          >
+            {labelPlaceholder}
+          </span>
         )}
       </span>
     </button>
@@ -1411,11 +1398,11 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
         "data-[typing]:ring-1 data-[typing]:ring-[color:var(--focus-ring,#6B97FF)]",
         field && !hasTime && !hasTimeRange && "flex-1",
         hasValue || typed ? "text-foreground" : "text-muted-foreground",
-        open && "text-foreground"
+        open && "text-foreground",
       )}
     >
       {field && (
-        <CalendarIcon size={sizeClasses.icon} strokeWidth={1.5} className="shrink-0 text-muted-foreground" />
+        <CalendarIcon size={sizeClasses.icon} strokeWidth={1.5} className="text-muted-foreground shrink-0" />
       )}
       <span className="inline-grid text-left tabular-nums">
         <span aria-hidden className="invisible col-start-1 row-start-1 whitespace-pre">
@@ -1451,8 +1438,8 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
           placeholder={labelPlaceholder}
           value={typedText}
           className={cn(
-            "col-start-1 row-start-1 w-full min-w-0 rounded-none bg-transparent p-0 text-left tabular-nums text-inherit outline-none placeholder:text-muted-foreground",
-            sizeClasses.field
+            "placeholder:text-muted-foreground col-start-1 row-start-1 w-full min-w-0 rounded-none bg-transparent p-0 text-left text-inherit tabular-nums outline-none",
+            sizeClasses.field,
           )}
           onFocus={(e) => {
             // The ring for a keyboard arrival only: a text field matches
@@ -1558,7 +1545,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
     <div
       className={cn(
         "shrink-0",
-        stacked ? "mt-1 border-t border-border pt-1" : "w-[152px] border-r border-border pr-1"
+        stacked ? "border-border mt-1 border-t pt-1" : "border-border w-[152px] border-r pr-1",
       )}
     >
       <PresetList
@@ -1592,8 +1579,9 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
           // Same box as the popup: its corners follow the popup's 12px.
           "flex rounded-[inherit] bg-inherit p-1",
           showPresets && stacked ? "flex-col" : "flex-row",
-          stacked && numberOfMonths > 1 &&
-            "max-h-[min(560px,var(--popup-available-height,560px))] overflow-y-auto"
+          stacked &&
+            numberOfMonths > 1 &&
+            "max-h-[min(560px,var(--popup-available-height,560px))] overflow-y-auto",
         )}
       >
         {/* Presets sit beside the calendar, or below it when the months
@@ -1613,7 +1601,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
   const daySlots = useMemo(() => buildSlots(step), [step]);
   const endSlots = useMemo(
     () => buildSlots(step, startMinutes ?? nowMinutes - (nowMinutes % step)),
-    [step, startMinutes, nowMinutes]
+    [step, startMinutes, nowMinutes],
   );
   const duration =
     startMinutes !== null && endMinutes !== null && endMinutes > startMinutes ? (
@@ -1621,7 +1609,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
       // note, not a field, and the smaller size keeps the row on a phone.
       <span
         data-slot="date-picker-duration"
-        className={cn("whitespace-nowrap text-muted-foreground", sizeClasses.text)}
+        className={cn("text-muted-foreground whitespace-nowrap", sizeClasses.text)}
       >
         {formatDuration(endMinutes - startMinutes)}
       </span>
@@ -1694,9 +1682,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
 
   // Stacked, each row keeps the one-row height (inside the field's 1px
   // border and 2px padding), so the segments' h-full still resolves.
-  const rowStyle = twoRows
-    ? { height: sizeClasses.controlHeight - (field ? 6 : 0) }
-    : undefined;
+  const rowStyle = twoRows ? { height: sizeClasses.controlHeight - (field ? 6 : 0) } : undefined;
   const clearable_ = field && clearable && (hasValue || (hasTime && !!time) || (hasTimeRange && !!timeRange));
   const content = (
     <div
@@ -1712,15 +1698,15 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
         sizeClasses.text,
         field
           ? cn(
-              "border border-border bg-transparent",
+              "border-border border bg-transparent",
               // Two rows get more room around them than the one-row field.
               twoRows ? "p-1" : "p-0.5",
               shape.input,
-              compact ? "min-w-[128px]" : "min-w-[160px]"
+              compact ? "min-w-[128px]" : "min-w-[160px]",
             )
           : "",
         disabled && "pointer-events-none opacity-50",
-        className
+        className,
       )}
       {...segmentHover.handlers}
     >
@@ -1732,7 +1718,7 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
           value={formValue(
             mode === "range" ? range : single,
             hasTime ? time : null,
-            hasTimeRange ? timeRange : null
+            hasTimeRange ? timeRange : null,
           )}
         />
       )}
@@ -1741,18 +1727,18 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
           "inline-flex h-full items-center",
           // A lone date field fills the box, so its hover spans the width.
           field && !timed && "flex-1",
-          twoRows && "order-1"
+          twoRows && "order-1",
         )}
         style={rowStyle}
       >
         {datePopover}
       </span>
       {timed && !twoRows && (
-        <span aria-hidden className="relative z-[1] mx-0.5 h-4 w-px shrink-0 bg-border" />
+        <span aria-hidden className="bg-border relative z-[1] mx-0.5 h-4 w-px shrink-0" />
       )}
       {twoRows && (
         // The line between the date row and the time row.
-        <span aria-hidden className="order-3 my-1 h-px basis-full bg-border" />
+        <span aria-hidden className="bg-border order-3 my-1 h-px basis-full" />
       )}
       {timed && (
         <span className={cn("inline-flex h-full items-center", twoRows && "order-4")} style={rowStyle}>
@@ -1768,12 +1754,12 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
             aria-label="Clear"
             data-slot="date-picker-clear"
             className={cn(
-              "relative z-[1] ml-auto inline-flex h-full shrink-0 cursor-pointer items-center justify-center text-muted-foreground outline-none hover:text-foreground",
+              "text-muted-foreground hover:text-foreground relative z-[1] ml-auto inline-flex h-full shrink-0 cursor-pointer items-center justify-center outline-none",
               // Two rows: the clear sits right after the date it clears.
               twoRows && "order-2 ml-0",
               "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
               compact ? "w-6" : "w-7",
-              innerRadius
+              innerRadius,
             )}
             style={rowStyle}
             initial={{ opacity: 0 }}
@@ -1799,9 +1785,4 @@ function DatePickerCore(props: DatePickerProps & { Popover: ComponentType<DatePi
 DatePickerCore.displayName = "DatePickerCore";
 
 export { DatePickerCore };
-export type {
-  DatePickerProps,
-  DatePickerSingleProps,
-  DatePickerRangeProps,
-  DateRange,
-};
+export type { DatePickerProps, DatePickerSingleProps, DatePickerRangeProps, DateRange };

@@ -43,8 +43,7 @@ import { SURFACE_BG } from "@/lib/surface-classes";
 // activates), and Escape closes the menu as usual.
 // ---------------------------------------------------------------------------
 
-const useIsoLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 interface SearchHandle {
   input: HTMLInputElement | null;
@@ -61,8 +60,7 @@ interface DropdownSearchHostValue {
   open: boolean;
 }
 
-export const DropdownSearchHostContext =
-  createContext<DropdownSearchHostValue | null>(null);
+export const DropdownSearchHostContext = createContext<DropdownSearchHostValue | null>(null);
 
 const ROW_SELECTOR = [
   '[role="menuitem"]:not([aria-disabled="true"])',
@@ -70,8 +68,7 @@ const ROW_SELECTOR = [
   '[role="menuitemcheckbox"]:not([aria-disabled="true"])',
 ].join(", ");
 
-const ANY_ROW =
-  '[role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"]';
+const ANY_ROW = '[role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"]';
 
 /** Whether `a` comes before `b` in the document. */
 function precedes(a: Node, b: Node) {
@@ -97,10 +94,7 @@ function scrollToTop(row: HTMLElement) {
   const menu = row.closest<HTMLElement>('[role="menu"]');
   for (let el = row.parentElement; el && menu?.contains(el); el = el.parentElement) {
     const { overflowY } = getComputedStyle(el);
-    if (
-      (overflowY === "auto" || overflowY === "scroll") &&
-      el.scrollHeight > el.clientHeight
-    ) {
+    if ((overflowY === "auto" || overflowY === "scroll") && el.scrollHeight > el.clientHeight) {
       el.scrollTop = 0;
       return;
     }
@@ -151,8 +145,7 @@ export function useDropdownSearchHost(open: boolean) {
       // At or past the first / last enabled row. Base UI lets arrows land on
       // a disabled row (Radix skips them), so a disabled row beyond the edge
       // leads back to the field too.
-      const pastEdge =
-        !edge || edge === target || (up ? precedes(target, edge) : precedes(edge, target));
+      const pastEdge = !edge || edge === target || (up ? precedes(target, edge) : precedes(edge, target));
       if (pastEdge) {
         e.preventDefault();
         e.stopPropagation();
@@ -180,10 +173,7 @@ export function useDropdownSearchHost(open: boolean) {
 
   /** Whether a mounted field takes focus when the popup opens, a frame after
    *  the primitive's own open autofocus. */
-  const searchTakesFocus = useCallback(
-    () => handleRef.current?.autoFocus ?? false,
-    []
-  );
+  const searchTakesFocus = useCallback(() => handleRef.current?.autoFocus ?? false, []);
 
   return {
     host,
@@ -198,11 +188,10 @@ export function useDropdownSearchHost(open: boolean) {
 // DropdownSearch
 // ---------------------------------------------------------------------------
 
-export interface DropdownSearchProps
-  extends Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    "value" | "onChange" | "size" | "defaultValue"
-  > {
+export interface DropdownSearchProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "value" | "onChange" | "size" | "defaultValue"
+> {
   /** The query. Filter the MenuItems you render against it. */
   value: string;
   onValueChange: (value: string) => void;
@@ -226,7 +215,7 @@ const DropdownSearch = forwardRef<HTMLInputElement, DropdownSearchProps>(
       onKeyDown,
       ...props
     },
-    ref
+    ref,
   ) => {
     const icons = useIcons();
     const SearchIcon = icons.search;
@@ -340,7 +329,7 @@ const DropdownSearch = forwardRef<HTMLInputElement, DropdownSearchProps>(
           onValueChangeRef.current("");
         }
       },
-      []
+      [],
     );
 
     const handleKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -372,18 +361,18 @@ const DropdownSearch = forwardRef<HTMLInputElement, DropdownSearchProps>(
         // below it inside the sticky band, and the first row 4px below the
         // divider: the same 4px as the popup's sides.
         className={cn(
-          "group/search sticky top-0 z-20 -mx-1 -mt-1 mb-1 box-content flex shrink-0 items-center border-b border-border/60 py-1",
+          "group/search border-border/60 sticky top-0 z-20 -mx-1 -mt-1 mb-1 box-content flex shrink-0 items-center border-b py-1",
           SURFACE_BG[surface],
           sizeClasses.control,
           sizeClasses.gap,
           compact ? "px-2.5" : "px-3",
-          className
+          className,
         )}
       >
         <SearchIcon
           size={sizeClasses.icon}
           strokeWidth={1.5}
-          className="shrink-0 text-muted-foreground transition-[color,stroke-width] duration-80 group-focus-within/search:text-foreground group-focus-within/search:stroke-[2]"
+          className="text-muted-foreground group-focus-within/search:text-foreground shrink-0 transition-[color,stroke-width] duration-80 group-focus-within/search:stroke-[2]"
         />
         <input
           ref={(node) => {
@@ -407,18 +396,18 @@ const DropdownSearch = forwardRef<HTMLInputElement, DropdownSearchProps>(
           // elements the shape radius, and a text input clips its caret to
           // its own corners (pill mode nicks the caret at the left edge).
           className={cn(
-            "min-w-0 flex-1 rounded-none bg-transparent text-foreground placeholder:text-muted-foreground outline-none font-[inherit]",
+            "text-foreground placeholder:text-muted-foreground min-w-0 flex-1 rounded-none bg-transparent font-[inherit] outline-none",
             sizeClasses.field,
             // The line box: Safari runs the caret its full height, so the
             // ladder's leading keeps it in proportion to the row. (Chrome
             // sizes the caret to the font itself, whatever the leading.)
-            compact ? "leading-5" : "leading-6"
+            compact ? "leading-5" : "leading-6",
           )}
           {...props}
         />
       </div>
     );
-  }
+  },
 );
 
 DropdownSearch.displayName = "DropdownSearch";
@@ -437,14 +426,14 @@ const DropdownEmpty = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>
         aria-live="polite"
         className={cn(
           // my-auto centers the message in the height the rows left.
-          "my-auto px-2 py-6 text-center text-muted-foreground",
+          "text-muted-foreground my-auto px-2 py-6 text-center",
           sizeClasses.text,
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 
 DropdownEmpty.displayName = "DropdownEmpty";

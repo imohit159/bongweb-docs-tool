@@ -57,10 +57,7 @@ function usePopupExit(open: boolean, setOpen: (open: boolean) => void) {
     if (actionsRef.current) actionsRef.current.close();
     else setRootOpen(false);
   }, [open, rootOpen]);
-  const onOpenChange = (
-    next: boolean,
-    details: { preventUnmountOnClose: () => void }
-  ) => {
+  const onOpenChange = (next: boolean, details: { preventUnmountOnClose: () => void }) => {
     if (!next) {
       details.preventUnmountOnClose();
       setRootOpen(false);
@@ -77,23 +74,14 @@ const DialogExitContext = createContext<{
   actionsRef: React.RefObject<DialogActions | null>;
 } | null>(null);
 
-function Dialog({
-  children,
-  open: openProp,
-  defaultOpen = false,
-  onOpenChange,
-  modal,
-}: DialogProps) {
+function Dialog({ children, open: openProp, defaultOpen = false, onOpenChange, modal }: DialogProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const open = openProp ?? uncontrolledOpen;
   const setOpen = (next: boolean) => {
     if (openProp === undefined) setUncontrolledOpen(next);
     onOpenChange?.(next);
   };
-  const { actionsRef, rootOpen, onOpenChange: handleOpenChange } = usePopupExit(
-    open,
-    setOpen
-  );
+  const { actionsRef, rootOpen, onOpenChange: handleOpenChange } = usePopupExit(open, setOpen);
   const exit = useMemo(() => ({ open, actionsRef }), [open, actionsRef]);
 
   return (
@@ -123,11 +111,7 @@ interface DialogSlotProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
 }
 
-function slotRender(
-  render: ReactElement | undefined,
-  asChild: boolean | undefined,
-  children: ReactNode
-) {
+function slotRender(render: ReactElement | undefined, asChild: boolean | undefined, children: ReactNode) {
   if (render) return render;
   return asChild && isValidElement(children) ? (children as ReactElement) : undefined;
 }
@@ -142,7 +126,7 @@ const DialogTrigger = forwardRef<HTMLButtonElement, DialogSlotProps>(
         {children}
       </DialogPrimitive.Trigger>
     );
-  }
+  },
 );
 DialogTrigger.displayName = "DialogTrigger";
 
@@ -156,7 +140,7 @@ const DialogClose = forwardRef<HTMLButtonElement, DialogSlotProps>(
         {children}
       </DialogPrimitive.Close>
     );
-  }
+  },
 );
 DialogClose.displayName = "DialogClose";
 
@@ -183,7 +167,10 @@ interface DialogContentProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
-  ({ className, children, size = "sm", container, showCloseButton = true, position = "center", ...props }, ref) => {
+  (
+    { className, children, size = "sm", container, showCloseButton = true, position = "center", ...props },
+    ref,
+  ) => {
     const icons = useIcons();
     const XIcon = icons.x;
     const shape = useShape();
@@ -203,10 +190,7 @@ const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
     const exitActionsRef = exit?.actionsRef;
     useEffect(() => {
       if (exitOpen) return;
-      const id = setTimeout(
-        () => exitActionsRef?.current?.unmount(),
-        exitFallbackMs(spring.slow)
-      );
+      const id = setTimeout(() => exitActionsRef?.current?.unmount(), exitFallbackMs(spring.slow));
       return () => clearTimeout(id);
     }, [exitOpen, exitActionsRef]);
 
@@ -215,24 +199,21 @@ const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
         <DialogPrimitive.Backdrop
           render={(backdropProps, state) => {
             const exiting = state.transitionStatus === "ending";
-            const rest = omit(
-              backdropProps as React.HTMLAttributes<HTMLDivElement>,
-              [
-                "style",
-                "onDrag",
-                "onDragStart",
-                "onDragEnd",
-                "onAnimationStart",
-                "onAnimationEnd",
-                "onAnimationIteration",
-              ]
-            );
+            const rest = omit(backdropProps as React.HTMLAttributes<HTMLDivElement>, [
+              "style",
+              "onDrag",
+              "onDragStart",
+              "onDragEnd",
+              "onAnimationStart",
+              "onAnimationEnd",
+              "onAnimationIteration",
+            ]);
             return (
               <motion.div
                 {...rest}
                 className={cn(
                   container ? "absolute" : "fixed",
-                  "inset-0 z-[var(--z-overlay,40)] bg-black/40 dark:bg-black/80"
+                  "inset-0 z-[var(--z-overlay,40)] bg-black/40 dark:bg-black/80",
                 )}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: exiting ? 0 : 1 }}
@@ -245,8 +226,7 @@ const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
           ref={ref}
           render={(popupProps, state) => {
             const exiting = state.transitionStatus === "ending";
-            const { style: baseStyle, ...baseProps } =
-              popupProps as React.HTMLAttributes<HTMLDivElement>;
+            const { style: baseStyle, ...baseProps } = popupProps as React.HTMLAttributes<HTMLDivElement>;
             const rest = omit(baseProps, [
               "onDrag",
               "onDragStart",
@@ -280,7 +260,7 @@ const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
                   size === "lg" && (compact ? "max-w-[480px]" : "max-w-[540px]"),
                   size === "xl" && (compact ? "max-w-[800px]" : "max-w-[880px]"),
                   shape.container,
-                  className
+                  className,
                 )}
                 style={{
                   ...(baseStyle as React.CSSProperties | undefined),
@@ -303,11 +283,7 @@ const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
                   {showCloseButton && (
                     <DialogPrimitive.Close
                       render={
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="absolute right-3 top-3"
-                        >
+                        <Button variant="ghost" size="icon-sm" className="absolute top-3 right-3">
                           <XIcon />
                           <span className="sr-only">Close</span>
                         </Button>
@@ -321,66 +297,46 @@ const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
         />
       </DialogPrimitive.Portal>
     );
-  }
+  },
 );
 DialogContent.displayName = "DialogContent";
 
 function DialogHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("flex flex-col gap-1.5 mb-4", className)}
-      {...props}
-    />
-  );
+  return <div className={cn("mb-4 flex flex-col gap-1.5", className)} {...props} />;
 }
 
 function DialogFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("flex justify-end gap-2 mt-6", className)}
-      {...props}
-    />
-  );
+  return <div className={cn("mt-6 flex justify-end gap-2", className)} {...props} />;
 }
 
-const DialogTitle = forwardRef<
-  HTMLHeadingElement,
-  HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => {
-  // The title role of the type scale — see /docs/sizes.
-  const compact = useSizeVariant() === "compact";
-  return (
-    <DialogPrimitive.Title
-      ref={ref}
-      className={cn(
-        typeClass("title", compact ? "compact" : "default"),
-        "text-foreground",
-        className
-      )}
-      style={{ fontVariationSettings: fontWeights.semibold }}
-      {...props}
-    />
-  );
-});
+const DialogTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingElement>>(
+  ({ className, ...props }, ref) => {
+    // The title role of the type scale — see /docs/sizes.
+    const compact = useSizeVariant() === "compact";
+    return (
+      <DialogPrimitive.Title
+        ref={ref}
+        className={cn(typeClass("title", compact ? "compact" : "default"), "text-foreground", className)}
+        style={{ fontVariationSettings: fontWeights.semibold }}
+        {...props}
+      />
+    );
+  },
+);
 DialogTitle.displayName = "DialogTitle";
 
-const DialogDescription = forwardRef<
-  HTMLParagraphElement,
-  HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => {
-  const compact = useSizeVariant() === "compact";
-  return (
-    <DialogPrimitive.Description
-      ref={ref}
-      className={cn(
-        typeClass("body", compact ? "compact" : "default"),
-        "text-muted-foreground",
-        className
-      )}
-      {...props}
-    />
-  );
-});
+const DialogDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLParagraphElement>>(
+  ({ className, ...props }, ref) => {
+    const compact = useSizeVariant() === "compact";
+    return (
+      <DialogPrimitive.Description
+        ref={ref}
+        className={cn(typeClass("body", compact ? "compact" : "default"), "text-muted-foreground", className)}
+        {...props}
+      />
+    );
+  },
+);
 DialogDescription.displayName = "DialogDescription";
 
 export {

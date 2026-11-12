@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus } from "lucide-react";
+import { IconMinus, IconPlus } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { Banner, BannerDescription, BannerTitle } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
@@ -99,7 +99,7 @@ export function PreviewPanel({
               disabled={zoomIndex === 0}
               onClick={() => setZoomIndex((i) => i - 1)}
             >
-              <Minus />
+              <IconMinus />
             </Button>
           </Tooltip>
           <Button variant="ghost" size="compact" onClick={() => setZoomIndex(ZOOM_STEPS.indexOf(1))}>
@@ -113,7 +113,7 @@ export function PreviewPanel({
               disabled={zoomIndex === ZOOM_STEPS.length - 1}
               onClick={() => setZoomIndex((i) => i + 1)}
             >
-              <Plus />
+              <IconPlus />
             </Button>
           </Tooltip>
         </div>

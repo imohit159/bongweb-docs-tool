@@ -30,7 +30,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         ref={ref}
         data-slot="textarea"
         className={cn(
-          "w-full min-w-0 border border-border bg-transparent text-foreground outline-none",
+          "border-border text-foreground w-full min-w-0 border bg-transparent outline-none",
           "field-sizing-content resize-none",
           "transition-[background-color,border-color] duration-80",
           "placeholder:text-muted-foreground",
@@ -39,7 +39,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           // Focus wins over the error tint while the value is fixed; the
           // stacked variant outranks aria-invalid, which Tailwind sorts last.
           "focus:border-foreground/40 aria-invalid:focus:border-foreground/40 focus:hover:bg-transparent",
-          "disabled:opacity-50 disabled:pointer-events-none",
+          "disabled:pointer-events-none disabled:opacity-50",
           // The first line sits where an Input's text does: (36 - 2 - 20) / 2
           // = 7px of padding, (28 - 2 - 18) / 2 = 4px compact. The minimum is
           // three body lines plus that padding and the border.
@@ -52,13 +52,13 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           shape.variant === "pill" ? shape.mergedBg : shape.input,
           sizeClasses.px,
           sizeClasses.field,
-          className
+          className,
         )}
         style={{ fontVariationSettings: fontWeights.normal, ...style }}
         {...props}
       />
     );
-  }
+  },
 );
 
 Textarea.displayName = "Textarea";

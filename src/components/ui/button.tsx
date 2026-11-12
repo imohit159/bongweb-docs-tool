@@ -45,7 +45,8 @@ const buttonVariants = cva(
       // default = 36px control height, compact = 28px for dense surfaces.
       size: {
         default: "h-9 px-4 text-[length:var(--fs-body,13px)] leading-[var(--lh-body,20px)] gap-1.5",
-        compact: "h-7 px-3 text-[length:var(--fs-body-compact,12px)] leading-[var(--lh-body-compact,18px)] gap-1",
+        compact:
+          "h-7 px-3 text-[length:var(--fs-body-compact,12px)] leading-[var(--lh-body-compact,18px)] gap-1",
         icon: "h-9 w-9 p-0 [&_svg]:h-4 [&_svg]:w-4",
         "icon-compact": "h-7 w-7 p-0 [&_svg]:h-3.5 [&_svg]:w-3.5",
       },
@@ -64,7 +65,7 @@ const buttonVariants = cva(
       variant: "primary",
       size: "default",
     },
-  }
+  },
 );
 
 type ButtonSizeCanonical = "default" | "compact" | "icon" | "icon-compact";
@@ -72,13 +73,7 @@ type ButtonSizeCanonical = "default" | "compact" | "icon" | "icon-compact";
 /** Public size values: the canonical two-size scale plus the pre-sizes-system
  *  aliases, kept so existing call sites keep compiling. Aliases resolve onto
  *  the canonical ladder (sm → compact; md/lg → default). */
-type ButtonSize =
-  | ButtonSizeCanonical
-  | "sm"
-  | "md"
-  | "lg"
-  | "icon-sm"
-  | "icon-lg";
+type ButtonSize = ButtonSizeCanonical | "sm" | "md" | "lg" | "icon-sm" | "icon-lg";
 
 const legacySizeAliases: Partial<Record<ButtonSize, ButtonSizeCanonical>> = {
   sm: "compact",
@@ -89,8 +84,7 @@ const legacySizeAliases: Partial<Record<ButtonSize, ButtonSizeCanonical>> = {
 };
 
 interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    Omit<VariantProps<typeof buttonVariants>, "size"> {
+  extends ButtonHTMLAttributes<HTMLButtonElement>, Omit<VariantProps<typeof buttonVariants>, "size"> {
   /** Omitted, the button follows the surrounding SizeProvider (default 36px,
    *  compact 28px). Legacy sm/md/lg values still resolve. */
   size?: ButtonSize;
@@ -153,7 +147,7 @@ const loadingBgVariants: Record<string, string> = Object.fromEntries(
       .split(" ")
       .filter((c) => !c.startsWith("group-hover:") && !c.startsWith("group-active:"))
       .join(" "),
-  ])
+  ]),
 );
 
 /* Forced-active (`active` prop): pressed colors at full size; the
@@ -165,8 +159,7 @@ const activeBgVariants: Record<string, string> = {
     "[--btn-bg:var(--tint)] bg-[var(--btn-bg)] shadow-[0_0_0_1px_var(--btn-bg)] group-active:shadow-[0_0_0_0px_var(--btn-bg)]",
   tertiary:
     "bg-active shadow-[0_0_0_1px_var(--border),inset_0_0_0_0px_var(--border)] group-active:shadow-[0_0_0_0px_var(--border),inset_0_0_0_1px_var(--border)]",
-  ghost:
-    "bg-active shadow-[0_0_0_1px_var(--active)] group-active:shadow-[0_0_0_0px_var(--active)]",
+  ghost: "bg-active shadow-[0_0_0_1px_var(--active)] group-active:shadow-[0_0_0_0px_var(--active)]",
   destructive:
     "[--btn-bg:light-dark(color-mix(in_oklab,var(--btn-red)_25%,transparent),color-mix(in_oklab,var(--btn-red)_30%,transparent))] bg-[var(--btn-bg)] shadow-[0_0_0_1px_var(--btn-bg)] group-active:shadow-[0_0_0_0px_var(--btn-bg)]",
 };
@@ -188,7 +181,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       style,
       ...rest
     },
-    ref
+    ref,
   ) => {
     // nativeButton is accepted for Base UI parity and ignored (see its doc).
     const props = omit(rest, ["nativeButton"]);
@@ -221,13 +214,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     // canonical ladder) > surrounding SizeProvider > default.
     const contextSize = useSizeVariant();
     const resolvedSize: ButtonSizeCanonical = size
-      ? legacySizeAliases[size] ?? (size as ButtonSizeCanonical)
+      ? (legacySizeAliases[size] ?? (size as ButtonSizeCanonical))
       : contextSize === "compact"
         ? "compact"
         : "default";
     const isIconOnly = resolvedSize === "icon" || resolvedSize === "icon-compact";
-    const isCompact =
-      resolvedSize === "compact" || resolvedSize === "icon-compact";
+    const isCompact = resolvedSize === "compact" || resolvedSize === "icon-compact";
     const iconSize = isCompact ? 14 : 16;
     const shape = useShape();
     const bgClass = active
@@ -242,20 +234,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           aria-hidden
           className={cn(
             "absolute inset-px rounded-[inherit] transition-[box-shadow,background-color] [transition-duration:180ms,80ms] [transition-timing-function:cubic-bezier(0.23,1,0.32,1),ease] group-active:[transition-duration:80ms,80ms]",
-            bgClass
+            bgClass,
           )}
         />
         <span className="relative inline-flex items-center justify-center gap-[inherit]">
           {loading ? (
             <>
               <span className="flex items-center justify-center gap-[inherit] opacity-0">
-                {LeadingIcon && !isIconOnly && (
-                  <LeadingIcon size={iconSize} strokeWidth={2} />
-                )}
+                {LeadingIcon && !isIconOnly && <LeadingIcon size={iconSize} strokeWidth={2} />}
                 {label}
-                {TrailingIcon && !isIconOnly && (
-                  <TrailingIcon size={iconSize} strokeWidth={2} />
-                )}
+                {TrailingIcon && !isIconOnly && <TrailingIcon size={iconSize} strokeWidth={2} />}
               </span>
               <span className="absolute inset-0 flex items-center justify-center">
                 {/* Two arcs on one eased lap per second: they stretch while
@@ -267,7 +255,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     9 o'clock. The 0.01 dash (not 0) keeps Safari drawing
                     the round caps as dots. */}
                 <svg width={iconSize} height={iconSize} viewBox="0 0 16 16" fill="none">
-                  <g className="origin-center [transform-box:fill-box] animate-[spinner-turn_1s_cubic-bezier(0.65,0,0.35,1)_infinite] motion-reduce:[animation-duration:2s]">
+                  <g className="origin-center animate-[spinner-turn_1s_cubic-bezier(0.65,0,0.35,1)_infinite] [transform-box:fill-box] motion-reduce:[animation-duration:2s]">
                     <circle
                       cx="8"
                       cy="8"
@@ -322,7 +310,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         iconRight: !isIconOnly && !!TrailingIcon,
       }),
       shape.button,
-      className
+      className,
     );
 
     if (asChildElement) {
@@ -335,7 +323,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className: cn(rootClassName, childProps.className),
           style: { ...style, ...childProps.style },
         },
-        internals
+        internals,
       );
     }
 
@@ -353,7 +341,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {internals}
       </ButtonPrimitive>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

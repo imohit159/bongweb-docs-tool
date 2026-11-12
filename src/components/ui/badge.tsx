@@ -53,6 +53,8 @@ const badgeVariants = cva(
       variant: {
         solid: "",
         dot: "border border-border text-foreground",
+        // Bongweb addition: a dashed outline in the badge's own color, with its dot.
+        dashed: "border border-dashed text-foreground",
         ghost: "",
       },
       // The two-step size ladder shared by every control: 24px tall by
@@ -60,7 +62,8 @@ const badgeVariants = cva(
       // trimmed label below can't shrink the badge.
       size: {
         default: "h-6 px-2.5 text-[length:var(--fs-caption,12px)] leading-[var(--lh-caption,16px)] gap-1.5",
-        compact: "h-5 px-2 text-[length:var(--fs-caption-compact,11px)] leading-[var(--lh-caption-compact,14px)] gap-1",
+        compact:
+          "h-5 px-2 text-[length:var(--fs-caption-compact,11px)] leading-[var(--lh-caption-compact,14px)] gap-1",
       },
     },
     // Ghost has nothing to pad away from, so its dot sits on the edge.
@@ -69,7 +72,7 @@ const badgeVariants = cva(
       variant: "solid",
       size: "default",
     },
-  }
+  },
 );
 
 type BadgeSizeCanonical = "default" | "compact";
@@ -86,8 +89,7 @@ const legacySizeAliases: Partial<Record<BadgeSize, BadgeSizeCanonical>> = {
 };
 
 interface BadgeProps
-  extends Omit<HTMLAttributes<HTMLSpanElement>, "color">,
-    Omit<VariantProps<typeof badgeVariants>, "size"> {
+  extends Omit<HTMLAttributes<HTMLSpanElement>, "color">, Omit<VariantProps<typeof badgeVariants>, "size"> {
   color?: BadgeColor;
   /** Omitted, the badge follows the surrounding SizeProvider. Legacy
    *  sm/md/lg values still resolve. */
@@ -95,18 +97,7 @@ interface BadgeProps
 }
 
 const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  (
-    {
-      className,
-      variant = "solid",
-      size: sizeProp,
-      color = "gray",
-      children,
-      style,
-      ...props
-    },
-    ref
-  ) => {
+  ({ className, variant = "solid", size: sizeProp, color = "gray", children, style, ...props }, ref) => {
     // Corner radius comes from the shape context (rounded, pill or sharp), so
     // badges follow the rest of the app instead of hard-coding a radius.
     const shape = useShape();
@@ -114,7 +105,7 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
     // canonical ladder) > surrounding SizeProvider > default.
     const contextSize = useSizeVariant();
     const size: BadgeSizeCanonical = sizeProp
-      ? legacySizeAliases[sizeProp] ?? (sizeProp as BadgeSizeCanonical)
+      ? (legacySizeAliases[sizeProp] ?? (sizeProp as BadgeSizeCanonical))
       : contextSize === "compact"
         ? "compact"
         : "default";
@@ -133,7 +124,14 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
             color: "var(--foreground)",
             backgroundColor: `color-mix(in srgb, ${colorValue} 15%, var(--background))`,
           }
-      : {};
+      : variant === "dashed"
+        ? {
+            borderColor:
+              color === "gray"
+                ? "color-mix(in srgb, var(--muted-foreground) 55%, transparent)"
+                : `color-mix(in srgb, ${colorValue} 60%, transparent)`,
+          }
+        : {};
 
     // The dot carries the full-strength hex. Gray uses the theme's muted text
     // color instead, so the neutral dot stays visible in both themes.
@@ -162,10 +160,12 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
         {/* Clipped sideways only (overflow-x: clip keeps the trimmed
             label's descenders, which hidden would cut), so a squeezed badge
             ends in an ellipsis. */}
-        <span className="min-w-0 overflow-x-clip text-ellipsis [text-box:trim-both_cap_alphabetic]">{children}</span>
+        <span className="min-w-0 overflow-x-clip text-ellipsis [text-box:trim-both_cap_alphabetic]">
+          {children}
+        </span>
       </span>
     );
-  }
+  },
 );
 
 Badge.displayName = "Badge";

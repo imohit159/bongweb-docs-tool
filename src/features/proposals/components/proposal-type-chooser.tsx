@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, FilePen, Plus, ReceiptText, Repeat, type LucideIcon } from "lucide-react";
+import {
+  IconBriefcase,
+  IconFileInvoice,
+  IconFilePencil,
+  IconPlus,
+  IconRepeat,
+  type Icon as TablerIcon,
+} from "@tabler/icons-react";
 import { Banner, BannerTitle } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,11 +32,11 @@ import {
 import { createProposalAction } from "../actions";
 import { PROPOSAL_TYPE_DETAILS, PROPOSAL_TYPES, type ProposalType } from "../domain";
 
-const TYPE_ICONS: Record<ProposalType, LucideIcon> = {
-  quotation: ReceiptText,
-  project: Briefcase,
-  retainer: Repeat,
-  change: FilePen,
+const TYPE_ICONS: Record<ProposalType, TablerIcon> = {
+  quotation: IconFileInvoice,
+  project: IconBriefcase,
+  retainer: IconRepeat,
+  change: IconFilePencil,
 };
 
 export function ProposalTypeChooser() {
@@ -61,7 +68,7 @@ export function ProposalTypeChooser() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button leadingIcon={Plus}>New offer</Button>} />
+      <DialogTrigger render={<Button leadingIcon={IconPlus}>New offer</Button>} />
       <DialogContent size="xl">
         <DialogHeader>
           <DialogTitle>New offer</DialogTitle>

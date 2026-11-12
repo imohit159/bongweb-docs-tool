@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, X } from "lucide-react";
+import { IconArrowDown, IconArrowUp, IconX } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
 
@@ -30,7 +30,7 @@ export function RowControls({
           disabled={index === 0}
           onClick={() => onMove(index, index - 1)}
         >
-          <ArrowUp />
+          <IconArrowUp />
         </Button>
       </Tooltip>
       <Tooltip content="Move down">
@@ -41,7 +41,7 @@ export function RowControls({
           disabled={index === count - 1}
           onClick={() => onMove(index, index + 1)}
         >
-          <ArrowDown />
+          <IconArrowDown />
         </Button>
       </Tooltip>
       <Tooltip content="Remove">
@@ -52,7 +52,7 @@ export function RowControls({
           disabled={count <= minCount}
           onClick={() => onRemove(index)}
         >
-          <X />
+          <IconX />
         </Button>
       </Tooltip>
     </div>

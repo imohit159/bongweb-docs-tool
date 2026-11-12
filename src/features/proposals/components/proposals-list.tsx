@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, FilePen, FileText, FolderOpen } from "lucide-react";
+import { IconDownload, IconFilePencil, IconFileText, IconFolderOpen } from "@tabler/icons-react";
 import {
   DataTable,
   DataTableColumnHeader,
@@ -117,7 +117,7 @@ function ProposalsEmptyState() {
     <div className="flex flex-col gap-8">
       <ProposalsHeader />
       <section className="border-border flex flex-col items-center gap-3 rounded-xl border border-dashed px-6 py-16 text-center">
-        <FileText aria-hidden className="text-muted-foreground size-6" strokeWidth={1.5} />
+        <IconFileText aria-hidden className="text-muted-foreground size-6" strokeWidth={1.5} />
         <h2 className="font-medium">No offers yet</h2>
         <p className="text-muted-foreground max-w-sm text-sm">
           Pick the template that matches the client&apos;s situation. You can revise it later without starting
@@ -152,20 +152,20 @@ function ProposalsTable({ proposals }: { proposals: ProposalSummary[] }) {
           <>
             <MenuItem
               index={0}
-              icon={FolderOpen}
+              icon={IconFolderOpen}
               label="Open"
               onSelect={() => router.push(`/proposals/${row.original.id}`)}
             />
             <MenuItem
               index={1}
-              icon={FilePen}
+              icon={IconFilePencil}
               label="Revise"
               disabled={!canRevise(row.original.status)}
               onSelect={() => revise(row.original.id)}
             />
             <MenuItem
               index={2}
-              icon={Download}
+              icon={IconDownload}
               label="Download PDF"
               onSelect={() => router.push(`/proposals/${row.original.id}?download=1`)}
             />

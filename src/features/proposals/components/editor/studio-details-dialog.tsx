@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2 } from "lucide-react";
+import { IconBuilding } from "@tabler/icons-react";
 import { useState } from "react";
 import { Banner, BannerTitle } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,7 @@ export function StudioDetailsDialog() {
     >
       <DialogTrigger
         render={
-          <Button variant="ghost" size="compact" leadingIcon={Building2}>
+          <Button variant="ghost" size="compact" leadingIcon={IconBuilding}>
             Studio details
           </Button>
         }

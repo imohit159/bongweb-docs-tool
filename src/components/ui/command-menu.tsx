@@ -28,22 +28,10 @@ import { useIcons, type IconComponent } from "@/lib/icon-context";
 import { usePopupShape } from "@/lib/shape-context";
 import { SizeProvider, useSize, typeClass, fieldTouchClass, type SizeVariant } from "@/lib/size-context";
 import { isDisabledRow } from "@/lib/popup";
-import {
-  useFluidHover,
-  useRegisterFluidHoverItem,
-  type UseFluidHoverReturn,
-} from "@/hooks/use-fluid-hover";
+import { useFluidHover, useRegisterFluidHoverItem, type UseFluidHoverReturn } from "@/hooks/use-fluid-hover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  FluidHoverHighlight,
-  type FluidHoverSource,
-} from "@/components/ui/fluid-hover-highlight";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { FluidHoverHighlight, type FluidHoverSource } from "@/components/ui/fluid-hover-highlight";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsItem } from "@/components/ui/tabs";
 
 // ---------------------------------------------------------------------------
@@ -196,7 +184,7 @@ export function parseShortcut(shortcut: string): ParsedShortcut {
  *  "t" is never read as the physical K. */
 export function matchesShortcut(
   e: Pick<KeyboardEvent, "key" | "code" | "metaKey" | "ctrlKey" | "altKey" | "shiftKey">,
-  parsed: ParsedShortcut
+  parsed: ParsedShortcut,
 ): boolean {
   if (parsed.key === "") return false;
   const key = e.key.toLowerCase();
@@ -255,7 +243,7 @@ export function formatShortcut(shortcut: string, mac: boolean): string[] {
     }
     const lower = token.toLowerCase();
     const modifier = MODIFIER_TOKENS[lower];
-    const name = modifier ?? (KEY_ALIASES[lower] ?? lower);
+    const name = modifier ?? KEY_ALIASES[lower] ?? lower;
     const cap = CAP_LABELS[name];
     if (cap) caps.push(mac ? cap.mac : cap.other);
     else if (name.length === 1) caps.push(name.toUpperCase());
@@ -303,10 +291,7 @@ function isEditable(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
   if (!el) return false;
   return (
-    el.tagName === "INPUT" ||
-    el.tagName === "TEXTAREA" ||
-    el.tagName === "SELECT" ||
-    el.isContentEditable
+    el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable
   );
 }
 
@@ -317,15 +302,10 @@ function isEditable(target: EventTarget | null): boolean {
 /** Every word of the query appears somewhere in the label, description, or
  *  keywords, case-insensitively. Order is kept: rows never re-sort under
  *  the cursor as the query grows. */
-export function defaultCommandMenuFilter(
-  item: CommandMenuItemData,
-  query: string
-): boolean {
+export function defaultCommandMenuFilter(item: CommandMenuItemData, query: string): boolean {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length === 0) return true;
-  const haystack = [item.label, item.description ?? "", ...(item.keywords ?? [])]
-    .join(" ")
-    .toLowerCase();
+  const haystack = [item.label, item.description ?? "", ...(item.keywords ?? [])].join(" ").toLowerCase();
   return words.every((word) => haystack.includes(word));
 }
 
@@ -335,11 +315,11 @@ export function sectionRows(
   visible: readonly CommandMenuItemData[],
   suggestions: readonly string[] | undefined,
   suggestionsLabel: string,
-  query: string
+  query: string,
 ): CommandMenuSection[] {
   const sections: CommandMenuSection[] = [];
   const byHeading = new Map<string | null, CommandMenuSection>();
-  const suggested = new Set(query === "" ? suggestions ?? [] : []);
+  const suggested = new Set(query === "" ? (suggestions ?? []) : []);
   let index = 0;
   const push = (heading: string | null, id: string, item: CommandMenuItemData) => {
     let section = byHeading.get(heading);
@@ -422,8 +402,7 @@ const CommandMenuContext = createContext<CommandMenuContextValue | null>(null);
 
 function useCommandMenu(): CommandMenuContextValue {
   const ctx = useContext(CommandMenuContext);
-  if (!ctx)
-    throw new Error("CommandMenu compound components must be inside <CommandMenu>");
+  if (!ctx) throw new Error("CommandMenu compound components must be inside <CommandMenu>");
   return ctx;
 }
 
@@ -441,8 +420,7 @@ const CommandMenuDialogContext = createContext<CommandMenuDialogContextValue | n
 // CommandMenu (root)
 // ---------------------------------------------------------------------------
 
-export interface CommandMenuProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onSelect"> {
+export interface CommandMenuProps extends Omit<HTMLAttributes<HTMLDivElement>, "onSelect"> {
   /** The actions. Keep the array stable (state, a module constant, or a
    *  memo): the highlight resets to the first row when it changes. */
   items: readonly CommandMenuItemData[];
@@ -486,7 +464,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const listId = useId();
     const listRef = useRef<HTMLDivElement | null>(null);
@@ -502,7 +480,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
         if (queryProp === undefined) setInternalQuery(next);
         onQueryChange?.(next);
       },
-      [queryProp, onQueryChange]
+      [queryProp, onQueryChange],
     );
 
     const itemsByValue = useMemo(() => {
@@ -531,7 +509,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
     const { onMouseEnter, onMouseMove, onMouseLeave, onClick } = hover.handlers;
     const listHandlers = useMemo(
       () => ({ onMouseEnter, onMouseMove, onMouseLeave, onClick }),
-      [onMouseEnter, onMouseMove, onMouseLeave, onClick]
+      [onMouseEnter, onMouseMove, onMouseLeave, onClick],
     );
 
     // The highlight, published as a store right after each commit: rows and
@@ -549,7 +527,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
           };
         },
       }),
-      []
+      [],
     );
     useIsoLayoutEffect(() => {
       highlightRef.current = activeIndex;
@@ -557,7 +535,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
     }, [activeIndex]);
     const fill = useMemo<FluidHoverSource>(
       () => ({ activeIndex, itemRects, isMeasured, session }),
-      [activeIndex, itemRects, isMeasured, session]
+      [activeIndex, itemRects, isMeasured, session],
     );
 
     // Scrolling is the root's, done the moment a move is decided rather
@@ -592,8 +570,8 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
           0,
           Math.min(
             rowTop + row.offsetHeight / 2 - viewport.clientHeight / 2,
-            viewport.scrollHeight - viewport.clientHeight
-          )
+            viewport.scrollHeight - viewport.clientHeight,
+          ),
         );
         if (reduceMotion) {
           viewport.scrollTop = target;
@@ -606,7 +584,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
           },
         });
       },
-      [reduceMotion]
+      [reduceMotion],
     );
     useEffect(() => () => scrollAnimationRef.current?.stop(), []);
 
@@ -643,7 +621,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
         setActiveIndex(next);
         scrollToRow(next, "center");
       },
-      [setActiveIndex, scrollToRow]
+      [setActiveIndex, scrollToRow],
     );
 
     const onSelectRef = useRef(onSelect);
@@ -657,7 +635,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
         onSelectRef.current?.(item);
         if (closeOnSelect) dialog?.close();
       },
-      [closeOnSelect, dialog]
+      [closeOnSelect, dialog],
     );
 
     const ctx = useMemo<CommandMenuContextValue>(
@@ -694,7 +672,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
         select,
         move,
         tabsMounted,
-      ]
+      ],
     );
 
     // The panel follows its rows: the column inside is measured (offsetHeight,
@@ -721,7 +699,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
           <div
             ref={ref}
             data-slot="command-menu"
-            className={cn("relative w-full max-h-[inherit] overflow-hidden", className)}
+            className={cn("relative max-h-[inherit] w-full overflow-hidden", className)}
             {...props}
           >
             <motion.div
@@ -740,7 +718,7 @@ const CommandMenu = forwardRef<HTMLDivElement, CommandMenuProps>(
     );
 
     return size ? <SizeProvider size={size}>{root}</SizeProvider> : root;
-  }
+  },
 );
 
 CommandMenu.displayName = "CommandMenu";
@@ -750,28 +728,23 @@ CommandMenu.displayName = "CommandMenu";
 // the list through aria-activedescendant.
 // ---------------------------------------------------------------------------
 
-export interface CommandMenuInputProps
-  extends Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    "value" | "defaultValue" | "onChange" | "size"
-  > {
+export interface CommandMenuInputProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "value" | "defaultValue" | "onChange" | "size"
+> {
   placeholder?: string;
   /** Leading icon. @default the search icon */
   icon?: IconComponent | null;
 }
 
 const CommandMenuInput = forwardRef<HTMLInputElement, CommandMenuInputProps>(
-  (
-    { className, placeholder = "Type a command or search…", icon, onKeyDown, ...props },
-    ref
-  ) => {
+  ({ className, placeholder = "Type a command or search…", icon, onKeyDown, ...props }, ref) => {
     const icons = useIcons();
     const SearchIcon = icons.search;
     const Icon = icon === undefined ? SearchIcon : icon;
     const sizeClasses = useSize();
     const compact = sizeClasses.variant === "compact";
-    const { query, setQuery, rows, listId, inputRef, highlight, select, move, tabsRef } =
-      useCommandMenu();
+    const { query, setQuery, rows, listId, inputRef, highlight, select, move, tabsRef } = useCommandMenu();
     const activeIndex = useSyncExternalStore(highlight.subscribe, highlight.get, () => null);
     const dialog = useContext(CommandMenuDialogContext);
 
@@ -789,15 +762,7 @@ const CommandMenuInput = forwardRef<HTMLInputElement, CommandMenuInputProps>(
           // of moving the caret. Modified presses keep their editing meaning —
           // Shift+Arrow in particular must still extend the selection.
           const tabs = tabsRef.current;
-          if (
-            !tabs ||
-            tabs.tabs.length === 0 ||
-            e.shiftKey ||
-            e.altKey ||
-            e.metaKey ||
-            e.ctrlKey
-          )
-            return;
+          if (!tabs || tabs.tabs.length === 0 || e.shiftKey || e.altKey || e.metaKey || e.ctrlKey) return;
           e.preventDefault();
           const count = tabs.tabs.length;
           const current = tabs.tabs.findIndex((tab) => tab.value === tabs.value);
@@ -847,14 +812,14 @@ const CommandMenuInput = forwardRef<HTMLInputElement, CommandMenuInputProps>(
         data-slot="command-menu-input"
         className={cn(
           "group/command-input flex shrink-0 items-center",
-          compact ? "h-10 gap-2 px-3" : "h-12 gap-2.5 px-4"
+          compact ? "h-10 gap-2 px-3" : "h-12 gap-2.5 px-4",
         )}
       >
         {Icon && (
           <Icon
             size={sizeClasses.icon}
             strokeWidth={1.5}
-            className="shrink-0 text-muted-foreground transition-[color,stroke-width] duration-80 group-focus-within/command-input:text-foreground group-focus-within/command-input:stroke-[2]"
+            className="text-muted-foreground group-focus-within/command-input:text-foreground shrink-0 transition-[color,stroke-width] duration-80 group-focus-within/command-input:stroke-[2]"
           />
         )}
         <input
@@ -879,18 +844,20 @@ const CommandMenuInput = forwardRef<HTMLInputElement, CommandMenuInputProps>(
           // rounded-none: the base :focus-visible rule hands focused elements
           // the shape radius, and a text input clips its caret to its corners.
           className={cn(
-            "min-w-0 flex-1 rounded-none bg-transparent text-foreground placeholder:text-muted-foreground outline-none font-[inherit]",
+            "text-foreground placeholder:text-muted-foreground min-w-0 flex-1 rounded-none bg-transparent font-[inherit] outline-none",
             // One notch above the rows' body size: the field is the palette's
             // title line. The line box keeps the caret in proportion.
-            compact ? "text-[length:var(--fs-subtitle-compact,13px)] leading-5" : "text-[length:var(--fs-subtitle,14px)] leading-6",
+            compact
+              ? "text-[length:var(--fs-subtitle-compact,13px)] leading-5"
+              : "text-[length:var(--fs-subtitle,14px)] leading-6",
             fieldTouchClass,
-            className
+            className,
           )}
           {...props}
         />
       </div>
     );
-  }
+  },
 );
 
 CommandMenuInput.displayName = "CommandMenuInput";
@@ -926,7 +893,7 @@ const CommandMenuTabs = forwardRef<HTMLDivElement, CommandMenuTabsProps>(
     const { tabsRef, setTabsMounted } = useCommandMenu();
     const selectedIndex = Math.max(
       0,
-      tabs.findIndex((tab) => tab.value === value)
+      tabs.findIndex((tab) => tab.value === value),
     );
 
     // The field reads the latest tabs and value from the ref on each ← / →,
@@ -952,7 +919,7 @@ const CommandMenuTabs = forwardRef<HTMLDivElement, CommandMenuTabsProps>(
         className={cn(
           "flex shrink-0 items-center",
           compact ? "gap-1 px-2 pb-1.5" : "gap-2 px-2.5 pb-2",
-          className
+          className,
         )}
         {...props}
       >
@@ -986,7 +953,7 @@ const CommandMenuTabs = forwardRef<HTMLDivElement, CommandMenuTabsProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 CommandMenuTabs.displayName = "CommandMenuTabs";
@@ -1017,14 +984,14 @@ const CommandMenuFilters = forwardRef<HTMLDivElement, CommandMenuFiltersProps>(
           "[&_[role=combobox]]:w-auto [&_[role=combobox]]:min-w-0",
           !inTabsRow && "flex-wrap",
           !inTabsRow && (compact ? "px-2 pb-1.5" : "px-2.5 pb-2"),
-          className
+          className,
         )}
         {...props}
       >
         <SizeProvider size="compact">{children}</SizeProvider>
       </div>
     );
-  }
+  },
 );
 
 CommandMenuFilters.displayName = "CommandMenuFilters";
@@ -1093,7 +1060,7 @@ const CommandMenuList = forwardRef<HTMLDivElement, CommandMenuListProps>(
       // footer the list is the panel's last child and that hairline would
       // land on the panel's own bottom edge and double it, so it is dropped.
       <ScrollArea
-        className="scroll-divider flex min-h-0 flex-1 flex-col border-t border-border/60 [&::before]:!-top-px [&:last-child::after]:!hidden"
+        className="scroll-divider border-border/60 flex min-h-0 flex-1 flex-col border-t [&::before]:!-top-px [&:last-child::after]:!hidden"
         viewportClassName="min-h-0 flex-1 [&>div[style]]:!block [&>div[style]]:!min-w-0 [--scroll-fade-size:32px] scroll-fade"
       >
         <div
@@ -1119,7 +1086,7 @@ const CommandMenuList = forwardRef<HTMLDivElement, CommandMenuListProps>(
             // together inside the viewport. Padding collapses when empty, and
             // the message centers in the height the rows left.
             "relative flex flex-col gap-1 p-1 outline-none data-[empty]:justify-center data-[empty]:p-0",
-            className
+            className,
           )}
           {...props}
         >
@@ -1131,20 +1098,15 @@ const CommandMenuList = forwardRef<HTMLDivElement, CommandMenuListProps>(
             // into two ids that exist nowhere.
             const headingId = section.heading ? `${listId}-group-${sectionIndex}` : undefined;
             return (
-              <div
-                key={section.id}
-                role="group"
-                aria-labelledby={headingId}
-                className="flex flex-col"
-              >
+              <div key={section.id} role="group" aria-labelledby={headingId} className="flex flex-col">
                 {section.heading && (
                   <div
                     id={headingId}
                     role="presentation"
                     className={cn(
-                      "flex shrink-0 items-center text-muted-foreground",
+                      "text-muted-foreground flex shrink-0 items-center",
                       compact ? "h-6 px-1.5" : "h-7 px-2",
-                      typeClass("caption", compact ? "compact" : "default")
+                      typeClass("caption", compact ? "compact" : "default"),
                     )}
                   >
                     {section.heading}
@@ -1164,7 +1126,7 @@ const CommandMenuList = forwardRef<HTMLDivElement, CommandMenuListProps>(
         </div>
       </ScrollArea>
     );
-  }
+  },
 );
 
 CommandMenuList.displayName = "CommandMenuList";
@@ -1175,27 +1137,21 @@ CommandMenuList.displayName = "CommandMenuList";
 
 export type CommandMenuEmptyProps = HTMLAttributes<HTMLDivElement>;
 
-const CommandMenuEmpty = forwardRef<HTMLDivElement, CommandMenuEmptyProps>(
-  ({ className, ...props }, ref) => {
-    const { rows } = useCommandMenu();
-    const sizeClasses = useSize();
-    if (rows.length > 0) return null;
-    return (
-      <div
-        ref={ref}
-        role="status"
-        aria-live="polite"
-        data-slot="command-menu-empty"
-        className={cn(
-          "px-3 py-6 text-center text-muted-foreground",
-          sizeClasses.text,
-          className
-        )}
-        {...props}
-      />
-    );
-  }
-);
+const CommandMenuEmpty = forwardRef<HTMLDivElement, CommandMenuEmptyProps>(({ className, ...props }, ref) => {
+  const { rows } = useCommandMenu();
+  const sizeClasses = useSize();
+  if (rows.length > 0) return null;
+  return (
+    <div
+      ref={ref}
+      role="status"
+      aria-live="polite"
+      data-slot="command-menu-empty"
+      className={cn("text-muted-foreground px-3 py-6 text-center", sizeClasses.text, className)}
+      {...props}
+    />
+  );
+});
 
 CommandMenuEmpty.displayName = "CommandMenuEmpty";
 
@@ -1213,9 +1169,7 @@ const CommandMenuShortcut = forwardRef<HTMLElement, CommandMenuShortcutProps>(
   ({ keys, className, ...props }, ref) => {
     const mac = useIsMac();
     const compact = useSize().variant === "compact";
-    const caps = (typeof keys === "string" ? [keys] : keys).flatMap((k) =>
-      formatShortcut(k, mac)
-    );
+    const caps = (typeof keys === "string" ? [keys] : keys).flatMap((k) => formatShortcut(k, mac));
     return (
       <kbd
         ref={ref}
@@ -1227,9 +1181,9 @@ const CommandMenuShortcut = forwardRef<HTMLElement, CommandMenuShortcutProps>(
           <span
             key={`${cap}-${i}`}
             className={cn(
-              "flex items-center justify-center rounded-[5px] bg-hover text-muted-foreground",
+              "bg-hover text-muted-foreground flex items-center justify-center rounded-[5px]",
               compact ? "h-4 min-w-4 px-1" : "h-5 min-w-5 px-1",
-              typeClass("micro", compact ? "compact" : "default")
+              typeClass("micro", compact ? "compact" : "default"),
             )}
           >
             {cap}
@@ -1237,7 +1191,7 @@ const CommandMenuShortcut = forwardRef<HTMLElement, CommandMenuShortcutProps>(
         ))}
       </kbd>
     );
-  }
+  },
 );
 
 CommandMenuShortcut.displayName = "CommandMenuShortcut";
@@ -1247,8 +1201,7 @@ CommandMenuShortcut.displayName = "CommandMenuShortcut";
 // prop set here overrides it.
 // ---------------------------------------------------------------------------
 
-export interface CommandMenuItemProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onSelect"> {
+export interface CommandMenuItemProps extends Omit<HTMLAttributes<HTMLDivElement>, "onSelect"> {
   value: string;
   label?: string;
   description?: string;
@@ -1260,120 +1213,118 @@ export interface CommandMenuItemProps
 
 // Memoized: the list re-renders as the fill travels, and a row whose props
 // did not change (the default row has only `value`) must not follow it.
-const CommandMenuItem = memo(forwardRef<HTMLDivElement, CommandMenuItemProps>(
-  (
-    {
-      value,
-      label,
-      description,
-      icon,
-      shortcut,
-      disabled,
-      onSelect,
-      className,
-      onClick,
-      children,
-      ...props
-    },
-    ref
-  ) => {
-    const listShape = usePopupShape();
-    const { itemsByValue, listId, registerItem, highlight, select } = useCommandMenu();
-    const index = useContext(CommandMenuIndexContext);
-    const internalRef = useRef<HTMLDivElement | null>(null);
-    const sizeClasses = useSize();
-    // One boolean per row: a highlight change re-renders the row it left
-    // and the row it reached, and no other.
-    const isActive = useSyncExternalStore(
-      highlight.subscribe,
-      () => highlight.get() === index,
-      () => false
-    );
+const CommandMenuItem = memo(
+  forwardRef<HTMLDivElement, CommandMenuItemProps>(
+    (
+      {
+        value,
+        label,
+        description,
+        icon,
+        shortcut,
+        disabled,
+        onSelect,
+        className,
+        onClick,
+        children,
+        ...props
+      },
+      ref,
+    ) => {
+      const listShape = usePopupShape();
+      const { itemsByValue, listId, registerItem, highlight, select } = useCommandMenu();
+      const index = useContext(CommandMenuIndexContext);
+      const internalRef = useRef<HTMLDivElement | null>(null);
+      const sizeClasses = useSize();
+      // One boolean per row: a highlight change re-renders the row it left
+      // and the row it reached, and no other.
+      const isActive = useSyncExternalStore(
+        highlight.subscribe,
+        () => highlight.get() === index,
+        () => false,
+      );
 
-    const data = itemsByValue.get(value);
-    const item: CommandMenuItemData = {
-      ...(data ?? { value, label: value }),
-      ...(label !== undefined && { label }),
-      ...(description !== undefined && { description }),
-      ...(icon !== undefined && { icon }),
-      ...(shortcut !== undefined && { shortcut }),
-      ...(disabled !== undefined && { disabled }),
-      ...(onSelect !== undefined && { onSelect }),
-    };
-    const Icon = item.icon;
+      const data = itemsByValue.get(value);
+      const item: CommandMenuItemData = {
+        ...(data ?? { value, label: value }),
+        ...(label !== undefined && { label }),
+        ...(description !== undefined && { description }),
+        ...(icon !== undefined && { icon }),
+        ...(shortcut !== undefined && { shortcut }),
+        ...(disabled !== undefined && { disabled }),
+        ...(onSelect !== undefined && { onSelect }),
+      };
+      const Icon = item.icon;
 
-    useRegisterFluidHoverItem(registerItem, index, internalRef);
+      useRegisterFluidHoverItem(registerItem, index, internalRef);
 
-    return (
-      <div
-        ref={(node) => {
-          internalRef.current = node;
-          if (typeof ref === "function") ref(node);
-          else if (ref) ref.current = node;
-        }}
-        id={`${listId}-${index}`}
-        role="option"
-        aria-selected={isActive}
-        aria-disabled={item.disabled || undefined}
-        data-fluid-hover-index={index}
-        data-value={value}
-        data-slot="command-menu-item"
-        onClick={(e) => {
-          onClick?.(e);
-          if (!e.defaultPrevented) select(item);
-        }}
-        className={cn(
-          // Fixed height so the text-box trim on the label doesn't shrink
-          // the row; shrink-0 because the list is a flex column.
-          "relative z-10 flex shrink-0 items-center cursor-pointer select-none outline-none",
-          sizeClasses.control,
-          sizeClasses.gap,
-          sizeClasses.itemPx,
-          sizeClasses.text,
-          listShape.item,
-          "transition-[color] duration-80",
-          item.destructive
-            ? isActive
-              ? "text-destructive"
-              : "text-destructive/80"
-            : isActive
-              ? "text-foreground"
-              : "text-muted-foreground",
-          item.disabled && "opacity-50 pointer-events-none",
-          className
-        )}
-        {...props}
-      >
-        {Icon && (
-          <Icon
-            size={sizeClasses.icon}
-            strokeWidth={isActive ? 2 : 1.5}
-            className="shrink-0 transition-[color,stroke-width] duration-80"
-          />
-        )}
-        {children ?? (
-          // py-1/-my-1 keeps truncate's overflow:hidden from clipping
-          // ascenders and descenders outside the trimmed box.
-          <span className="flex min-w-0 flex-1 items-baseline gap-2">
-            <span className="truncate [text-box:trim-both_cap_alphabetic] py-1 -my-1">
-              {item.label}
-            </span>
-            {/* The description shares the label's size, muted on both
+      return (
+        <div
+          ref={(node) => {
+            internalRef.current = node;
+            if (typeof ref === "function") ref(node);
+            else if (ref) ref.current = node;
+          }}
+          id={`${listId}-${index}`}
+          role="option"
+          aria-selected={isActive}
+          aria-disabled={item.disabled || undefined}
+          data-fluid-hover-index={index}
+          data-value={value}
+          data-slot="command-menu-item"
+          onClick={(e) => {
+            onClick?.(e);
+            if (!e.defaultPrevented) select(item);
+          }}
+          className={cn(
+            // Fixed height so the text-box trim on the label doesn't shrink
+            // the row; shrink-0 because the list is a flex column.
+            "relative z-10 flex shrink-0 cursor-pointer items-center outline-none select-none",
+            sizeClasses.control,
+            sizeClasses.gap,
+            sizeClasses.itemPx,
+            sizeClasses.text,
+            listShape.item,
+            "transition-[color] duration-80",
+            item.destructive
+              ? isActive
+                ? "text-destructive"
+                : "text-destructive/80"
+              : isActive
+                ? "text-foreground"
+                : "text-muted-foreground",
+            item.disabled && "pointer-events-none opacity-50",
+            className,
+          )}
+          {...props}
+        >
+          {Icon && (
+            <Icon
+              size={sizeClasses.icon}
+              strokeWidth={isActive ? 2 : 1.5}
+              className="shrink-0 transition-[color,stroke-width] duration-80"
+            />
+          )}
+          {children ?? (
+            // py-1/-my-1 keeps truncate's overflow:hidden from clipping
+            // ascenders and descenders outside the trimmed box.
+            <span className="flex min-w-0 flex-1 items-baseline gap-2">
+              <span className="-my-1 truncate py-1 [text-box:trim-both_cap_alphabetic]">{item.label}</span>
+              {/* The description shares the label's size, muted on both
                 states of the row. */}
-            {item.description && (
-              <span
-                className="min-w-0 truncate [text-box:trim-both_cap_alphabetic] py-1 -my-1 text-muted-foreground"
-              >
-                {item.description}
-              </span>
-            )}
-          </span>
-        )}
-        {item.shortcut && <CommandMenuShortcut keys={item.shortcut} />}
-      </div>
-    );
-  }
-));
+              {item.description && (
+                <span className="text-muted-foreground -my-1 min-w-0 truncate py-1 [text-box:trim-both_cap_alphabetic]">
+                  {item.description}
+                </span>
+              )}
+            </span>
+          )}
+          {item.shortcut && <CommandMenuShortcut keys={item.shortcut} />}
+        </div>
+      );
+    },
+  ),
+);
 
 CommandMenuItem.displayName = "CommandMenuItem";
 
@@ -1417,10 +1368,10 @@ const CommandMenuFooter = forwardRef<HTMLDivElement, CommandMenuFooterProps>(
         ref={ref}
         data-slot="command-menu-footer"
         className={cn(
-          "flex shrink-0 items-center overflow-hidden text-muted-foreground",
+          "text-muted-foreground flex shrink-0 items-center overflow-hidden",
           compact ? "h-8 gap-3 px-3" : "h-10 gap-4 px-4",
           typeClass("caption", compact ? "compact" : "default"),
-          className
+          className,
         )}
         {...props}
       >
@@ -1435,7 +1386,7 @@ const CommandMenuFooter = forwardRef<HTMLDivElement, CommandMenuFooterProps>(
             {action !== null && (
               <span
                 data-slot="command-menu-footer-action"
-                className="ml-auto flex min-w-0 items-center gap-1.5 text-foreground"
+                className="text-foreground ml-auto flex min-w-0 items-center gap-1.5"
               >
                 <span className="truncate">{action}</span>
                 <CommandMenuShortcut keys="enter" className="ml-0" />
@@ -1445,7 +1396,7 @@ const CommandMenuFooter = forwardRef<HTMLDivElement, CommandMenuFooterProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 CommandMenuFooter.displayName = "CommandMenuFooter";
@@ -1568,7 +1519,11 @@ function CommandMenuDialog({
       if (!hasModifier(parsed) && isEditable(e.target)) return;
       const peers = mountedDialogs.filter((d) => d.combo === combo);
       const answers =
-        peers.find((d) => d.isOpen()) ?? peers.slice().reverse().find((d) => d.inScope());
+        peers.find((d) => d.isOpen()) ??
+        peers
+          .slice()
+          .reverse()
+          .find((d) => d.inScope());
       if (answers !== entry) return;
       e.preventDefault();
       setOpen(!openRef.current);
@@ -1586,28 +1541,26 @@ function CommandMenuDialog({
   return (
     <>
       <span ref={anchorRef} hidden />
-    <Dialog open={open} onOpenChange={setOpen} modal={modal}>
-      <DialogContent
-        size="lg"
-        container={container}
-        showCloseButton={false}
-        // Opens centered at its cap and keeps that top edge: the top is where
-        // a panel at the cap height, min(440px, 76dvh), sits centered, so
-        // the field stays put while the rows under it filter down. Below
-        // 580px of height the cap is 76dvh and the top lands on 12dvh.
-        position="top"
-        className={cn(
-          "top-[max(12dvh,calc(50dvh-220px))] flex max-h-[min(440px,76dvh)] flex-col overflow-hidden p-0",
-          className
-        )}
-      >
-        <DialogTitle className="sr-only">{title}</DialogTitle>
-        <DialogDescription className="sr-only">{description}</DialogDescription>
-        <CommandMenuDialogContext.Provider value={dialogCtx}>
-          {children}
-        </CommandMenuDialogContext.Provider>
-      </DialogContent>
-    </Dialog>
+      <Dialog open={open} onOpenChange={setOpen} modal={modal}>
+        <DialogContent
+          size="lg"
+          container={container}
+          showCloseButton={false}
+          // Opens centered at its cap and keeps that top edge: the top is where
+          // a panel at the cap height, min(440px, 76dvh), sits centered, so
+          // the field stays put while the rows under it filter down. Below
+          // 580px of height the cap is 76dvh and the top lands on 12dvh.
+          position="top"
+          className={cn(
+            "top-[max(12dvh,calc(50dvh-220px))] flex max-h-[min(440px,76dvh)] flex-col overflow-hidden p-0",
+            className,
+          )}
+        >
+          <DialogTitle className="sr-only">{title}</DialogTitle>
+          <DialogDescription className="sr-only">{description}</DialogDescription>
+          <CommandMenuDialogContext.Provider value={dialogCtx}>{children}</CommandMenuDialogContext.Provider>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
