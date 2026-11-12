@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, Handshake, Receipt } from "lucide-react";
+import { FileSignature, FileText, ReceiptIndianRupee, type LucideIcon, type LucideProps } from "lucide-react";
 import { MotionConfig } from "motion/react";
 import { useState, type ReactNode } from "react";
 import {
@@ -28,10 +28,20 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 // open/closed state is separate and never written to the cookie.
 const EDITOR_ROUTE = /^\/proposals\/[0-9a-f-]{36}$/i;
 
+// The menu thickens a lit row's icon stroke; these keep one light outline in
+// every state, so the pill background alone marks the active and hovered row.
+function outline(Icon: LucideIcon) {
+  function OutlineIcon(props: LucideProps) {
+    return <Icon {...props} strokeWidth={1.5} />;
+  }
+  OutlineIcon.displayName = `Outline${Icon.displayName ?? ""}`;
+  return OutlineIcon;
+}
+
 const navigation = [
-  { href: "/proposals", label: "Proposals", icon: FileText },
-  { href: "/agreements", label: "Agreements", icon: Handshake },
-  { href: "/invoices", label: "Invoices", icon: Receipt },
+  { href: "/proposals", label: "Proposals", icon: outline(FileText) },
+  { href: "/agreements", label: "Agreements", icon: outline(FileSignature) },
+  { href: "/invoices", label: "Invoices", icon: outline(ReceiptIndianRupee) },
 ];
 
 export function DashboardShell({
@@ -94,7 +104,9 @@ export function DashboardShell({
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel>Documents</SidebarGroupLabel>
-              <SidebarMenu>
+              {/* A small gap keeps the active and hover highlights as separate pills, and the
+                  active one is a clearly stronger tint than hover (scoped to this menu). */}
+              <SidebarMenu className="gap-0.5 [--active:color-mix(in_oklab,var(--foreground)_13%,transparent)] [--hover:color-mix(in_oklab,var(--foreground)_5%,transparent)]">
                 {navigation.map((item) => (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton

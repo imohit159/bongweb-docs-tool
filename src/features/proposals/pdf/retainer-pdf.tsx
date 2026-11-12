@@ -13,12 +13,12 @@ import {
   ChosenOption,
   DocHeader,
   Fill,
-  TitleBlock,
+  DocumentHeading,
   NumberedList,
   PageFooter,
-  Parties,
   PlanTable,
   Section,
+  SignOff,
   Signatures,
   SimpleTable,
   SubTitle,
@@ -37,6 +37,7 @@ export function RetainerPdf({
   studio: StudioDetails;
 }) {
   const wording = (key: RetainerWordingKey) => content.wording[key]?.trim() || RETAINER_WORDING[key].text;
+  const client = [content.client.name, content.client.business].filter((v) => v.trim()).join(", ");
   const deliverables = content.deliverables.filter((d) => d.item.trim() || d.perMonth.trim());
   const months = `${content.minimumTermMonths} ${content.minimumTermMonths === 1 ? "month" : "months"}`;
 
@@ -44,14 +45,14 @@ export function RetainerPdf({
     <Document title={`Retainer Proposal ${number}`} author={STUDIO_NAME} creator={STUDIO_NAME}>
       <Page size="A4" style={s.page}>
         <DocHeader number={number} />
-        <TitleBlock
+        <DocumentHeading
           title="Retainer Proposal"
-          meta={[
-            { label: "Date", value: <Fill value={day(content.issueDate)} label="DD Mon YYYY" /> },
-            { label: "Valid until", value: <Fill value={day(content.validUntil)} label="DD Mon YYYY" /> },
+          info={[
+            { label: "DATE", value: <Fill value={day(content.issueDate)} label="DD Mon YYYY" /> },
+            { label: "VALID UNTIL", value: <Fill value={day(content.validUntil)} label="DD Mon YYYY" /> },
+            { label: "CLIENT", value: <Fill value={client} label="Client / Business name" /> },
           ]}
         />
-        <Parties studio={studio} client={content.client} />
 
         <Section title="1. Summary">
           <Text style={s.body}>
@@ -145,12 +146,12 @@ export function RetainerPdf({
           </Text>
         </View>
 
-        <Section title="8. Acceptance">
+        <SignOff title="8. Acceptance">
           <ChosenOption label="Chosen plan" plans={content.plans} />
           <Signatures clientHeading="Accepted by (Client)" signatoryName={studio.signatoryName} />
-        </Section>
+        </SignOff>
 
-        <PageFooter />
+        <PageFooter studio={studio} />
       </Page>
     </Document>
   );

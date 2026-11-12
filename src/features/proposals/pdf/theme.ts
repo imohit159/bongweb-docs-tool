@@ -64,7 +64,7 @@ export const pdfStyles = StyleSheet.create({
     paddingHorizontal: 44,
   },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 22 },
-  headerNumber: { fontSize: 10, lineHeight: 1.2, fontWeight: 600 },
+  headerNumber: { fontSize: 9, lineHeight: 1.2, color: PDF_COLORS.muted },
   eyebrow: { fontSize: 7.5, lineHeight: 1.2, letterSpacing: 1.2, fontWeight: 600, color: PDF_COLORS.muted },
   title: { fontSize: 20, lineHeight: 1.2, fontWeight: 600 },
   subtitle: { fontSize: 9.5, lineHeight: 1.4, color: PDF_COLORS.muted, marginTop: 3 },
@@ -108,9 +108,14 @@ export const pdfStyles = StyleSheet.create({
   bulletRow: { flexDirection: "row", gap: 6, marginBottom: 2 },
   bullet: { fontSize: 9.5, lineHeight: 1.45, width: 8 },
   bulletText: { flex: 1, fontSize: 9.5, lineHeight: 1.45 },
+  // No border on the container: a bordered parent holding an unbreakable first
+  // group mis-places the rows after it when that group moves to the next page.
+  tableGroup: { marginBottom: 6 },
   table: { borderTopWidth: 1, borderColor: PDF_COLORS.hairline, marginBottom: 6 },
   tableHead: {
     flexDirection: "row",
+    borderTopWidth: 1,
+    borderColor: PDF_COLORS.hairline,
     backgroundColor: PDF_COLORS.band,
     paddingVertical: 5,
     paddingHorizontal: 6,
@@ -126,6 +131,9 @@ export const pdfStyles = StyleSheet.create({
   th: { fontSize: 8, lineHeight: 1.3, fontWeight: 600, color: PDF_COLORS.muted },
   td: { fontSize: 9.5, lineHeight: 1.4 },
   gap: { backgroundColor: PDF_COLORS.gap, color: PDF_COLORS.gapInk },
+  // marginTop "auto" takes up the free space on the last page; paddingTop is the
+  // minimum gap from the content above.
+  signOff: { marginTop: "auto", paddingTop: 16 },
   signatures: { flexDirection: "row", gap: 24, marginTop: 10 },
   signature: { flex: 1, borderTopWidth: 1, borderColor: PDF_COLORS.hairline, paddingTop: 6 },
   signatureLine: { fontSize: 9, lineHeight: 1.9 },

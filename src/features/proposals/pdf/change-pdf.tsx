@@ -2,7 +2,16 @@ import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { STUDIO_NAME, howToPay, type StudioDetails } from "@/features/studio/schema";
 import { formatDocDate } from "@/lib/dates";
 import { CHANGE_WORDING, type ChangeContent, type ChangeWordingKey } from "../templates/change";
-import { DocHeader, Fill, ItemsTable, KeyValueRows, PageFooter, Section, Signatures } from "./blocks";
+import {
+  DocHeader,
+  DocumentHeading,
+  Fill,
+  ItemsTable,
+  PageFooter,
+  Section,
+  SignOff,
+  Signatures,
+} from "./blocks";
 import { pdfStyles as s } from "./theme";
 
 const day = (value: string) => (value ? formatDocDate(value) : "");
@@ -22,22 +31,21 @@ export function ChangePdf({
     <Document title={`Change Request ${number}`} author={STUDIO_NAME} creator={STUDIO_NAME}>
       <Page size="A4" style={s.page}>
         <DocHeader number={number} />
-        <Text style={[s.title, { marginBottom: 12 }]}>Change Request</Text>
-        <KeyValueRows
-          rows={[
-            { label: "Change request No.", value: number },
-            { label: "Date", value: <Fill value={day(content.issueDate)} label="DD Mon YYYY" /> },
-            { label: "Client", value: <Fill value={client} label="Client name, Business name" /> },
-            { label: "Project", value: <Fill value={content.projectName} label="Project name" /> },
+        <DocumentHeading
+          title="Change Request"
+          subtitle={<Fill value={content.projectName} label="Project name" />}
+          info={[
+            { label: "DATE", value: <Fill value={day(content.issueDate)} label="DD Mon YYYY" /> },
             {
-              label: "Original proposal",
+              label: "ORIGINAL PROPOSAL",
               value: (
                 <>
-                  <Fill value={content.original.number} label="BW-P-001" /> dated{" "}
+                  <Fill value={content.original.number} label="BW-P-001" /> ·{" "}
                   <Fill value={day(content.original.date)} label="DD Mon YYYY" />
                 </>
               ),
             },
+            { label: "CLIENT", value: <Fill value={client} label="Client / Business name" /> },
           ]}
         />
 
@@ -66,12 +74,12 @@ export function ChangePdf({
           </Text>
         </Section>
 
-        <Section title="Approval">
+        <SignOff title="Approval">
           <Text style={s.body}>{wording("approval")}</Text>
           <Signatures clientHeading="Approved by (Client)" signatoryName={studio.signatoryName} />
-        </Section>
+        </SignOff>
 
-        <PageFooter />
+        <PageFooter studio={studio} />
       </Page>
     </Document>
   );

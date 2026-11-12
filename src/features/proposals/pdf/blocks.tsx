@@ -28,7 +28,7 @@ export function Fill({ value, label }: { value: string | null | undefined; label
 export function DocHeader({ number }: { number: string }) {
   return (
     <View style={s.header} fixed>
-      <Wordmark style={{ height: 24, width: 83 }} />
+      <Wordmark style={{ height: 18, width: 63 }} />
       <Text style={s.headerNumber}>{number}</Text>
     </View>
   );
@@ -61,6 +61,24 @@ export function TitleBlock({
         </View>
       ) : null}
     </View>
+  );
+}
+
+/** The first-page heading every document shares: title, subtitle, then the info row. */
+export function DocumentHeading({
+  title,
+  subtitle,
+  info,
+}: {
+  title: ReactNode;
+  subtitle?: ReactNode;
+  info: { label: string; value: ReactNode }[];
+}) {
+  return (
+    <>
+      <TitleBlock title={title} subtitle={subtitle} />
+      <InfoRow items={info} />
+    </>
   );
 }
 
@@ -126,6 +144,20 @@ export function Section({ title, children }: { title: string; children: ReactNod
   );
 }
 
+/**
+ * The closing acceptance / approval section, pushed to the bottom of the last
+ * page (just above the footer) however short the document is. It moves to a new
+ * page whole if it doesn't fit.
+ */
+export function SignOff({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <View style={s.signOff} wrap={false}>
+      <Text style={s.sectionTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
 export function Bullet({ children }: { children: ReactNode }) {
   return (
     <View style={s.bulletRow}>
@@ -150,18 +182,23 @@ export function Signatures({
     </View>
   );
   return (
-    <View style={s.signatures} wrap={false}>
+    // Not unbreakable itself: it always sits inside a Section, which keeps it whole.
+    <View style={s.signatures}>
       {block(clientHeading, null)}
       {block(`For ${STUDIO_NAME}`, signatoryName)}
     </View>
   );
 }
 
-export function PageFooter() {
+/** Studio name and contacts on the left, page count on the right; on every page. */
+export function PageFooter({ studio }: { studio: StudioDetails }) {
+  const contacts = [STUDIO_NAME, studio.phone, studio.email, studio.website]
+    .filter((v) => v.trim())
+    .join("  ·  ");
   return (
     <>
-      <Text style={[s.footerText, { left: 44 }]} fixed>
-        {STUDIO_NAME}
+      <Text style={[s.footerText, { left: 44, right: 140 }]} fixed>
+        {contacts}
       </Text>
       <Text
         style={[s.footerText, { left: 44, right: 44, textAlign: "right" }]}
@@ -201,7 +238,7 @@ export function ItemsTable({ items, heading }: { items: readonly LineItem[]; hea
   const total = items.reduce((sum, item) => sum + lineAmount(item.qty, item.ratePaise), 0);
   return (
     <>
-      <View style={s.table}>
+      <View style={s.tableGroup}>
         <View wrap={false}>
           {heading}
           <View style={s.tableHead}>
@@ -274,11 +311,7 @@ export function NumberedList({ items }: { items: readonly ReactNode[] }) {
 }
 
 export function SubTitle({ children }: { children: ReactNode }) {
-  return (
-    <Text style={[s.body, s.strong, { marginTop: 6, marginBottom: 2 }]} minPresenceAhead={40}>
-      {children}
-    </Text>
-  );
+  return <Text style={[s.body, s.strong, { marginTop: 6, marginBottom: 2 }]}>{children}</Text>;
 }
 
 /**
@@ -310,7 +343,7 @@ export function SimpleTable({
   );
   const [first, ...rest] = rows;
   return (
-    <View style={s.table}>
+    <View style={s.tableGroup}>
       <View wrap={false}>
         {heading}
         <View style={s.tableHead}>
@@ -337,15 +370,29 @@ export function SimpleTable({
 }
 
 /** Label | value rows, as in the service blocks and the change-request header. */
-export function KeyValueRows({ rows }: { rows: { label: string; value: ReactNode }[] }) {
+export function KeyValueRows({
+  rows,
+  heading,
+}: {
+  rows: { label: string; value: ReactNode }[];
+  heading?: ReactNode;
+}) {
+  // Flat on purpose: nesting unbreakable rows inside an unbreakable block makes
+  // react-pdf misplace the content that follows. `heading` stays with row one.
+  const row = (r: { label: string; value: ReactNode }, first: boolean) => (
+    <View key={r.label} style={[s.tableRow, first ? { borderTopWidth: 1 } : {}]} wrap={false}>
+      <Text style={[s.td, s.strong, { width: "30%" }]}>{r.label}</Text>
+      <Text style={[s.td, { width: "70%" }]}>{r.value}</Text>
+    </View>
+  );
+  const [first, ...rest] = rows;
   return (
-    <View style={s.table}>
-      {rows.map((row) => (
-        <View key={row.label} style={s.tableRow} wrap={false}>
-          <Text style={[s.td, s.strong, { width: "30%" }]}>{row.label}</Text>
-          <Text style={[s.td, { width: "70%" }]}>{row.value}</Text>
-        </View>
-      ))}
+    <View style={s.tableGroup}>
+      <View wrap={false}>
+        {heading}
+        {first && row(first, true)}
+      </View>
+      {rest.map((r) => row(r, false))}
     </View>
   );
 }
@@ -381,7 +428,7 @@ export function PlanTable({
   );
   const [first, ...rest] = plans.rows;
   return (
-    <View style={s.table}>
+    <View style={s.tableGroup}>
       <View wrap={false}>
         {heading}
         <View style={s.tableHead}>

@@ -14,11 +14,11 @@ import {
   DocHeader,
   Fill,
   ItemsTable,
-  TitleBlock,
+  DocumentHeading,
   PageFooter,
-  Parties,
   Rupee,
   Section,
+  SignOff,
   Signatures,
 } from "./blocks";
 import { pdfStyles as s } from "./theme";
@@ -35,6 +35,7 @@ export function QuotationPdf({
   studio: StudioDetails;
 }) {
   const wording = (key: QuotationWordingKey) => content.wording[key]?.trim() || QUOTATION_WORDING[key].text;
+  const client = [content.client.name, content.client.business].filter((v) => v.trim()).join(", ");
   const { advance, balance } = quotationPayment(content);
   const [advancePct, balancePct] = QUOTATION_PAYMENT_PERCENTS;
   const pay = howToPay(studio);
@@ -43,14 +44,14 @@ export function QuotationPdf({
     <Document title={`Quotation ${number}`} author={STUDIO_NAME} creator={STUDIO_NAME}>
       <Page size="A4" style={s.page}>
         <DocHeader number={number} />
-        <TitleBlock
+        <DocumentHeading
           title="Quotation"
-          meta={[
-            { label: "Date", value: <Fill value={day(content.issueDate)} label="DD Mon YYYY" /> },
-            { label: "Valid until", value: <Fill value={day(content.validUntil)} label="DD Mon YYYY" /> },
+          info={[
+            { label: "DATE", value: <Fill value={day(content.issueDate)} label="DD Mon YYYY" /> },
+            { label: "VALID UNTIL", value: <Fill value={day(content.validUntil)} label="DD Mon YYYY" /> },
+            { label: "CLIENT", value: <Fill value={client} label="Client / Business name" /> },
           ]}
         />
-        <Parties studio={studio} client={content.client} />
 
         <Section title="The work">
           <Text style={s.body}>
@@ -95,12 +96,12 @@ export function QuotationPdf({
           </Text>
         </Section>
 
-        <Section title="To accept">
+        <SignOff title="To accept">
           <Text style={s.body}>{wording("toAccept")}</Text>
           <Signatures clientHeading="Accepted by (Client)" signatoryName={studio.signatoryName} />
-        </Section>
+        </SignOff>
 
-        <PageFooter />
+        <PageFooter studio={studio} />
       </Page>
     </Document>
   );

@@ -14,13 +14,13 @@ import {
   DocHeader,
   Fill,
   KeyValueRows,
-  InfoRow,
-  TitleBlock,
+  DocumentHeading,
   NumberedList,
   PageFooter,
   PlanTable,
   Rupee,
   Section,
+  SignOff,
   Signatures,
   SimpleTable,
   SubTitle,
@@ -56,12 +56,10 @@ export function ProjectPdf({
     <Document title={`Project Proposal ${number}`} author={STUDIO_NAME} creator={STUDIO_NAME}>
       <Page size="A4" style={s.page}>
         <DocHeader number={number} />
-        <TitleBlock
+        <DocumentHeading
           title={<Fill value={content.projectName} label="Project name" />}
           subtitle={<Fill value={content.outcome} label="One line on the outcome" />}
-        />
-        <InfoRow
-          items={[
+          info={[
             { label: "DATE", value: <Fill value={day(content.issueDate)} label="DD Mon YYYY" /> },
             { label: "VALID UNTIL", value: <Fill value={day(content.validUntil)} label="DD Mon YYYY" /> },
             { label: "CLIENT", value: <Fill value={client} label="Client / Business name" /> },
@@ -113,19 +111,20 @@ export function ProjectPdf({
             </Text>
           </View>
           {services.map((service, index) => (
-            <View key={service.id} wrap={false} style={{ marginBottom: 6 }}>
-              <SubTitle>
-                {index + 1}. <Fill value={service.name} label="Service name" />
-              </SubTitle>
-              <KeyValueRows
-                rows={[
-                  { label: "What you get", value: <Fill value={service.whatYouGet} label="Deliverables" /> },
-                  { label: "Revision rounds", value: service.revisions || "—" },
-                  { label: "We need from you", value: service.weNeed || "—" },
-                  { label: "Not included", value: service.notIncluded || "—" },
-                ]}
-              />
-            </View>
+            <KeyValueRows
+              key={service.id}
+              heading={
+                <SubTitle>
+                  {index + 1}. <Fill value={service.name} label="Service name" />
+                </SubTitle>
+              }
+              rows={[
+                { label: "What you get", value: <Fill value={service.whatYouGet} label="Deliverables" /> },
+                { label: "Revision rounds", value: service.revisions || "—" },
+                { label: "We need from you", value: service.weNeed || "—" },
+                { label: "Not included", value: service.notIncluded || "—" },
+              ]}
+            />
           ))}
           <SubTitle>Why this approach</SubTitle>
           <Text style={s.body}>
@@ -260,12 +259,12 @@ export function ProjectPdf({
           </Text>
         </Section>
 
-        <Section title="11. Acceptance">
+        <SignOff title="11. Acceptance">
           <ChosenOption label="Chosen option" plans={content.investment} />
           <Signatures clientHeading="Accepted by (Client)" signatoryName={studio.signatoryName} />
-        </Section>
+        </SignOff>
 
-        <PageFooter />
+        <PageFooter studio={studio} />
       </Page>
     </Document>
   );
