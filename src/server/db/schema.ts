@@ -20,6 +20,12 @@ import {
   type ProposalStatus,
   type ProposalType,
 } from "@/features/proposals/domain";
+import {
+  AGREEMENT_STATUSES,
+  AGREEMENT_TYPES,
+  type AgreementStatus,
+  type AgreementType,
+} from "@/features/agreements/domain";
 
 export const auditEvents = pgTable(
   "audit_events",
@@ -111,3 +117,46 @@ export const studioSettings = pgTable(
 );
 
 export type ProposalRow = typeof proposals.$inferSelect;
+
+export const agreements = pgTable(
+  "agreements",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    type: text("type").$type<AgreementType>().notNull(),
+    sequence: integer("sequence").notNull(),
+    status: text("status").$type<AgreementStatus>().default("draft").notNull(),
+    proposalId: uuid("proposal_id")
+      .notNull()
+      .references(() => proposals.id, { onDelete: "restrict" }),
+    title: text("title").default("").notNull(),
+    clientName: text("client_name").default("").notNull(),
+    issueDate: date("issue_date", { mode: "string" }),
+    totalPaise: bigint("total_paise", { mode: "number" }).notNull(),
+    content: jsonb("content").$type<Record<string, unknown>>().notNull(),
+    rowVersion: integer("row_version").default(1).notNull(),
+    createdBy: text("created_by").notNull(),
+    updatedBy: text("updated_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    unique("agreements_number_unique").on(t.sequence),
+    check("agreements_type_valid", sql`${t.type} in (${sqlList(AGREEMENT_TYPES)})`),
+    check("agreements_status_valid", sql`${t.status} in (${sqlList(AGREEMENT_STATUSES)})`),
+    check("agreements_sequence_positive", sql`${t.sequence} > 0`),
+    check("agreements_row_version_positive", sql`${t.rowVersion} > 0`),
+    check("agreements_total_nonnegative", sql`${t.totalPaise} >= 0`),
+    check("agreements_content_object", sql`jsonb_typeof(${t.content}) = 'object'`),
+    index("agreements_status_type_idx").on(t.status, t.type),
+    index("agreements_proposal_idx").on(t.proposalId),
+  ],
+);
+
+export const agreementCounter = pgTable(
+  "agreement_counter",
+  {
+    id: smallint("id").default(1).primaryKey(),
+    lastValue: integer("last_value").default(0).notNull(),
+  },
+  (t) => [check("agreement_counter_singleton", sql`${t.id} = 1`)],
+);

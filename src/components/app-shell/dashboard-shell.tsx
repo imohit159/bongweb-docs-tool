@@ -27,7 +27,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 // The proposal editor needs the width: the sidebar closes whenever an offer
 // opens, and the user's saved choice comes back on other pages. The editor's
 // open/closed state is separate and never written to the cookie.
-const EDITOR_ROUTE = /^\/proposals\/[0-9a-f-]{36}$/i;
+const EDITOR_ROUTE = /^\/(proposals|agreements)\/[0-9a-f-]{36}$/i;
 
 // The menu thickens a lit row's icon stroke; these keep one light outline in
 // every state, so the pill background alone marks the active and hovered row.

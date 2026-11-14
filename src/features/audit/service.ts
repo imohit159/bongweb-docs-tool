@@ -7,7 +7,12 @@ import { sql, type SQL } from "drizzle-orm";
 // fragment as the final INSERT of a CTE chain whose `source` CTE yields `id`.
 
 export type AuditAction =
-  "proposal.created" | "proposal.status_changed" | "proposal.revised" | "studio_settings.updated";
+  | "proposal.created"
+  | "proposal.status_changed"
+  | "proposal.revised"
+  | "studio_settings.updated"
+  | "agreement.created"
+  | "agreement.status_changed";
 
 export function auditInsertFrom(
   source: SQL,

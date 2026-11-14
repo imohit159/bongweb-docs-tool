@@ -15,6 +15,13 @@
       "when": 1794506337194,
       "tag": "0001_proposals",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794578217541,
+      "tag": "0002_agreements",
+      "breakpoints": true
     }
   ]
 }

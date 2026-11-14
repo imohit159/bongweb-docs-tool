@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { useUnsavedWarning } from "@/features/documents/hooks/use-unsaved-warning";
 import { saveProposalAction } from "../../actions";
 import { useEditorStoreApi } from "./editor-store";
 
@@ -10,6 +11,11 @@ const AUTOSAVE_DELAY_MS = 1000;
 export function useAutosave() {
   const store = useEditorStoreApi();
   const inFlight = useRef(false);
+  const isUnsaved = useCallback(() => {
+    const { saveState } = store.getState();
+    return saveState === "dirty" || saveState === "saving";
+  }, [store]);
+  useUnsavedWarning(isUnsaved);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -49,16 +55,9 @@ export function useAutosave() {
       if (state.revision !== previous.revision) schedule();
     });
 
-    const warnOnLeave = (event: BeforeUnloadEvent) => {
-      const { saveState } = store.getState();
-      if (saveState === "dirty" || saveState === "saving") event.preventDefault();
-    };
-    window.addEventListener("beforeunload", warnOnLeave);
-
     return () => {
       unsubscribe();
       clearTimeout(timer);
-      window.removeEventListener("beforeunload", warnOnLeave);
       // Flush a pending edit when the editor unmounts (client-side navigation).
       if (store.getState().saveState === "dirty") void save();
     };
